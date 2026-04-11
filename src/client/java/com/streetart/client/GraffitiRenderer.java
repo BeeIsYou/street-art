@@ -24,13 +24,19 @@ public class GraffitiRenderer {
     }
 
     private static void renderGraffiti(SubmitNodeStorage storage, PoseStack pose, GClientData data) {
-        pose.pushPose();
-        pose.translate(data.pos.x, data.pos.y, data.pos.z);
-        pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
-        storage.submitCustomGeometry(pose, RenderTypes.entityCutout(data.location),
-                (_pose, buffer) -> GraffitiRenderer.renderDecal(_pose, buffer, data.light)
-        );
-        pose.popPose();
+        if (data.light != -1) {
+            pose.pushPose();
+            pose.translate(
+                    data.pos.getX() + data.dir.getStepX() * data.depth,
+                    data.pos.getY() + data.dir.getStepY() * data.depth,
+                    data.pos.getZ() + data.dir.getStepZ() * data.depth
+            );
+            pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
+            storage.submitCustomGeometry(pose, RenderTypes.entityCutout(data.location),
+                    (_pose, buffer) -> GraffitiRenderer.renderDecal(_pose, buffer, data.light)
+            );
+            pose.popPose();
+        }
     }
 
     private static void renderDecal(PoseStack.Pose pose, VertexConsumer buffer, int light) {

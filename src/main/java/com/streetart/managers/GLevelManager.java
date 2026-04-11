@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,12 +32,7 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
         this.level = level;
     }
 
-    /**
-     * Creates (if necessary) graffiti dataHolder and populates it with the given click position.
-     */
-    public void createAndPopulateGraffiti(final BlockPos pos, final Direction dir, final Vec3 absolutePos, final int color) {
-        GServerData data = this.getOrCreate(pos, dir, absolutePos);
-        data.computeChanges(pos, absolutePos, dir, color);
+    public void markDirty(GServerData data, final BlockPos pos, final Direction dir) {
         this.dirtyData.add(new TempData(data, pos, dir));
     }
 

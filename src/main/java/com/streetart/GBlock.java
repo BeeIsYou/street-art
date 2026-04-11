@@ -2,7 +2,6 @@ package com.streetart;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,15 +36,11 @@ public abstract class GBlock<
                 return data;
             }
         }
-        Vec3 pos = new Vec3(
-                this.blockPos.getX() + dir.getStepX() * snap,
-                this.blockPos.getY() + dir.getStepY() * snap,
-                this.blockPos.getZ() + dir.getStepZ() * snap
-        );
-        D created = this.createData(dir, snap, pos, graffitiManager);
+
+        D created = this.createData(dir, snap, this.blockPos, graffitiManager);
         dataList.add(created);
         return created;
     }
 
-    abstract public D createData(Direction dir, double depth, Vec3 pos, M graffitiManager);
+    abstract public D createData(Direction dir, double depth, BlockPos pos, M graffitiManager);
 }

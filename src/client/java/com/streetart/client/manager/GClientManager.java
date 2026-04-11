@@ -73,7 +73,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock, GClientM
             if (this.syncTimer > 10) {
                 this.modified.removeIf(data -> {
                     ClientPlayNetworking.send(new ServerBoundGraffitiUpdate(
-                            BlockPos.containing(data.pos),
+                            data.pos,
                             data.dir,
                             data.depth,
                             data.getTextureData()

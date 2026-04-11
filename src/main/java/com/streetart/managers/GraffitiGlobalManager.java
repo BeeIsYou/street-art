@@ -28,8 +28,10 @@ public class GraffitiGlobalManager {
         for (byte b : packet.textureData()) {
             if (b != 0) {
                 // todo length validation
-                GServerData data = getGraffitiLevelManager(context.player().level()).getOrCreate(packet.pos(), packet.dir(), packet.depth());
+                GLevelManager manager = getGraffitiLevelManager(context.player().level());
+                GServerData data = manager.getOrCreate(packet.pos(), packet.dir(), packet.depth());
                 System.arraycopy(packet.textureData(), 0, data.graffitiData, 0, packet.textureData().length);
+                manager.markDirty(data, packet.pos(), packet.dir());
                 return;
             }
         }

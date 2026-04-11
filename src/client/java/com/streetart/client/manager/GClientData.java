@@ -20,14 +20,14 @@ import java.nio.ByteBuffer;
 
 public class GClientData extends GData implements AutoCloseable {
     public final Direction dir;
-    public final Vec3 pos;
+    public final BlockPos pos;
     public final int id;
     public final Identifier location;
     private final DynamicTexture texture;
 
-    public int light = 0;
+    public int light = -1;
 
-    public GClientData(Direction dir, double depth, Vec3 pos, int id, TextureManager textureManager) {
+    public GClientData(Direction dir, double depth, BlockPos pos, int id, TextureManager textureManager) {
         super(depth);
         this.dir = dir;
         this.pos = pos;
@@ -49,7 +49,9 @@ public class GClientData extends GData implements AutoCloseable {
     }
 
     public void updateLight(ClientLevel level) {
-        this.light = LevelRenderer.getLightCoords(level, BlockPos.containing(this.pos));
+        this.light = LevelRenderer.getLightCoords(level,
+                this.depth == 1 ? this.pos.relative(this.dir) : this.pos
+        );
     }
 
     public void upload() {
