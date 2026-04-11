@@ -18,16 +18,16 @@ public class GraffitiRenderer {
         Vec3 camPos = context.levelState().cameraRenderState.pos;
         pose.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
-        for (GraffitiManager.Tile tile : StreetArtClient.textureManager.tiles.values()) {
-            renderGraffiti(storage, pose, tile);
-        }
+        StreetArtClient.textureManager.forEach(data -> {
+            renderGraffiti(storage, pose, data);
+        });
     }
 
-    private static void renderGraffiti(SubmitNodeStorage storage, PoseStack pose, GraffitiManager.Tile tile) {
+    private static void renderGraffiti(SubmitNodeStorage storage, PoseStack pose, GraffitiManager.TileData data) {
         pose.pushPose();
-        pose.translate(tile.pos);
-        pose.rotateAround(tile.dir.getRotation(), 0.5f, 0.5f, 0.5f);
-        storage.submitCustomGeometry(pose, RenderTypes.entityCutout(tile.location), GraffitiRenderer::renderDecal);
+        pose.translate(data.pos.x, data.pos.y, data.pos.z);
+        pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
+        storage.submitCustomGeometry(pose, RenderTypes.entityCutout(data.tile.location), GraffitiRenderer::renderDecal);
         pose.popPose();
     }
 
