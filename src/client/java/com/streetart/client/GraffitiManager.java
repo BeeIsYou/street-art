@@ -50,7 +50,7 @@ public class GraffitiManager implements AutoCloseable {
                 data.dir = tiles.getKey();
                 for (Tile tile : tiles.getValue()) {
                     data.pos.set(pos.getX(), pos.getY(), pos.getZ());
-                    data.pos.fma(tile.depth + 0.01, data.dir.getUnitVec3f());
+                    data.pos.fma(-tile.depth + 0.01, data.dir.getUnitVec3f());
                     data.tile = tile;
                     consumer.accept(data);
                 }
@@ -66,7 +66,7 @@ public class GraffitiManager implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         this.closeAll();
     }
 
@@ -93,6 +93,8 @@ public class GraffitiManager implements AutoCloseable {
             };
             if (dir.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
                 depth -= 1;
+            } else {
+                depth = -depth;
             }
             return this.getOrNew(depth, dir);
         }

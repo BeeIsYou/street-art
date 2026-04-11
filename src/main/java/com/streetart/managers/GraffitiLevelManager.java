@@ -41,7 +41,7 @@ public class GraffitiLevelManager {
         };
 
         if (dir.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
-            depth -= 1;
+            depth = 1 - depth;
         }
 
         final List<GraffitiData> grafArr = data.computeIfAbsent(dir, d -> new ArrayList<>());
