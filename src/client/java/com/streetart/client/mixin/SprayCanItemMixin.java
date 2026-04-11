@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SprayCanItemMixin {
     @Inject(method = "useOn", at = @At("HEAD"))
     private void evil(CallbackInfoReturnable<InteractionResult> cir, @Local UseOnContext useOnContext) {
-        if (useOnContext.getLevel().isClientSide()) {
-            StreetArtClient.textureManager.getOrNew(
-                    useOnContext.getClickedPos(),
-                    useOnContext.getClickLocation(),
-                    useOnContext.getClickedFace()
-            );
-        }
+//        if (useOnContext.getLevel().isClientSide()) { //I don't think we can actually remove this as we don't have access to client classes in main project
+//            StreetArtClient.textureManager.getOrNew(
+//                    useOnContext.getClickedPos(),
+//                    useOnContext.getClickLocation(),
+//                    useOnContext.getClickedFace()
+//            );
+//        }
     }
 }
