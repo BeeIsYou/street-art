@@ -4,22 +4,25 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class GBlock<
             D extends GData,
             B extends GBlock<D, B, M>,
             M extends GManager<D, B, M>
         > implements AutoCloseable {
-    protected final BlockPos blockPos;
+    public final BlockPos blockPos;
     protected final Map<Direction, List<D>> blockData = new HashMap<>();
 
     public GBlock(BlockPos pos) {
         this.blockPos = pos;
     }
 
-    public Set<Map.Entry<Direction, List<D>>> entrySet() {
-        return this.blockData.entrySet();
+    public Map<Direction, List<D>> getBlockData() {
+        return this.blockData;
     }
 
     public static double snapToGrid(double v) {

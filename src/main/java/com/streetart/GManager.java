@@ -3,6 +3,7 @@ package com.streetart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -38,7 +39,11 @@ public abstract class GManager<
         return this.getOrCreate(pos, dir, depth);
     }
 
+    public @Nullable B popBlock(BlockPos pos) {
+        return this.getGraffiti().remove(pos);
+    }
+
     public abstract B newBlockData(BlockPos pos);
 
-    protected abstract Map<BlockPos, B> getGraffiti();
+    public abstract Map<BlockPos, B> getGraffiti();
 }

@@ -2,9 +2,9 @@ package com.streetart;
 
 import com.streetart.managers.GraffitiGlobalManager;
 import com.streetart.networking.ClientBoundGraffitUpdate;
+import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.ClientboundPlayChannelEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
@@ -24,5 +24,6 @@ public class StreetArt implements ModInitializer {
 
 		ServerTickEvents.END_LEVEL_TICK.register(GraffitiGlobalManager::tickLevel);
 		PayloadTypeRegistry.clientboundPlay().register(ClientBoundGraffitUpdate.TYPE, ClientBoundGraffitUpdate.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ClientBoundInvalidateBlock.TYPE, ClientBoundInvalidateBlock.CODEC);
 	}
 }
