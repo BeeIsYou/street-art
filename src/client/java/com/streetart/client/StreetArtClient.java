@@ -2,6 +2,7 @@ package com.streetart.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 
@@ -15,5 +16,7 @@ public class StreetArtClient implements ClientModInitializer {
 		ClientLifecycleEvents.CLIENT_STARTED.register(
 			_ -> StreetArtClient.textureManager = new GraffitiManager(Minecraft.getInstance().getTextureManager())
 		);
+
+		ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> StreetArtClient.textureManager.closeAll());
 	}
 }

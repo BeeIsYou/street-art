@@ -37,6 +37,11 @@ public class GraffitiManager implements AutoCloseable {
         return graffitis.getOrNew(hitPos, dir);
     }
 
+    public Tile getOrNew(BlockPos block, double depth, Direction dir) {
+        BlockGraffiti graffitis = this.graffiti.computeIfAbsent(block, _ -> new BlockGraffiti());
+        return graffitis.getOrNew(depth, dir);
+    }
+
     public void forEach(Consumer<TileData> consumer) {
         TileData data = new TileData();
         for (Map.Entry<BlockPos, BlockGraffiti> graffitis : this.graffiti.entrySet()) {
@@ -53,10 +58,11 @@ public class GraffitiManager implements AutoCloseable {
         }
     }
 
-    public void closeAll() throws Exception {
+    public void closeAll() {
         for (BlockGraffiti graffitis : this.graffiti.values()) {
             graffitis.close();
         }
+        this.graffiti.clear();
     }
 
     @Override
@@ -67,18 +73,10 @@ public class GraffitiManager implements AutoCloseable {
     public class BlockGraffiti implements AutoCloseable {
         Map<Direction, List<Tile>> blockTiles = new HashMap<>();
 
-        public Tile getOrNew(Vec3 relativePos, Direction dir) {
+        public Tile getOrNew(double depth, Direction dir) {
             List<Tile> tiles = this.blockTiles.computeIfAbsent(dir, _ -> new ArrayList<>());
-            double depth = switch (dir.getAxis()) {
-                case X -> relativePos.x;
-                case Y -> relativePos.y;
-                case Z -> relativePos.z;
-            };
-            if (dir.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
-                depth -= 1;
-            }
             for (Tile tile : tiles) {
-                if (tile.depth == depth) {
+                if (Math.abs(tile.depth - depth) < 1E-4) {
                     return tile;
                 }
             }
@@ -87,13 +85,31 @@ public class GraffitiManager implements AutoCloseable {
             return created;
         }
 
-        @Override
-        public void close() throws Exception {
+        public Tile getOrNew(Vec3 relativePos, Direction dir) {
+            double depth = switch (dir.getAxis()) {
+                case X -> relativePos.x;
+                case Y -> relativePos.y;
+                case Z -> relativePos.z;
+            };
+            if (dir.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
+                depth -= 1;
+            }
+            return this.getOrNew(depth, dir);
+        }
+
+        public void closeAll() {
             for (List<Tile> tiles : this.blockTiles.values()) {
                 for (Tile tile : tiles) {
-                    tile.close();
+                    try {
+                        tile.close();
+                    } catch (Exception _) {}
                 }
             }
+        }
+
+        @Override
+        public void close() {
+            this.closeAll();
         }
     }
 
