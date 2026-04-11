@@ -4,17 +4,21 @@ import com.streetart.AllItems;
 import com.streetart.client.StreetArtClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.awt.*;
-
 public class SpraySessionManager {
     public static void tick(Minecraft client) {
         LocalPlayer player = client.player;
-        if (player != null && player.getUseItem().is(AllItems.SPRAY_CAN)) {
+        if (player == null) {
+            return;
+        }
+        ItemStack stack = player.getUseItem();
+        if (stack.is(AllItems.SPRAY_CAN) && stack.has(DataComponents.DYED_COLOR)) {
             for (int i = 0; i < 16; i++) {
                 Vec3 view = player.calculateViewVector(player.getXRot(i / 16f), player.getYRot(i / 16f));
 
@@ -38,7 +42,7 @@ public class SpraySessionManager {
                 BlockHitResult hitResult = player.level().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
 
                 if (hitResult.getType() == HitResult.Type.BLOCK) {
-                    StreetArtClient.textureManager.computeChanges(hitResult, Color.RED.getRGB());
+                    StreetArtClient.textureManager.computeChanges(hitResult, stack.get(DataComponents.DYED_COLOR).rgb());
                 }
             }
         }

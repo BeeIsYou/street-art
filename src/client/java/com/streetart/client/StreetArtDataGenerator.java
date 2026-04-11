@@ -1,6 +1,5 @@
 package com.streetart.client;
 
-import com.streetart.AllItems;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
@@ -28,7 +27,6 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 		@Override
 		public void generateItemModels(ItemModelGenerators itemModelGenerators) {
-			itemModelGenerators.declareCustomModelItem(AllItems.SPRAY_CAN);
 		}
 	}
 }

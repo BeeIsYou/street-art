@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "street_art:item/spray_can_item",
+    "layer1": "street_art:item/spray_can_item_label"
+  }
+}

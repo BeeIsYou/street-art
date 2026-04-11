@@ -1,17 +1,43 @@
 package com.streetart;
 
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 
 import java.util.function.Function;
 
 public class AllItems {
-    public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new, new Item.Properties().stacksTo(1));
+    public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
+            BuiltInRegistries.CREATIVE_MODE_TAB.key(), StreetArt.id("creative_tab")
+    );
 
-    public static void init() {}
+    public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new,
+            new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.RED.getTextureDiffuseColor()))
+    );
+
+    public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
+            .icon(() -> new ItemStack(SPRAY_CAN))
+            .title(Component.translatable("key.category.street_art"))
+            .displayItems((parameters, output) -> {
+                for (DyeColor color : DyeColor.values()) {
+                    ItemStack stack = new ItemStack(SPRAY_CAN);
+                    stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color.getTextureDiffuseColor()));
+                    output.accept(stack);
+                }
+            }).build();
+
+    public static void init() {
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, CREATIVE_TAB_KEY, CREATIVE_TAB);
+    }
 
     private static <T extends Item> T register(String name, Function<Item.Properties, T> factory, Item.Properties properties) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, StreetArt.id(name));
