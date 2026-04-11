@@ -35,7 +35,7 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
      */
     public void createAndPopulateGraffiti(final BlockPos pos, final Direction dir, final Vec3 absolutePos, final int color) {
         GServerData data = this.getOrCreate(pos, dir, absolutePos);
-        data.computeChanges(pos, absolutePos, color);
+        data.computeChanges(pos, absolutePos, dir, color);
         this.dirtyData.add(new TempData(data, pos, dir));
     }
 
