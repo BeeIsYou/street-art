@@ -19,7 +19,7 @@ public abstract class GManager<
         > implements AutoCloseable {
 
     public D getOrCreate(BlockPos pos, Direction dir, double depth) {
-        B blockData = this.getGraffiti().computeIfAbsent(pos, _ -> this.newBlockData());
+        B blockData = this.getGraffiti().computeIfAbsent(pos, _ -> this.newBlockData(pos));
         return blockData.getOrCreate(dir, depth, (M) this);
     }
 
@@ -31,14 +31,14 @@ public abstract class GManager<
             case Z -> relativePos.z;
         };
 
-        if (dir.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
+        if (dir.getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
             depth = 1 - depth;
         }
 
         return this.getOrCreate(pos, dir, depth);
     }
 
-    public abstract B newBlockData();
+    public abstract B newBlockData(BlockPos pos);
 
     protected abstract Map<BlockPos, B> getGraffiti();
 }

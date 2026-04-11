@@ -3,19 +3,28 @@ package com.streetart.client.manager;
 import com.google.common.primitives.Ints;
 import com.streetart.GData;
 import com.streetart.StreetArt;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
 
 public class GClientData extends GData implements AutoCloseable {
+    public final Direction dir;
+    public final Vec3 pos;
     public final int id;
     public final Identifier location;
     private final DynamicTexture texture;
 
     public int light = 0;
 
-    public GClientData(double depth, int id, TextureManager textureManager) {
+    public GClientData(Direction dir, double depth, Vec3 pos, int id, TextureManager textureManager) {
         super(depth);
+        this.dir = dir;
+        this.pos = pos;
         this.id = id;
         this.location = StreetArt.id("graffiti/" + this.id);
         this.texture = new DynamicTexture(() -> "Graffiti " + this.id, 16, 16, true);
@@ -31,6 +40,10 @@ public class GClientData extends GData implements AutoCloseable {
             }
         }
         this.texture.upload();
+    }
+
+    public void updateLight(ClientLevel level) {
+        this.light = LevelRenderer.getLightCoords(level, BlockPos.containing(this.pos));
     }
 
     @Override

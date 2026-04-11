@@ -59,8 +59,8 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
     }
 
     @Override
-    public GServerBlock newBlockData() {
-        return new GServerBlock();
+    public GServerBlock newBlockData(BlockPos pos) {
+        return new GServerBlock(pos);
     }
 
     @Override

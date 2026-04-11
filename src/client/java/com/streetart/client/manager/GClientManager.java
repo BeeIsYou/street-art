@@ -4,11 +4,9 @@ import com.streetart.GManager;
 import com.streetart.networking.ClientBoundGraffitUpdate;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import org.joml.Vector3d;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +27,8 @@ public class GClientManager extends GManager<GClientData, GClientBlock, GClientM
     }
 
     @Override
-    public GClientBlock newBlockData() {
-        return new GClientBlock();
+    public GClientBlock newBlockData(BlockPos pos) {
+        return new GClientBlock(pos);
     }
 
     @Override
@@ -38,31 +36,27 @@ public class GClientManager extends GManager<GClientData, GClientBlock, GClientM
         return this.graffiti;
     }
 
-    public void forEach(Consumer<TileData> consumer) {
-        TileData data = new TileData();
+    public void forEach(Consumer<GClientData> consumer) {
         for (Map.Entry<BlockPos, GClientBlock> graffitis : this.getGraffiti().entrySet()) {
             BlockPos pos = graffitis.getKey();
             for (Map.Entry<Direction, List<GClientData>> tiles : graffitis.getValue().entrySet()) {
-                data.dir = tiles.getKey();
                 for (GClientData tile : tiles.getValue()) {
-                    data.pos.set(pos.getX(), pos.getY(), pos.getZ());
-                    data.pos.fma(-tile.depth + 0.01, data.dir.getUnitVec3f());
-                    data.tile = tile;
-                    consumer.accept(data);
+                    consumer.accept(tile);
                 }
             }
         }
     }
 
     public void handlePacket(ClientBoundGraffitUpdate packet, ClientPlayNetworking.Context context) {
-        this.getOrCreate(packet.pos(), packet.dir(), packet.depth()).update(packet.textureData());
+        GClientData data = this.getOrCreate(packet.pos(), packet.dir(), packet.depth());
+        data.update(packet.textureData());
+        data.updateLight(context.client().level);
     }
 
     public void updateLights(ClientLevel level) {
         this.forEach(data -> {
-            data.tile.light = LevelRenderer.getLightCoords(level, BlockPos.containing(data.pos.x, data.pos.y, data.pos.z));
+            data.updateLight(level);
         });
-
     }
 
     public void closeAll() {
@@ -75,11 +69,5 @@ public class GClientManager extends GManager<GClientData, GClientBlock, GClientM
     @Override
     public void close() {
         this.closeAll();
-    }
-
-    public static class TileData {
-        public Vector3d pos = new Vector3d();
-        public Direction dir;
-        public GClientData tile;
     }
 }

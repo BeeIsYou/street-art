@@ -1,6 +1,8 @@
 package com.streetart;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -9,7 +11,12 @@ public abstract class GBlock<
             B extends GBlock<D, B, M>,
             M extends GManager<D, B, M>
         > implements AutoCloseable {
+    protected final BlockPos blockPos;
     protected final Map<Direction, List<D>> blockData = new HashMap<>();
+
+    public GBlock(BlockPos pos) {
+        this.blockPos = pos;
+    }
 
     public Set<Map.Entry<Direction, List<D>>> entrySet() {
         return this.blockData.entrySet();
@@ -27,10 +34,15 @@ public abstract class GBlock<
                 return data;
             }
         }
-        D created = this.createData(depth, graffitiManager);
+        Vec3 pos = new Vec3(
+                this.blockPos.getX() + dir.getStepX() * depth,
+                this.blockPos.getY() + dir.getStepY() * depth,
+                this.blockPos.getZ() + dir.getStepZ() * depth
+        );
+        D created = this.createData(dir, depth, pos, graffitiManager);
         dataList.add(created);
         return created;
     }
 
-    abstract public D createData(double depth, M graffitiManager);
+    abstract public D createData(Direction dir, double depth, Vec3 pos, M graffitiManager);
 }

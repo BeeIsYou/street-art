@@ -1,13 +1,20 @@
 package com.streetart.client.manager;
 
 import com.streetart.GBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
 public class GClientBlock extends GBlock<GClientData, GClientBlock, GClientManager> {
+    public GClientBlock(BlockPos pos) {
+        super(pos);
+    }
+
     @Override
-    public GClientData createData(double depth, GClientManager manager) {
-        return new GClientData(depth, manager.nextID(), manager.textureManager);
+    public GClientData createData(Direction dir, double depth, Vec3 pos, GClientManager manager) {
+        return new GClientData(dir, depth, pos, manager.nextID(), manager.textureManager);
     }
 
     @Override

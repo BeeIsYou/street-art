@@ -2,7 +2,7 @@ package com.streetart.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.streetart.client.manager.GClientManager;
+import com.streetart.client.manager.GClientData;
 import com.streetart.client.mixin.LevelRendererAccessor;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
 import net.minecraft.client.renderer.SubmitNodeStorage;
@@ -23,13 +23,12 @@ public class GraffitiRenderer {
         });
     }
 
-    private static void renderGraffiti(SubmitNodeStorage storage, PoseStack pose, GClientManager.TileData data) {
+    private static void renderGraffiti(SubmitNodeStorage storage, PoseStack pose, GClientData data) {
         pose.pushPose();
         pose.translate(data.pos.x, data.pos.y, data.pos.z);
         pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
-        int l = data.tile.light;
-        storage.submitCustomGeometry(pose, RenderTypes.entityCutout(data.tile.location),
-                (_pose, buffer) -> GraffitiRenderer.renderDecal(_pose, buffer, l)
+        storage.submitCustomGeometry(pose, RenderTypes.entityCutout(data.location),
+                (_pose, buffer) -> GraffitiRenderer.renderDecal(_pose, buffer, data.light)
         );
         pose.popPose();
     }
@@ -42,7 +41,7 @@ public class GraffitiRenderer {
     }
 
     private static void vertex(PoseStack.Pose pose, VertexConsumer buffer, float x, float z, int light) {
-        buffer.addVertex(pose, x, 1, z)
+        buffer.addVertex(pose, x, 0.01f, z)
                 .setColor(-1)
                 .setUv(x, z)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
