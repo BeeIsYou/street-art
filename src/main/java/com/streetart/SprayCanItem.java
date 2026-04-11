@@ -29,7 +29,7 @@ public class SprayCanItem extends Item {
 
     @Override
     public ItemUseAnimation getUseAnimation(ItemStack itemStack) {
-        return ItemUseAnimation.CROSSBOW;
+        return ItemUseAnimation.SPEAR;
     }
 
     @Override

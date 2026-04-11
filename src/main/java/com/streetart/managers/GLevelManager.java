@@ -34,6 +34,7 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
 
     public void markDirty(GServerData data, final BlockPos pos, final Direction dir) {
         this.dirtyData.add(new TempData(data, pos, dir));
+        data.dirty = true;
     }
 
     public void markForRemoval(BlockPos pos) {

@@ -38,7 +38,7 @@ public class SpraySessionManager {
                 BlockHitResult hitResult = player.level().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
 
                 if (hitResult.getType() == HitResult.Type.BLOCK) {
-                    StreetArtClient.textureManager.computeChanges(hitResult, Color.CYAN.getRGB());
+                    StreetArtClient.textureManager.computeChanges(hitResult, Color.RED.getRGB());
                 }
             }
         }
