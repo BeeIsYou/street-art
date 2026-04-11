@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelManager> {
+public class GLevelManager extends GManager<GServerData, GServerBlock> {
     private final Map<BlockPos, GServerBlock> graffiti = new HashMap<>();
     private final List<TempData> dirtyData = new ArrayList<>();
     private final List<BlockPos> toRemove = new ArrayList<>();
@@ -74,6 +74,7 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
 
             return true;
         });
+
         this.toRemove.removeIf(pos -> {
             for (final ServerPlayer player : PlayerLookup.around(this.level, pos.getCenter(), 100)) {
                 ServerPlayNetworking.send(player, new ClientBoundInvalidateBlock(pos));
@@ -81,6 +82,7 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
             this.getGraffiti().remove(pos);
             return true;
         });
+
         this.smothered.removeIf(dataHolder -> {
             GServerBlock block = this.getGraffiti().get(dataHolder.pos);
             List<GServerData> dataList = block.getBlockData().get(dataHolder.dir);

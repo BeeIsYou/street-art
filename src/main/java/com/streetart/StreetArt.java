@@ -5,6 +5,7 @@ import com.streetart.networking.ClientBoundGraffitiUpdate;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import com.streetart.networking.ServerBoundGraffitiUpdate;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -16,7 +17,8 @@ public class StreetArt implements ModInitializer {
 	public static final String MOD_ID = "street_art";
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static Identifier id(String path) {
+
+	public static Identifier id(final String path) {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 
@@ -31,5 +33,11 @@ public class StreetArt implements ModInitializer {
 		PayloadTypeRegistry.serverboundPlay().register(ServerBoundGraffitiUpdate.TYPE, ServerBoundGraffitiUpdate.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(ServerBoundGraffitiUpdate.TYPE, GraffitiGlobalManager::handleServerUpdatePacket);
+
+
+		final Identifier gIdentifier = id("graffiti_data");
+//		AttachmentRegistry.create(gIdentifier, b -> b.initializer().buildAndRegister(gIdentifier))
+
+
 	}
 }

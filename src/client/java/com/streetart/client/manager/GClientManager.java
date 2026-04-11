@@ -16,7 +16,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class GClientManager extends GManager<GClientData, GClientBlock, GClientManager> {
+public class GClientManager extends GManager<GClientData, GClientBlock> {
     private Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
     public final TextureManager textureManager;
     private int id = 0;

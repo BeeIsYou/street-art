@@ -8,15 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class GBlock<
-            D extends GData,
-            B extends GBlock<D, B, M>,
-            M extends GManager<D, B, M>
-        > implements AutoCloseable {
+public abstract class GBlock<D extends GData> implements AutoCloseable {
     public final BlockPos blockPos;
     protected final Map<Direction, List<D>> blockData = new HashMap<>();
 
-    public GBlock(BlockPos pos) {
+    public GBlock(final BlockPos pos) {
         this.blockPos = pos;
     }
 
@@ -24,23 +20,23 @@ public abstract class GBlock<
         return this.blockData;
     }
 
-    public static double snapToGrid(double v) {
+    public static double snapToGrid(final double v) {
         return Math.round(v * 16) / 16d;
     }
 
-    public D getOrCreate(Direction dir, double depth, M graffitiManager) {
-        List<D> dataList = this.blockData.computeIfAbsent(dir, _ -> new ArrayList<>(6));
-        double snap = snapToGrid(depth);
-        for (D data : dataList) {
+    public D getOrCreate(final Direction dir, final double depth, final GManager<D, ? extends GBlock<D>> graffitiManager) {
+        final List<D> dataList = this.blockData.computeIfAbsent(dir, _ -> new ArrayList<>(6));
+        final double snap = snapToGrid(depth);
+        for (final D data : dataList) {
             if (data.depth == snap) {
                 return data;
             }
         }
 
-        D created = this.createData(dir, snap, this.blockPos, graffitiManager);
+        final D created = this.createData(dir, snap, this.blockPos, graffitiManager);
         dataList.add(created);
         return created;
     }
 
-    abstract public D createData(Direction dir, double depth, BlockPos pos, M graffitiManager);
+    abstract public D createData(Direction dir, double depth, BlockPos pos, GManager<D, ? extends GBlock<D>> graffitiManager);
 }

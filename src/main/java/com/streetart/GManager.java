@@ -9,22 +9,18 @@ import java.util.Map;
 
 /**
  * Level-wide manager for graffiti instances
+ *
  * @param <D> The data for a plane
  * @param <B> All the planes on a block
- * @param <M> This. Because generic hell reasons
  */
-public abstract class GManager<
-            D extends GData,
-            B extends GBlock<D, B, M>,
-            M extends GManager<D, B, M>
-        > implements AutoCloseable {
+public abstract class GManager<D extends GData, B extends GBlock<D>> implements AutoCloseable {
 
-    public D getOrCreate(BlockPos pos, Direction dir, double depth) {
-        B blockData = this.getGraffiti().computeIfAbsent(pos, _ -> this.newBlockData(pos));
-        return blockData.getOrCreate(dir, depth, (M) this);
+    public D getOrCreate(final BlockPos pos, final Direction dir, final double depth) {
+        final B blockData = this.getGraffiti().computeIfAbsent(pos, _ -> this.newBlockData(pos));
+        return blockData.getOrCreate(dir, depth, this);
     }
 
-    public D getOrCreate(BlockPos pos, Direction dir, Vec3 absolutePos) {
+    public D getOrCreate(final BlockPos pos, final Direction dir, final Vec3 absolutePos) {
         final Vec3 relativePos = absolutePos.subtract(Vec3.atLowerCornerOf(pos));
         double depth = switch (dir.getAxis()) {
             case X -> relativePos.x;
@@ -39,7 +35,7 @@ public abstract class GManager<
         return this.getOrCreate(pos, dir, depth);
     }
 
-    public @Nullable B popBlock(BlockPos pos) {
+    public @Nullable B popBlock(final BlockPos pos) {
         return this.getGraffiti().remove(pos);
     }
 
