@@ -1,5 +1,7 @@
 package com.streetart.managers;
 
+import com.streetart.networking.ServerBoundGraffitiUpdate;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
@@ -22,7 +24,15 @@ public class GraffitiGlobalManager {
         }
     }
 
-
-
-
+    public static void handleServerUpdatePacket(ServerBoundGraffitiUpdate packet, ServerPlayNetworking.Context context) {
+        for (byte b : packet.textureData()) {
+            if (b != 0) {
+                // todo length validation
+                GServerData data = getGraffitiLevelManager(context.player().level()).getOrCreate(packet.pos(), packet.dir(), packet.depth());
+                System.arraycopy(packet.textureData(), 0, data.graffitiData, 0, packet.textureData().length);
+                return;
+            }
+        }
+        // todo mark specific thing removed
+    }
 }

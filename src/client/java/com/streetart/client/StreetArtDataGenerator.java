@@ -28,7 +28,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 		@Override
 		public void generateItemModels(ItemModelGenerators itemModelGenerators) {
-			itemModelGenerators.declareCustomModelItem(AllItems.sprayCanItem);
+			itemModelGenerators.declareCustomModelItem(AllItems.SPRAY_CAN);
 		}
 	}
 }

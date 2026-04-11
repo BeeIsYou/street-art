@@ -1,8 +1,5 @@
 package com.streetart;
 
-import com.streetart.managers.GLevelManager;
-import com.streetart.managers.GraffitiGlobalManager;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -11,10 +8,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.level.Level;
-
-import java.awt.*;
 
 public class SprayCanItem extends Item {
     public SprayCanItem(final Properties properties) {
@@ -22,22 +18,18 @@ public class SprayCanItem extends Item {
     }
 
     @Override
-    public InteractionResult useOn(final UseOnContext context) {
-        final Level level = context.getLevel();
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        return ItemUtils.startUsingInstantly(level, player, hand);
+    }
 
-        if (level.isClientSide()) {
+    @Override
+    public int getUseDuration(ItemStack itemStack, LivingEntity user) {
+        return 1200;
+    }
 
-        } else {
-            final GLevelManager manager = GraffitiGlobalManager.getGraffitiLevelManager((ServerLevel) level);
-            manager.createAndPopulateGraffiti(
-                    context.getClickedPos(),
-                    context.getClickedFace(),
-                    context.getClickLocation(),
-                    Color.CYAN.getRGB()
-            );
-        }
-
-        return InteractionResult.CONSUME;
+    @Override
+    public ItemUseAnimation getUseAnimation(ItemStack itemStack) {
+        return ItemUseAnimation.CROSSBOW;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.streetart.managers;
 
 import com.streetart.GManager;
-import com.streetart.networking.ClientBoundGraffitUpdate;
+import com.streetart.networking.ClientBoundGraffitiUpdate;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -67,7 +67,7 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
             if (dataHolder.data.dirty) {
                 dataHolder.data.dirty = false;
                 for (final ServerPlayer player : PlayerLookup.around(this.level, dataHolder.pos.getCenter(), 100)) {
-                    ServerPlayNetworking.send(player, new ClientBoundGraffitUpdate(
+                    ServerPlayNetworking.send(player, new ClientBoundGraffitiUpdate(
                             dataHolder.pos,
                             dataHolder.dir,
                             dataHolder.data.depth,
@@ -92,7 +92,7 @@ public class GLevelManager extends GManager<GServerData, GServerBlock, GLevelMan
             if (dataList != null) {
                 dataList.remove(dataHolder.data);
                 for (final ServerPlayer player : PlayerLookup.around(this.level, dataHolder.pos.getCenter(), 100)) {
-                    ServerPlayNetworking.send(player, new ClientBoundGraffitUpdate(
+                    ServerPlayNetworking.send(player, new ClientBoundGraffitiUpdate(
                             dataHolder.pos,
                             dataHolder.dir,
                             dataHolder.data.depth,

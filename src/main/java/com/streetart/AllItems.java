@@ -9,7 +9,7 @@ import net.minecraft.world.item.Item;
 import java.util.function.Function;
 
 public class AllItems {
-    public static SprayCanItem sprayCanItem = register("spray_can", SprayCanItem::new, new Item.Properties().stacksTo(1));
+    public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new, new Item.Properties().stacksTo(1));
 
     public static void init() {}
 

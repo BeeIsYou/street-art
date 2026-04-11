@@ -31,18 +31,18 @@ public abstract class GBlock<
 
     public D getOrCreate(Direction dir, double depth, M graffitiManager) {
         List<D> dataList = this.blockData.computeIfAbsent(dir, _ -> new ArrayList<>(6));
+        double snap = snapToGrid(depth);
         for (D data : dataList) {
-            double snap = snapToGrid(depth);
             if (data.depth == snap) {
                 return data;
             }
         }
         Vec3 pos = new Vec3(
-                this.blockPos.getX() + dir.getStepX() * depth,
-                this.blockPos.getY() + dir.getStepY() * depth,
-                this.blockPos.getZ() + dir.getStepZ() * depth
+                this.blockPos.getX() + dir.getStepX() * snap,
+                this.blockPos.getY() + dir.getStepY() * snap,
+                this.blockPos.getZ() + dir.getStepZ() * snap
         );
-        D created = this.createData(dir, depth, pos, graffitiManager);
+        D created = this.createData(dir, snap, pos, graffitiManager);
         dataList.add(created);
         return created;
     }
