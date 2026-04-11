@@ -1,7 +1,7 @@
 package com.streetart;
 
+import com.streetart.managers.GLevelManager;
 import com.streetart.managers.GraffitiGlobalManager;
-import com.streetart.managers.GraffitiLevelManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,8 +28,13 @@ public class SprayCanItem extends Item {
         if (level.isClientSide()) {
 
         } else {
-            final GraffitiLevelManager manager = GraffitiGlobalManager.getGraffitiLevelManager((ServerLevel) level);
-            manager.createAndPopulateGraffiti(context.getClickedPos(), context.getClickLocation(), context.getClickedFace(), Color.CYAN.getRGB());
+            final GLevelManager manager = GraffitiGlobalManager.getGraffitiLevelManager((ServerLevel) level);
+            manager.createAndPopulateGraffiti(
+                    context.getClickedPos(),
+                    context.getClickedFace(),
+                    context.getClickLocation(),
+                    Color.CYAN.getRGB()
+            );
         }
 
         return InteractionResult.CONSUME;

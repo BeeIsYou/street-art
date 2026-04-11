@@ -1,7 +1,6 @@
 package com.streetart.networking;
 
 import com.streetart.StreetArt;
-import com.streetart.managers.GraffitiLevelManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
