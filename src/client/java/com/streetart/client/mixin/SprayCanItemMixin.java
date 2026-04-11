@@ -15,10 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SprayCanItemMixin {
     @Inject(method = "useOn", at = @At("HEAD"))
     private void evil(CallbackInfoReturnable<InteractionResult> cir, @Local UseOnContext useOnContext) {
-        StreetArtClient.textureManager.getOrNew(
-                useOnContext.getClickedPos(),
-                useOnContext.getClickLocation(),
-                useOnContext.getClickedFace()
-        );
+        if (useOnContext.getLevel().isClientSide()) {
+            StreetArtClient.textureManager.getOrNew(
+                    useOnContext.getClickedPos(),
+                    useOnContext.getClickLocation(),
+                    useOnContext.getClickedFace()
+            );
+        }
     }
 }

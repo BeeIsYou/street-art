@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "street-art",
+	"id": "street_art",
 	"version": "${version}",
 	"name": "Street Art",
 	"description": "This is an example description! Tell everyone what your mod is about!",
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/street-art/icon.png",
+	"icon": "assets/street_art/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -26,9 +26,9 @@
 		]
 	},
 	"mixins": [
-		"street-art.mixins.json",
+		"street_art.mixins.json",
 		{
-			"config": "street-art.client.mixins.json",
+			"config": "street_art.client.mixins.json",
 			"environment": "client"
 		}
 	],
