@@ -1,19 +1,21 @@
 package com.streetart.managers;
 
 import com.streetart.AttachmentTypes;
+import com.streetart.StreetArt;
 import com.streetart.networking.ServerBoundGraffitiUpdate;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GraffitiGlobalManager {
-
     public static void handleServerUpdatePacket(final ServerBoundGraffitiUpdate packet, final ServerPlayNetworking.Context context) {
+        if (!StreetArt.AREA_LIB.allowedToEdit(context.player(), packet.pos())) {
+            // todo: specific packet tell of player?
+            return;
+        }
+
         for (final byte b : packet.textureData()) {
             if (b != 0) {
                 // todo length validation

@@ -53,6 +53,7 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
 
     @Override
     public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int ticksRemaining) {
+        // evil self mixin here
     }
 
     @Override

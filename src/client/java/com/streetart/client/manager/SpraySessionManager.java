@@ -1,6 +1,7 @@
 package com.streetart.client.manager;
 
 import com.streetart.SprayPaintInteractor;
+import com.streetart.StreetArt;
 import com.streetart.client.StreetArtClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -39,6 +40,7 @@ public class SpraySessionManager {
         }
         ItemStack stack = player.getUseItem();
         if (stack.getItem() instanceof SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
+            boolean explicitFailure = false;
             active = true;
 
             boolean rightClick = minecraft.options.keyUse.isDown();
@@ -59,7 +61,8 @@ public class SpraySessionManager {
                 Vec3 to = snapshot.pos.add(view.x * range, view.y * range, view.z * range);
                 BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
 
-                if (hitResult.getType() == HitResult.Type.BLOCK) {
+                if (hitResult.getType() == HitResult.Type.BLOCK &&
+                        StreetArt.AREA_LIB.allowedToEdit(player, hitResult.getBlockPos())) {
                     StreetArtClient.textureManager.computeChanges(hitResult, sprayPaint.getColor(player, stack));
                 }
             }
