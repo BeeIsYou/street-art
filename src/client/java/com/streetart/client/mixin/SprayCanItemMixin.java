@@ -1,8 +1,8 @@
 package com.streetart.client.mixin;
 
-import com.streetart.SprayCanItem;
-import com.streetart.SprayPaintInteractor;
 import com.streetart.client.ArtUtil;
+import com.streetart.item.SprayCanItem;
+import com.streetart.item.SprayPaintInteractor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SprayCanItem.class)
 public abstract class SprayCanItemMixin implements SprayPaintInteractor {
-    @Inject(method = "Lcom/streetart/SprayCanItem;onUseTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V",
+    @Inject(method = "Lcom/streetart/item/SprayCanItem;onUseTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V",
         at = @At("HEAD")
     )
     private void streetArt$evilSelfMixinForClientClassAccess(Level level, LivingEntity livingEntity, ItemStack itemStack,

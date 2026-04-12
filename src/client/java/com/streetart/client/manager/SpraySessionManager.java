@@ -1,8 +1,8 @@
 package com.streetart.client.manager;
 
-import com.streetart.SprayPaintInteractor;
 import com.streetart.StreetArt;
 import com.streetart.client.StreetArtClient;
+import com.streetart.item.SprayPaintInteractor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;

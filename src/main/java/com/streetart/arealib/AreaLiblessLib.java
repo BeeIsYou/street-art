@@ -1,7 +1,6 @@
 package com.streetart.arealib;
 
-import com.streetart.AllItems;
-import com.streetart.SprayPaintInteractor;
+import com.streetart.item.SprayPaintInteractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Player;

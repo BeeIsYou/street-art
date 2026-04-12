@@ -1,5 +1,7 @@
 package com.streetart;
 
+import com.streetart.item.PressureWasherItem;
+import com.streetart.item.SprayCanItem;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -22,6 +24,10 @@ public class AllItems {
 
     public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new,
             new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.RED.getTextureDiffuseColor()))
+    );
+
+    public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
+            new Item.Properties().stacksTo(1)
     );
 
     public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()

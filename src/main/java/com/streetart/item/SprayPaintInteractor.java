@@ -1,4 +1,4 @@
-package com.streetart;
+package com.streetart.item;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

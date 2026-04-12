@@ -1,7 +1,5 @@
 package com.streetart.mixin;
 
-import com.streetart.AllItems;
-import com.streetart.SprayPaintInteractor;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +13,7 @@ public class PlayerMixin {
         at = @At("HEAD"), cancellable = true
     )
     private void streetArt$noCanSwing(final ItemStack itemStack, final int tolerance, CallbackInfoReturnable<Boolean> cir) {
-        if (itemStack.getItem() instanceof SprayPaintInteractor) {
+        if (itemStack.getItem() instanceof com.streetart.item.SprayPaintInteractor) {
             cir.setReturnValue(true);
         }
     }

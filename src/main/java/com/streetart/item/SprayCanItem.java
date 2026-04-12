@@ -1,4 +1,4 @@
-package com.streetart;
+package com.streetart.item;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
