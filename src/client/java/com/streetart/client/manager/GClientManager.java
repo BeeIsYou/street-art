@@ -28,10 +28,6 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         this.tileAtlasManager = new TileAtlasManager(textureManager);
 
         // how many people will put me down for doing THIS
-        ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiUpdate.TYPE, this::handleDataUpdate);
-        ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, this::handleBlockInvalidate);
-        ClientTickEvents.END_LEVEL_TICK.register(this::updateLights);
-        ClientTickEvents.END_CLIENT_TICK.register(this::tick);
     }
 
     public int nextID() {

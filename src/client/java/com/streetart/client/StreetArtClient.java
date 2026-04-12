@@ -3,10 +3,15 @@ package com.streetart.client;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
+import com.streetart.networking.ClientBoundGraffitiUpdate;
+import com.streetart.networking.ClientBoundInvalidateBlock;
+import com.streetart.networking.ServerBoundRequestDataPacket;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 
@@ -20,12 +25,22 @@ public class StreetArtClient implements ClientModInitializer {
 		ClientLifecycleEvents.CLIENT_STARTED.register(
 			_ -> {
 				StreetArtClient.textureManager = new GClientManager(Minecraft.getInstance().getTextureManager());
+
+				ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiUpdate.TYPE, StreetArtClient.textureManager::handleDataUpdate);
+				ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, StreetArtClient.textureManager::handleBlockInvalidate);
+
+				ClientTickEvents.END_LEVEL_TICK.register(StreetArtClient.textureManager::updateLights);
+				ClientTickEvents.END_CLIENT_TICK.register(StreetArtClient.textureManager::tick);
 			}
 		);
 
 		ClientTickEvents.END_CLIENT_TICK.register(SpraySessionManager::tick);
 
-		// todo find clientside level unload event :p
-		ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> StreetArtClient.textureManager.closeAll());
+		ClientChunkEvents.CHUNK_LOAD.register((l, ll) -> {
+			ClientPlayNetworking.send(new ServerBoundRequestDataPacket(ll.getPos()));
+		});
+
+		// todo find clientside world leave event grrrrrrrrr
+		ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((_, _) -> StreetArtClient.textureManager.closeAll());
 	}
 }

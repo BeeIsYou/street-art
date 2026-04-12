@@ -68,7 +68,9 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
         }
     }
 
-    public void tick(final ServerLevel level) {
+    public boolean tick(final ServerLevel level) {
+        final boolean shouldSaveData = !this.dirtyData.isEmpty() || !this.toRemove.isEmpty() || !this.smothered.isEmpty();
+
         this.dirtyData.removeIf(dataHolder -> {
             if (dataHolder.data.dirty) {
                 dataHolder.data.dirty = false;
@@ -111,6 +113,8 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
             }
             return true;
         });
+
+        return shouldSaveData;
     }
 
     @Override

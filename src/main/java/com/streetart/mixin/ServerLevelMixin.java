@@ -20,18 +20,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends Level {
 
-
-    protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
+    protected ServerLevelMixin(final WritableLevelData levelData, final ResourceKey<Level> dimension, final RegistryAccess registryAccess, final Holder<DimensionType> dimensionTypeRegistration, final boolean isClientSide, final boolean isDebug, final long biomeZoomSeed, final int maxChainedNeighborUpdates) {
         super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
     }
 
     @Inject(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V", at = @At("TAIL"))
-    private void streetart$TickManagers(final LevelChunk chunk, final int tickSpeed, final CallbackInfo ci, @Local ProfilerFiller filler) {
+    private void streetart$TickManagers(final LevelChunk chunk, final int tickSpeed, final CallbackInfo ci, @Local final ProfilerFiller filler) {
         filler.push("Street Art Chunk Managers");
 
         final GServerChunkManager manager = chunk.getAttached(AttachmentTypes.CHUNK_MANAGER);
         if (manager != null) {
-            manager.tick(((ServerLevel) (Object) this));
+            final ServerLevel sl = (ServerLevel) (Object) this;
+            if (manager.tick(sl)) {
+                chunk.markUnsaved();
+            }
         }
 
         filler.pop();
