@@ -12,7 +12,9 @@
     "requireAnnotations": true
   },
   "mixins": [
+    "DustParticleMixin",
     "LevelRendererAccessor",
-    "LocalPlayerMixin"
+    "LocalPlayerMixin",
+    "SprayCanItemMixin"
   ]
 }

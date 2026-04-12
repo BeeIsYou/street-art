@@ -55,6 +55,10 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
     }
 
     @Override
+    public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int ticksRemaining) {
+    }
+
+    @Override
     public Vec3 getLookVector(Player player, Vec2 originalRot, Vec3 forward, ItemStack itemStack, float pt) {
         Vec3 left = player.calculateViewVector(originalRot.x + 90, originalRot.y);
         Vec3 up = forward.cross(left);
