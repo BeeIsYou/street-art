@@ -6,7 +6,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public interface SprayPaintInteractor {
-    Vec3 getLookVector(Player player, Vec2 originalRot, Vec3 forward, ItemStack itemStack, float pt);
+    Vec3 getLookVector(Player player, Vec2 originalRot, Vec3 forward, ItemStack itemStack, float pt, boolean rightClick);
 
     int iterationsPerTick(Player player, ItemStack itemStack);
 

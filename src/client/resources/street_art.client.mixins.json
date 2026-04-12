@@ -3,19 +3,17 @@
   "package": "com.streetart.client.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "ExampleClientMixin"
+    "DebugRendererMixin",
+    "DustParticleMixin",
+    "LevelRendererAccessor",
+    "LocalPlayerMixin",
+    "MinecraftMixin",
+    "SprayCanItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "overwrites": {
     "requireAnnotations": true
-  },
-  "mixins": [
-    "DebugRendererMixin",
-    "DustParticleMixin",
-    "LevelRendererAccessor",
-    "LocalPlayerMixin",
-    "SprayCanItemMixin"
-  ]
+  }
 }

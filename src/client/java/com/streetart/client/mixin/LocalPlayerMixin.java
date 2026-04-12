@@ -16,6 +16,6 @@ public abstract class LocalPlayerMixin extends Player {
     @Override
     public void turn(double xo, double yo) {
         super.turn(xo, yo);
-        SpraySessionManager.playerTurned(this);
+        SpraySessionManager.takeSnapshot(this);
     }
 }

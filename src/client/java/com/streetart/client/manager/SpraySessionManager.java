@@ -12,70 +12,87 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SpraySessionManager {
     public static boolean active = false;
-    private static List<Vec2> lookXY = new ArrayList<>();
+    private static List<SpraySnapshot> snapshots = new ArrayList<>();
 
-    public static void playerTurned(Player player) {
+    public static void takeSnapshot(Player player) {
         if (active) {
-            lookXY.add(new Vec2(player.getXRot(), player.getYRot()));
+            snapshots.add(new SpraySnapshot(
+                    player.getEyePosition(),
+                    new Vec2(player.getXRot(), player.getYRot()))
+            );
         }
     }
 
-    public static void tick(Minecraft client) {
-        LocalPlayer player = client.player;
+    public static void tick(Minecraft minecraft) {
+        LocalPlayer player = minecraft.player;
         if (player == null) {
             active = false;
-            lookXY.clear();
+            snapshots.clear();
             return;
         }
         ItemStack stack = player.getUseItem();
         if (stack.getItem() instanceof SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
             active = true;
 
+            boolean rightClick = minecraft.options.keyUse.isDown();
             int iterations = sprayPaint.iterationsPerTick(player, stack);
-            Vec3 from = player.getEyePosition();
             for (int i = 0; i < iterations; i++) {
                 float pt = (float) i / iterations;
 
-                Vec2 xyRot = sampleLerp(pt, new Vec2(player.getXRot(), player.getYRot()));
-                Vec3 originalView = player.calculateViewVector(xyRot.x, xyRot.y);
+                SpraySnapshot snapshot = sampleLerp(pt);
+                if (snapshot == null) {
+                    snapshot = new SpraySnapshot(player.getEyePosition(), new Vec2(player.getXRot(), player.getYRot()));
+                }
 
-                Vec3 view = sprayPaint.getLookVector(player, xyRot, originalView, stack, pt);
+                Vec3 originalView = player.calculateViewVector(snapshot.look.x, snapshot.look.y);
+
+                Vec3 view = sprayPaint.getLookVector(player, snapshot.look, originalView, stack, pt, rightClick);
 
                 double range = player.blockInteractionRange();
-                Vec3 to = from.add(view.x * range, view.y * range, view.z * range);
-                BlockHitResult hitResult = player.level().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+                Vec3 to = snapshot.pos.add(view.x * range, view.y * range, view.z * range);
+                BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
 
                 if (hitResult.getType() == HitResult.Type.BLOCK) {
                     StreetArtClient.textureManager.computeChanges(hitResult, sprayPaint.getColor(player, stack));
                 }
             }
-            lookXY.clear();
-            lookXY.add(new Vec2(player.getXRot(), player.getYRot()));
+            snapshots.clear();
+            takeSnapshot(player);
         } else {
             active = false;
-            lookXY.clear();
+            snapshots.clear();
         }
     }
 
-    private static Vec2 sampleLerp(float pt, Vec2 fallBack) {
-        if (lookXY.isEmpty()) {
-            return fallBack;
+    private static @Nullable SpraySnapshot sampleLerp(float pt) {
+        if (snapshots.isEmpty()) {
+            return null;
         }
-        if (lookXY.size() == 1) {
-            return lookXY.getFirst();
+        if (snapshots.size() == 1) {
+            return snapshots.getFirst();
         }
-        float ipt = pt * lookXY.size();
+        float ipt = pt * snapshots.size();
         int i = Mth.floor(ipt);
-        if (i >= lookXY.size() - 1) {
-            return lookXY.getLast();
+        if (i >= snapshots.size() - 1) {
+            return snapshots.getLast();
         }
         float mix = (ipt - i);
-        return lookXY.get(i).scale(1 - mix).add(lookXY.get(i + 1).scale(mix));
+        Vec2 lookA = snapshots.get(i).look;
+        Vec2 lookB = snapshots.get(i+1).look;
+        Vec3 posA = snapshots.get(i).pos;
+        Vec3 posB = snapshots.get(i+1).pos;
+        return new SpraySnapshot(
+                posA.scale(1 - mix).add(posB.scale(mix)),
+                lookA.scale(1 - mix).add(lookB.scale(mix))
+        );
     }
+
+    private record SpraySnapshot(Vec3 pos, Vec2 look) {}
 }

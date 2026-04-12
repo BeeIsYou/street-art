@@ -31,13 +31,10 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllItems.SPRAY_CAN, "Spray Can");
 
 			translationBuilder.add("lore.street_art.spray_can",
-					"The perfect tool for freeform expression! Sneak + Use to switch modes"
+					"The perfect tool for freeform expression! Hold left click to spray in a smaller cone"
 			);
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");
-
-			translationBuilder.add("street_art.spray_can.unfocused", "Unfocused");
-			translationBuilder.add("street_art.spray_can.focused", "Focused");
 
 			translationBuilder.add("street_art.toast.atlas_full.title", "Atlas Full");
 			translationBuilder.add("street_art.toast.atlas_full.body", "Spray Paint textures forced to clear");
