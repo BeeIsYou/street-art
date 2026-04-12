@@ -16,8 +16,6 @@ public class GServerDataHolder extends GData {
 
     private final ByteBuffer graffitiData;
 
-    boolean dirty;
-
     public GServerDataHolder(final double depth) {
         this(ByteBuffer.allocate(4 * 16 * 16), depth);
     }

@@ -9,10 +9,15 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GServerChunkManager extends GManager<GServerDataHolder, GServerBlock> {
 
@@ -22,10 +27,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
     );
 
     private final Map<BlockPos, GServerBlock> graffiti;
-
     private final List<TempData> dirtyData = new ArrayList<>();
-    private final List<BlockPos> toRemove = new ArrayList<>();
-    private final List<TempData> smothered = new ArrayList<>();
 
     public GServerChunkManager() {
         this.graffiti = new HashMap<>();
@@ -44,13 +46,12 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
     }
 
     public void markDirty(final GServerDataHolder data, final BlockPos pos, final Direction dir) {
-        this.dirtyData.add(new TempData(data, pos, dir));
-        data.dirty = true;
+        this.dirtyData.add(new TempData(data, pos, dir, Type.DIRTY));
     }
 
     public void markForRemoval(final BlockPos pos) {
         if (this.getGraffiti().containsKey(pos)) {
-            this.toRemove.add(pos);
+            this.dirtyData.add(new TempData(null, pos, null, Type.REMOVED));
         }
     }
 
@@ -61,56 +62,51 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
             if (dataList != null) {
                 for (final GServerDataHolder data : dataList) {
                     if (data.getDepth() == 1) {
-                        this.smothered.add(new TempData(data, pos, dir));
+                        this.dirtyData.add(new TempData(data, pos, dir, Type.SMOTHERED));
                     }
                 }
             }
         }
     }
 
-    public boolean tick(final ServerLevel level) {
-        final boolean shouldSaveData = !this.dirtyData.isEmpty() || !this.toRemove.isEmpty() || !this.smothered.isEmpty();
+    public boolean tick(final ServerLevel level, final ChunkPos pos) {
+        final boolean shouldSaveData = !this.dirtyData.isEmpty();
 
-        this.dirtyData.removeIf(dataHolder -> {
-            if (dataHolder.data.dirty) {
-                dataHolder.data.dirty = false;
-                for (final ServerPlayer player : PlayerLookup.around(level, dataHolder.pos.getCenter(), 100)) {
-                    ServerPlayNetworking.send(player, new ClientBoundGraffitiUpdate(
-                            dataHolder.pos,
-                            dataHolder.dir,
-                            dataHolder.data.getDepth(),
-                            dataHolder.data.getGraffitiData().array()
-                    ));
+        this.dirtyData.removeIf(tempData -> {
+            final Type type = tempData.type;
+
+            CustomPacketPayload packet = null;
+            switch (type) {
+                case DIRTY -> {
+                    packet = new ClientBoundGraffitiUpdate(
+                            tempData.pos,
+                            tempData.dir,
+                            tempData.data.getDepth(),
+                            tempData.data.getGraffitiData().array());
                 }
 
-            }
+                case REMOVED -> {
+                    this.getGraffiti().remove(tempData.pos);
+                    packet = new ClientBoundInvalidateBlock(tempData.pos);
+                }
 
-            return true;
-        });
+                case SMOTHERED ->{
+                    final GServerBlock block = this.getGraffiti().get(tempData.pos);
+                    final List<GServerDataHolder> dataList = block.getBlockData().get(tempData.dir);
+                    dataList.remove(tempData.data);
 
-        this.toRemove.removeIf(pos -> {
-            for (final ServerPlayer player : PlayerLookup.around(level, pos.getCenter(), 100)) {
-                ServerPlayNetworking.send(player, new ClientBoundInvalidateBlock(pos));
-            }
-
-            this.getGraffiti().remove(pos);
-            return true;
-        });
-
-        this.smothered.removeIf(dataHolder -> {
-            final GServerBlock block = this.getGraffiti().get(dataHolder.pos);
-            final List<GServerDataHolder> dataList = block.getBlockData().get(dataHolder.dir);
-            if (dataList != null) {
-                dataList.remove(dataHolder.data);
-                for (final ServerPlayer player : PlayerLookup.around(level, dataHolder.pos.getCenter(), 100)) {
-                    ServerPlayNetworking.send(player, new ClientBoundGraffitiUpdate(
-                            dataHolder.pos,
-                            dataHolder.dir,
-                            dataHolder.data.getDepth(),
-                            new byte[0]
-                    ));
+                    packet = new ClientBoundGraffitiUpdate(
+                            tempData.pos,
+                            tempData.dir,
+                            tempData.data.getDepth(),
+                            new byte[0]);
                 }
             }
+
+            for (final ServerPlayer player : PlayerLookup.tracking(level, pos)) {
+                ServerPlayNetworking.send(player, packet);
+            }
+
             return true;
         });
 
@@ -123,7 +119,14 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
     }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
 
-    public record TempData(GServerDataHolder data, BlockPos pos, Direction dir) { }
+    //data, dir nullable -> type == REMOVED
+    public record TempData(GServerDataHolder data, BlockPos pos, Direction dir, Type type) {
+    }
+
+    public enum Type {
+        SMOTHERED, REMOVED, DIRTY
+    }
 }
