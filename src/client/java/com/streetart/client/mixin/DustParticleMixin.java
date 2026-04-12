@@ -29,6 +29,8 @@ public abstract class DustParticleMixin extends DustParticleBase<DustParticleOpt
             final SpriteSet sprites,
             CallbackInfo ci
     ) {
-        this.setParticleSpeed(xAux, yAux, zAux);
+        if (xAux != 0 ||  yAux != 0 || zAux != 0) {
+            this.setParticleSpeed(xAux, yAux, zAux);
+        }
     }
 }

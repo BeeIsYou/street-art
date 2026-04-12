@@ -83,6 +83,10 @@ public class GClientData extends GData implements AutoCloseable {
         }
     }
 
+    public int getPixel(int x, int z) {
+        return this.texture.getPixels().getPixel(x, z);
+    }
+
     public byte[] getTextureData() {
         byte[] data = new byte[16*16*4];
         ByteBuffer buffer = ByteBuffer.wrap(data);

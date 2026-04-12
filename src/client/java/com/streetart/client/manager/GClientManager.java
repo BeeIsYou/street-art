@@ -110,6 +110,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     public void handleBlockInvalidate(ClientBoundInvalidateBlock packet, ClientPlayNetworking.Context context) {
         GClientBlock block = this.getGraffiti().remove(packet.pos());
         if (block != null) {
+            block.spawnParticles(context.client().level);
             block.close();
         }
     }
