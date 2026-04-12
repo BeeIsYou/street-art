@@ -1,6 +1,7 @@
 package com.streetart.arealib;
 
 import com.streetart.AllItems;
+import com.streetart.SprayPaintInteractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Player;
@@ -25,12 +26,12 @@ public class AreaLiblessLib {
 
         BlockInWorld block = new BlockInWorld(player.level(), pos, false);
         ItemStack main = player.getMainHandItem();
-        if (main.is(AllItems.SPRAY_CAN) && permitsUsage(main, block)) {
+        if (main.getItem() instanceof SprayPaintInteractor && permitsUsage(main, block)) {
             return true;
         }
 
         ItemStack offHand = player.getMainHandItem();
-        if (offHand.is(AllItems.SPRAY_CAN) && permitsUsage(offHand, block)) {
+        if (offHand.getItem() instanceof SprayPaintInteractor && permitsUsage(offHand, block)) {
             return true;
         }
 

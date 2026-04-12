@@ -3,6 +3,7 @@ package com.streetart.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.streetart.AllItems;
+import com.streetart.SprayPaintInteractor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -28,7 +29,7 @@ public class MinecraftMixin {
     )
     private void streetArt$dontSwingCan(Minecraft instance, boolean value, Operation<Void> operation) {
         ItemStack mainhand = this.player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (mainhand.is(AllItems.SPRAY_CAN) && value) {
+        if (mainhand.getItem() instanceof SprayPaintInteractor && value) {
             mainhand.use(this.level, this.player, InteractionHand.MAIN_HAND);
             operation.call(instance, false);
         } else {
@@ -41,7 +42,7 @@ public class MinecraftMixin {
     )
     private boolean streetArt$keepUsingCan(KeyMapping instance, Operation<Boolean> operation) {
         ItemStack mainhand = this.player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (mainhand.is(AllItems.SPRAY_CAN)) {
+        if (mainhand.getItem() instanceof SprayPaintInteractor) {
             return operation.call(instance) && !this.options.keyAttack.isDown();
         }
         return operation.call(instance);

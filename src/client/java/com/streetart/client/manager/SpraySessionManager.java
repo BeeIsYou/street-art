@@ -38,9 +38,9 @@ public class SpraySessionManager {
             snapshots.clear();
             return;
         }
+
         ItemStack stack = player.getUseItem();
         if (stack.getItem() instanceof SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
-            boolean explicitFailure = false;
             active = true;
 
             boolean rightClick = minecraft.options.keyUse.isDown();
@@ -66,6 +66,7 @@ public class SpraySessionManager {
                     StreetArtClient.textureManager.computeChanges(hitResult, sprayPaint.getColor(player, stack));
                 }
             }
+
             snapshots.clear();
             takeSnapshot(player);
         } else {
