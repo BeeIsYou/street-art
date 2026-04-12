@@ -12,6 +12,7 @@
     "requireAnnotations": true
   },
   "mixins": [
+    "DebugRendererMixin",
     "DustParticleMixin",
     "LevelRendererAccessor",
     "LocalPlayerMixin",
