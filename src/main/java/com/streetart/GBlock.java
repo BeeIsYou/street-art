@@ -2,6 +2,7 @@ package com.streetart;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +22,18 @@ public abstract class GBlock<D extends GData> implements AutoCloseable {
         this.blockData = new HashMap<>();
     }
 
+    @ApiStatus.Internal
     public GBlock(final Map<Direction, List<D>> blockData, final BlockPos pos) {
         this.blockPos = pos;
-        this.blockData = blockData;
+
+        final HashMap<Direction, List<D>> map = new HashMap<>();
+        //grrr mc grrrrrr
+        //we need to iterate over all entries as we need to be able to mutate the inner lists here
+        for (final Map.Entry<Direction, List<D>> entries : blockData.entrySet()) {
+            map.put(entries.getKey(), new ArrayList<>(entries.getValue()));
+        }
+
+        this.blockData = map;
     }
 
     public Map<Direction, List<D>> getBlockData() {
