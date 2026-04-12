@@ -1,8 +1,13 @@
 package com.streetart.client.manager;
 
+import com.streetart.ArtUtil;
 import com.streetart.StreetArt;
 import com.streetart.client.StreetArtClient;
 import com.streetart.item.SprayPaintInteractor;
+import com.streetart.networking.BiDirectionalGraffitiChange;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
@@ -14,17 +19,20 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2i;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SpraySessionManager {
     public static boolean active = false;
-    private static List<SpraySnapshot> snapshots = new ArrayList<>();
+    private static List<SpraySnapshot> positionSnapshots = new ArrayList<>();
+    private static Int2ObjectMap<BiDirectionalGraffitiChange> changes = new Int2ObjectOpenHashMap<>();
 
     public static void takeSnapshot(Player player) {
         if (active) {
-            snapshots.add(new SpraySnapshot(
+            positionSnapshots.add(new SpraySnapshot(
                     player.getEyePosition(),
                     new Vec2(player.getXRot(), player.getYRot()))
             );
@@ -35,13 +43,15 @@ public class SpraySessionManager {
         LocalPlayer player = minecraft.player;
         if (player == null) {
             active = false;
-            snapshots.clear();
+            positionSnapshots.clear();
             return;
         }
 
         ItemStack stack = player.getUseItem();
         if (stack.getItem() instanceof SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
             active = true;
+            int color = sprayPaint.getColor(player, stack);
+            BiDirectionalGraffitiChange change = changes.computeIfAbsent(color, _ -> new BiDirectionalGraffitiChange(color, new HashMap<>()));
 
             boolean rightClick = minecraft.options.keyUse.isDown();
             int iterations = sprayPaint.iterationsPerTick(player, stack);
@@ -63,35 +73,42 @@ public class SpraySessionManager {
 
                 if (hitResult.getType() == HitResult.Type.BLOCK &&
                         StreetArt.AREA_LIB.allowedToEdit(player, hitResult.getBlockPos())) {
-                    StreetArtClient.textureManager.computeChanges(hitResult, sprayPaint.getColor(player, stack));
+                    Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
+                    StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color);
+                    change.markChanged(hitResult, coordinates.x, coordinates.y);
                 }
             }
 
-            snapshots.clear();
+            positionSnapshots.clear();
             takeSnapshot(player);
         } else {
             active = false;
-            snapshots.clear();
+            positionSnapshots.clear();
         }
     }
 
+    public static void sync() {
+        changes.forEach((_, change) -> ClientPlayNetworking.send(change));
+        changes.clear();
+    }
+
     private static @Nullable SpraySnapshot sampleLerp(float pt) {
-        if (snapshots.isEmpty()) {
+        if (positionSnapshots.isEmpty()) {
             return null;
         }
-        if (snapshots.size() == 1) {
-            return snapshots.getFirst();
+        if (positionSnapshots.size() == 1) {
+            return positionSnapshots.getFirst();
         }
-        float ipt = pt * snapshots.size();
+        float ipt = pt * positionSnapshots.size();
         int i = Mth.floor(ipt);
-        if (i >= snapshots.size() - 1) {
-            return snapshots.getLast();
+        if (i >= positionSnapshots.size() - 1) {
+            return positionSnapshots.getLast();
         }
         float mix = (ipt - i);
-        Vec2 lookA = snapshots.get(i).look;
-        Vec2 lookB = snapshots.get(i+1).look;
-        Vec3 posA = snapshots.get(i).pos;
-        Vec3 posB = snapshots.get(i+1).pos;
+        Vec2 lookA = positionSnapshots.get(i).look;
+        Vec2 lookB = positionSnapshots.get(i+1).look;
+        Vec3 posA = positionSnapshots.get(i).pos;
+        Vec3 posB = positionSnapshots.get(i+1).pos;
         return new SpraySnapshot(
                 posA.scale(1 - mix).add(posB.scale(mix)),
                 lookA.scale(1 - mix).add(lookB.scale(mix))

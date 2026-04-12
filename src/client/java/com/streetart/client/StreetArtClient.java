@@ -3,7 +3,7 @@ package com.streetart.client;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
-import com.streetart.networking.ClientBoundGraffitiUpdate;
+import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import com.streetart.networking.ServerBoundRequestDataPacket;
 import net.fabricmc.api.ClientModInitializer;
@@ -26,7 +26,7 @@ public class StreetArtClient implements ClientModInitializer {
 			_ -> {
 				StreetArtClient.textureManager = new GClientManager(Minecraft.getInstance().getTextureManager());
 
-				ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiUpdate.TYPE, StreetArtClient.textureManager::handleDataUpdate);
+				ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, StreetArtClient.textureManager::handleDataUpdate);
 				ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, StreetArtClient.textureManager::handleBlockInvalidate);
 
 				ClientTickEvents.END_LEVEL_TICK.register(StreetArtClient.textureManager::updateLights);

@@ -1,6 +1,7 @@
 package com.streetart.client.mixin;
 
 import com.streetart.client.debug.AllDebugEntries;
+import com.streetart.client.debug.ReachingOverSidesRenderer;
 import com.streetart.client.debug.SprayPaintBlockRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.debug.DebugRenderer;
@@ -22,6 +23,9 @@ public class DebugRendererMixin {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.debugEntries.isCurrentlyEnabled(AllDebugEntries.SPRAY_PAINT_BLOCKS)) {
             this.renderers.add(new SprayPaintBlockRenderer());
+        }
+        if (minecraft.debugEntries.isCurrentlyEnabled(AllDebugEntries.SERVER_SPRAY_PAINT_BLOCKS)) {
+            this.renderers.add(new ReachingOverSidesRenderer());
         }
     }
 }

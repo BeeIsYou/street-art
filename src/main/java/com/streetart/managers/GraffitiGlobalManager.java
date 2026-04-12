@@ -2,10 +2,10 @@ package com.streetart.managers;
 
 import com.streetart.AttachmentTypes;
 import com.streetart.StreetArt;
-import com.streetart.networking.ClientBoundGraffitiUpdate;
+import com.streetart.networking.BiDirectionalGraffitiChange;
+import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ServerBoundGraffitiUpdate;
 import com.streetart.networking.ServerBoundRequestDataPacket;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -58,7 +58,7 @@ public class GraffitiGlobalManager {
             for (final GServerBlock value : manager.getGraffiti().values()) {
                 for (final Map.Entry<Direction, List<GServerDataHolder>> entries : value.getBlockData().entrySet()) {
                     for (final GServerDataHolder holder : entries.getValue()) {
-                        ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiUpdate(
+                        ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
                                 value.getBlockPos(),
                                 entries.getKey(),
                                 holder.getDepth(),
@@ -67,6 +67,23 @@ public class GraffitiGlobalManager {
                     }
                 }
             }
+        }
+    }
+
+    public static void handleChange(BiDirectionalGraffitiChange packet, ServerPlayNetworking.Context context) {
+        final ServerLevel level = context.player().level();
+        for (Map.Entry<BiDirectionalGraffitiChange.TileKey, BiDirectionalGraffitiChange.TileChange> entry : packet.changes().entrySet()) {
+            BiDirectionalGraffitiChange.TileKey key = entry.getKey();
+            BiDirectionalGraffitiChange.TileChange change = entry.getValue();
+
+            final LevelChunk chunk = level.getChunkAt(key.pos());
+            final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
+
+            GServerDataHolder tile = manager.getOrCreate(key.pos(), key.dir(), key.depth());
+            tile.handleChange(packet.color(), change);
+
+            chunk.markUnsaved();
+            manager.markDirty(tile, key.pos(), key.dir());
         }
     }
 }

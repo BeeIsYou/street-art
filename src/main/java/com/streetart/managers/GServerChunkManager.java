@@ -3,7 +3,7 @@ package com.streetart.managers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.GManager;
-import com.streetart.networking.ClientBoundGraffitiUpdate;
+import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -78,7 +78,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
             CustomPacketPayload packet = null;
             switch (type) {
                 case DIRTY -> {
-                    packet = new ClientBoundGraffitiUpdate(
+                    packet = new ClientBoundGraffitiSet(
                             tempData.pos,
                             tempData.dir,
                             tempData.data.getDepth(),
@@ -95,7 +95,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
                     final List<GServerDataHolder> dataList = block.getBlockData().get(tempData.dir);
                     dataList.remove(tempData.data);
 
-                    packet = new ClientBoundGraffitiUpdate(
+                    packet = new ClientBoundGraffitiSet(
                             tempData.pos,
                             tempData.dir,
                             tempData.data.getDepth(),

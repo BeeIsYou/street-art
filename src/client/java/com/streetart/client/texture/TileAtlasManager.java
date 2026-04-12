@@ -106,7 +106,7 @@ public class TileAtlasManager {
         return this.atlasTexture.getPixels().getPixel(x, y);
     }
 
-    public byte[] getPixelData(int id) {
+    public byte[] copyPixelData(int id) {
         byte[] data = new byte[16*16*4];
         ByteBuffer buffer = ByteBuffer.wrap(data);
 

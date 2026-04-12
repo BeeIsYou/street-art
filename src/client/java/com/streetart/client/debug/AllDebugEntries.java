@@ -9,6 +9,9 @@ public class AllDebugEntries {
     public static final Identifier SPRAY_PAINT_BLOCKS = DebugScreenEntries.register(
             StreetArt.id("spray_paint_blocks"),
             new DebugEntryNoop());
+    public static final Identifier SERVER_SPRAY_PAINT_BLOCKS = DebugScreenEntries.register(
+            StreetArt.id("server_spray_paint_blocks"),
+            new DebugEntryNoop());
     public static final Identifier ATLAS_USAGE = DebugScreenEntries.register(
             StreetArt.id("atlas_usage"),
             new AtlasStatusEntry()

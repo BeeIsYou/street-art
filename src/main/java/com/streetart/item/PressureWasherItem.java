@@ -46,7 +46,9 @@ public class PressureWasherItem extends Item {
                 HitResult h = player.pick(player.blockInteractionRange(), 1, false);
                 if (h.getType() != HitResult.Type.MISS && h instanceof BlockHitResult hit) {
                     GServerChunkManager manager = player.level().getChunk(hit.getBlockPos()).getAttached(AttachmentTypes.CHUNK_MANAGER);
-                    manager.markForRemoval(hit.getBlockPos());
+                    if (manager != null) {
+                        manager.markForRemoval(hit.getBlockPos());
+                    }
                 }
             }
         }

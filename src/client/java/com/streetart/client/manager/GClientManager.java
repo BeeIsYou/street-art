@@ -1,11 +1,10 @@
 package com.streetart.client.manager;
 
+import com.streetart.ArtUtil;
 import com.streetart.GManager;
 import com.streetart.client.texture.TileAtlasManager;
-import com.streetart.networking.ClientBoundGraffitiUpdate;
+import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
-import com.streetart.networking.ServerBoundGraffitiUpdate;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -13,15 +12,17 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
+import org.joml.Vector2i;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class GClientManager extends GManager<GClientData, GClientBlock> {
     private Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
     public final TileAtlasManager tileAtlasManager;
 
-    private Set<GClientData> modified = new HashSet<>();
     private int syncTimer = 0;
 
     public GClientManager(TextureManager textureManager) {
@@ -44,8 +45,12 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         return this.graffiti;
     }
 
-    public void computeChanges(BlockHitResult hitResult, int color) {
-        this.getOrCreate(hitResult.getBlockPos(), hitResult.getDirection(), hitResult.getLocation()).computeChanges(hitResult, color);
+    public void applyPixelChange(BlockHitResult hitResult, Vector2i coordinates, int color) {
+        this.getOrCreate(
+                hitResult.getBlockPos(),
+                hitResult.getDirection(),
+                ArtUtil.calculateDepth(hitResult)
+        ).applyPixel(coordinates, color);
     }
 
     public void forEach(Consumer<GClientData> consumer) {
@@ -58,30 +63,18 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         }
     }
 
-    public void markModified(GClientData graffiti) {
-        this.modified.add(graffiti);
-    }
-
     public void tick(Minecraft minecraft) {
-        if (!this.modified.isEmpty()) {
+        if (minecraft.getConnection() != null) {
             this.syncTimer++;
             if (this.syncTimer > 10) {
-                this.modified.removeIf(data -> {
-                    ClientPlayNetworking.send(new ServerBoundGraffitiUpdate(
-                            data.pos,
-                            data.dir,
-                            data.getDepth(),
-                            data.getTextureData()
-                    ));
-                    return true;
-                });
+                SpraySessionManager.sync();
                 this.syncTimer = 0;
             }
         }
         this.tileAtlasManager.checkDirty();
     }
 
-    public void handleDataUpdate(ClientBoundGraffitiUpdate packet, ClientPlayNetworking.Context context) {
+    public void handleDataUpdate(ClientBoundGraffitiSet packet, ClientPlayNetworking.Context context) {
         if (packet.textureData().length == 16*16*4) {
             GClientData data = this.getOrCreate(packet.pos(), packet.dir(), packet.depth());
             data.update(packet.textureData());

@@ -3,10 +3,7 @@ package com.streetart;
 import com.streetart.arealib.AreaLibLib;
 import com.streetart.arealib.AreaLiblessLib;
 import com.streetart.managers.GraffitiGlobalManager;
-import com.streetart.networking.ClientBoundGraffitiUpdate;
-import com.streetart.networking.ClientBoundInvalidateBlock;
-import com.streetart.networking.ServerBoundGraffitiUpdate;
-import com.streetart.networking.ServerBoundRequestDataPacket;
+import com.streetart.networking.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -32,14 +29,17 @@ public class StreetArt implements ModInitializer {
         AllItems.init();
         AttachmentTypes.init();
 
-        PayloadTypeRegistry.clientboundPlay().register(ClientBoundGraffitiUpdate.TYPE, ClientBoundGraffitiUpdate.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ClientBoundGraffitiSet.TYPE, ClientBoundGraffitiSet.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundInvalidateBlock.TYPE, ClientBoundInvalidateBlock.CODEC);
 
         PayloadTypeRegistry.serverboundPlay().register(ServerBoundRequestDataPacket.TYPE, ServerBoundRequestDataPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(ServerBoundGraffitiUpdate.TYPE, ServerBoundGraffitiUpdate.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
 
-        ServerPlayNetworking.registerGlobalReceiver(ServerBoundGraffitiUpdate.TYPE, GraffitiGlobalManager::handleServerUpdatePacket);
         ServerPlayNetworking.registerGlobalReceiver(ServerBoundRequestDataPacket.TYPE, GraffitiGlobalManager::handleRequestPacket);
+        ServerPlayNetworking.registerGlobalReceiver(ServerBoundGraffitiUpdate.TYPE, GraffitiGlobalManager::handleServerUpdatePacket);
+
+        ServerPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, GraffitiGlobalManager::handleChange);
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
             AREA_LIB = new AreaLibLib();
