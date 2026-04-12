@@ -28,6 +28,7 @@ public class TileAtlasManager {
     public static final float V_SIZE = 1f / ENTRIES_Y;
 
     private int nextIndex = 0;
+    private int useCount = 0;
     private IntSet freeIDs = new IntArraySet(ID_COUNT);
     public final Identifier atlasLocation;
     private final DynamicTexture atlasTexture;
@@ -42,15 +43,18 @@ public class TileAtlasManager {
 
     public int allocateID() {
         if (this.nextIndex < ID_COUNT) {
+            this.useCount++;
             return this.nextIndex++;
         }
         OptionalInt id = this.freeIDs.intStream().findFirst();
         if (id.isEmpty()) {
             this.panic();
             this.nextIndex = 1;
+            this.useCount = 1;
             return 0;
         }
         this.freeIDs.remove(id.getAsInt());
+        this.useCount++;
         return id.getAsInt();
     }
 
@@ -66,6 +70,7 @@ public class TileAtlasManager {
 
     public void freeID(int id) {
         this.freeIDs.add(id);
+        this.useCount--;
     }
 
     public void checkDirty() {
@@ -79,6 +84,7 @@ public class TileAtlasManager {
         this.atlasTexture.setPixels(new NativeImage(ENTRIES_X * 16, ENTRIES_Y * 16, true));
         this.freeIDs.clear();
         this.nextIndex = 0;
+        this.useCount = 0;
     }
 
     public static Vector2f getUV(int id) {
@@ -112,5 +118,13 @@ public class TileAtlasManager {
             }
         }
         return data;
+    }
+
+    public int getCapacity() {
+        return ID_COUNT;
+    }
+
+    public int getSize() {
+        return this.useCount;
     }
 }
