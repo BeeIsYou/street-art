@@ -29,9 +29,13 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generateTranslations(HolderLookup.Provider provider, TranslationBuilder translationBuilder) {
 			translationBuilder.add(AllItems.SPRAY_CAN, "Spray Can");
+			translationBuilder.add(AllItems.PRESSURE_WASHER, "Pressure Washer");
 
 			translationBuilder.add("lore.street_art.spray_can",
 					"The perfect tool for freeform expression! Hold left click to spray in a smaller cone"
+			);
+			translationBuilder.add("lore.street_art.pressure_washer",
+					"The perfect tool for crushing freeform expression! Operator only"
 			);
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");

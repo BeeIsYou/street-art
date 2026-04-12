@@ -1,10 +1,9 @@
 package com.streetart.client.mixin;
 
 import com.streetart.client.ParticleThrower;
-import com.streetart.item.SprayCanItem;
-import com.streetart.item.SprayPaintInteractor;
-import net.minecraft.core.particles.DustParticleOptions;
+import com.streetart.item.PressureWasherItem;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(SprayCanItem.class)
-public abstract class SprayCanItemMixin implements SprayPaintInteractor, ParticleThrower {
-    @Inject(method = "Lcom/streetart/item/SprayCanItem;onUseTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V",
-        at = @At("HEAD")
+@Mixin(PressureWasherItem.class)
+public class PressureWasherMixin implements ParticleThrower {
+    @Inject(method = "Lcom/streetart/item/PressureWasherItem;onUseTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V",
+            at = @At("HEAD")
     )
     private void streetArt$evilSelfMixinForClientClassAccess(Level level, LivingEntity livingEntity, ItemStack itemStack,
-                                                           int ticksRemaining, CallbackInfo ci) {
+                                                             int ticksRemaining, CallbackInfo ci) {
         if (level.isClientSide() && livingEntity instanceof Player player) {
             this.throwParticles(level, player, itemStack);
         }
@@ -30,17 +29,16 @@ public abstract class SprayCanItemMixin implements SprayPaintInteractor, Particl
 
     @Override
     public Vector3f firstPersonPlane() {
-        return new Vector3f(0.525f, -0.1f, 1);
+        return new Vector3f(0.25f, -0.05f, 2);
     }
 
     @Override
     public Vec2 thirdPersonOffset() {
-        return new Vec2(0.35f, 0.8f);
+        return new Vec2(0.35f, 1.6f);
     }
 
     @Override
     public ParticleOptions getParticleOptions(Player player, ItemStack itemStack) {
-        int color = this.getColor(player, itemStack);
-        return new DustParticleOptions(color, 1);
+        return ParticleTypes.SPLASH;
     }
 }

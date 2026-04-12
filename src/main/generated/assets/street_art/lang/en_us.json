@@ -1,6 +1,8 @@
 {
+  "item.street_art.pressure_washer": "Pressure Washer",
   "item.street_art.spray_can": "Spray Can",
   "key.category.street_art": "Street Art",
+  "lore.street_art.pressure_washer": "The perfect tool for crushing freeform expression! Operator only",
   "lore.street_art.spray_can": "The perfect tool for freeform expression! Hold left click to spray in a smaller cone",
   "street_art.toast.atlas_full.body": "Spray Paint textures forced to clear",
   "street_art.toast.atlas_full.title": "Atlas Full"
