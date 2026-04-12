@@ -3,5 +3,7 @@
   "key.category.street_art": "Street Art",
   "lore.street_art.spray_can": "The perfect tool for freeform expression! Sneak + Use to switch modes",
   "street_art.spray_can.focused": "Focused",
-  "street_art.spray_can.unfocused": "Unfocused"
+  "street_art.spray_can.unfocused": "Unfocused",
+  "street_art.toast.atlas_full.body": "Spray Paint textures forced to clear",
+  "street_art.toast.atlas_full.title": "Atlas Full"
 }

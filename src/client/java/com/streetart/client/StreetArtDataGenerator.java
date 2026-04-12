@@ -38,6 +38,9 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 			translationBuilder.add("street_art.spray_can.unfocused", "Unfocused");
 			translationBuilder.add("street_art.spray_can.focused", "Focused");
+
+			translationBuilder.add("street_art.toast.atlas_full.title", "Atlas Full");
+			translationBuilder.add("street_art.toast.atlas_full.body", "Spray Paint textures forced to clear");
 		}
 	}
 

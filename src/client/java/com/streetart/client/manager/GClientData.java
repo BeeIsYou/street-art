@@ -2,39 +2,28 @@ package com.streetart.client.manager;
 
 import com.google.common.primitives.Ints;
 import com.streetart.GData;
-import com.streetart.StreetArt;
 import com.streetart.client.StreetArtClient;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
-import java.nio.ByteBuffer;
-
 public class GClientData extends GData implements AutoCloseable {
     public final Direction dir;
     public final BlockPos pos;
     public final int id;
-    public final Identifier location;
-    private final DynamicTexture texture;
 
     public int light = -1;
 
-    public GClientData(Direction dir, double depth, BlockPos pos, int id, TextureManager textureManager) {
+    public GClientData(Direction dir, double depth, BlockPos pos, int id) {
         super(depth);
         this.dir = dir;
         this.pos = pos;
         this.id = id;
-        this.location = StreetArt.id("graffiti/" + this.id);
-        this.texture = new DynamicTexture(() -> "Graffiti " + this.id, 16, 16, true);
-        textureManager.register(this.location, this.texture);
     }
 
     public void update(byte[] data) {
@@ -42,20 +31,15 @@ public class GClientData extends GData implements AutoCloseable {
             for (int y = 0; y < 16; y++) {
                 int i = (x + y*16) * 4;
                 int argb = Ints.fromBytes(data[i], data[i+1], data[i+2], data[i+3]);
-                this.texture.getPixels().setPixel(x, y, argb);
+                this.setPixel(x, y, argb);
             }
         }
-        this.texture.upload();
     }
 
     public void updateLight(ClientLevel level) {
         this.light = LevelRenderer.getLightCoords(level,
                 this.depth == 1 ? this.pos.relative(this.dir) : this.pos
         );
-    }
-
-    public void upload() {
-        this.texture.upload();
     }
 
     public void computeChanges(BlockHitResult hitResult, final int color) {
@@ -78,26 +62,25 @@ public class GClientData extends GData implements AutoCloseable {
         int y = (int)(plane.y * 16);
         int i = (x + y * 16) * 4;
         if (0 <= i && i < 16*16*4) {
-            this.texture.getPixels().setPixel(x, y, color);
+            this.setPixel(x, y, color);
             StreetArtClient.textureManager.markModified(this);
         }
     }
 
-    public int getPixel(int x, int z) {
-        return this.texture.getPixels().getPixel(x, z);
+    public void setPixel(int x, int y, int color) {
+        StreetArtClient.textureManager.tileAtlasManager.setPixel(this.id, x, y, color);
+    }
+
+    public int getPixel(int x, int y) {
+        return StreetArtClient.textureManager.tileAtlasManager.getPixel(this.id, x, y);
     }
 
     public byte[] getTextureData() {
-        byte[] data = new byte[16*16*4];
-        ByteBuffer buffer = ByteBuffer.wrap(data);
-        for (int i : this.texture.getPixels().getPixels()) {
-            buffer.putInt(i);
-        }
-        return data;
+        return StreetArtClient.textureManager.tileAtlasManager.getPixelData(this.id);
     }
 
     @Override
     public void close() {
-        this.texture.close();
+        StreetArtClient.textureManager.tileAtlasManager.freeID(this.id);
     }
 }

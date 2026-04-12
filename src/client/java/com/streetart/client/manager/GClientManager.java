@@ -1,6 +1,7 @@
 package com.streetart.client.manager;
 
 import com.streetart.GManager;
+import com.streetart.client.texture.TileAtlasManager;
 import com.streetart.networking.ClientBoundGraffitiUpdate;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import com.streetart.networking.ServerBoundGraffitiUpdate;
@@ -18,14 +19,13 @@ import java.util.function.Consumer;
 
 public class GClientManager extends GManager<GClientData, GClientBlock> {
     private Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
-    public final TextureManager textureManager;
-    private int id = 0;
+    public final TileAtlasManager tileAtlasManager;
 
     private Set<GClientData> modified = new HashSet<>();
     private int syncTimer = 0;
 
     public GClientManager(TextureManager textureManager) {
-        this.textureManager = textureManager;
+        this.tileAtlasManager = new TileAtlasManager(textureManager);
 
         // how many people will put me down for doing THIS
         ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiUpdate.TYPE, this::handleDataUpdate);
@@ -35,7 +35,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     }
 
     public int nextID() {
-        return this.id++;
+        return this.tileAtlasManager.allocateID();
     }
 
     @Override
@@ -69,7 +69,6 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     public void tick(Minecraft minecraft) {
         if (!this.modified.isEmpty()) {
             this.syncTimer++;
-            this.modified.forEach(GClientData::upload);
             if (this.syncTimer > 10) {
                 this.modified.removeIf(data -> {
                     ClientPlayNetworking.send(new ServerBoundGraffitiUpdate(
@@ -83,6 +82,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
                 this.syncTimer = 0;
             }
         }
+        this.tileAtlasManager.checkDirty();
     }
 
     public void handleDataUpdate(ClientBoundGraffitiUpdate packet, ClientPlayNetworking.Context context) {

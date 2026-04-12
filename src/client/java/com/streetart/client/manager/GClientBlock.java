@@ -22,7 +22,7 @@ public class GClientBlock extends GBlock<GClientData> {
         assert graffitiManager instanceof GClientManager;
         final GClientManager clientManager = (GClientManager) graffitiManager;
 
-        return new GClientData(dir, depth, pos, clientManager.nextID(), clientManager.textureManager);
+        return new GClientData(dir, depth, pos, clientManager.nextID());
     }
 
     @Override
@@ -33,6 +33,7 @@ public class GClientBlock extends GBlock<GClientData> {
     public void closeAll() {
         for (final List<GClientData> tiles : this.blockData.values()) {
             for (final GClientData tile : tiles) {
+
                 tile.close();
             }
         }

@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Every texture plane placed on a block
+ * @param <D> The data for a plane
+ */
 public abstract class GBlock<D extends GData> implements AutoCloseable {
     public final BlockPos blockPos;
     protected final Map<Direction, List<D>> blockData = new HashMap<>();

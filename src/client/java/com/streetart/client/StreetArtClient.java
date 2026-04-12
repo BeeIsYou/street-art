@@ -2,6 +2,7 @@ package com.streetart.client;
 
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
+import com.streetart.client.texture.GraffitiRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
