@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "ExampleMixin",
-    "LevelMixin"
+    "LevelMixin",
+    "ServerLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

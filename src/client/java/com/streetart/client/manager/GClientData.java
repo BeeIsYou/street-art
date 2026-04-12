@@ -38,7 +38,7 @@ public class GClientData extends GData implements AutoCloseable {
 
     public void updateLight(ClientLevel level) {
         this.light = LevelRenderer.getLightCoords(level,
-                this.depth == 1 ? this.pos.relative(this.dir) : this.pos
+                this.getDepth() == 1 ? this.pos.relative(this.dir) : this.pos
         );
     }
 

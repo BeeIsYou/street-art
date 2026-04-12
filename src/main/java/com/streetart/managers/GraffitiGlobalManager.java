@@ -1,37 +1,34 @@
 package com.streetart.managers;
 
+import com.streetart.AttachmentTypes;
 import com.streetart.networking.ServerBoundGraffitiUpdate;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 public class GraffitiGlobalManager {
 
-    private static final Map<Level, GLevelManager> LEVEL_GRAFFITI_MAP = new HashMap<>();
-
-
-    public static GLevelManager getGraffitiLevelManager(final ServerLevel level) {
-        return LEVEL_GRAFFITI_MAP.computeIfAbsent(level, l -> new GLevelManager(level));
-    }
-
-    public static void tickLevel(final ServerLevel level) {
-        final GLevelManager manager = LEVEL_GRAFFITI_MAP.get(level);
-        if (manager != null) {
-            manager.tick();
-        }
-    }
-
-    public static void handleServerUpdatePacket(ServerBoundGraffitiUpdate packet, ServerPlayNetworking.Context context) {
-        for (byte b : packet.textureData()) {
+    public static void handleServerUpdatePacket(final ServerBoundGraffitiUpdate packet, final ServerPlayNetworking.Context context) {
+        for (final byte b : packet.textureData()) {
             if (b != 0) {
                 // todo length validation
-                GLevelManager manager = getGraffitiLevelManager(context.player().level());
-                GServerData data = manager.getOrCreate(packet.pos(), packet.dir(), packet.depth());
-                System.arraycopy(packet.textureData(), 0, data.graffitiData, 0, packet.textureData().length);
-                manager.markDirty(data, packet.pos(), packet.dir());
+
+                final ServerLevel level = context.player().level();
+                final ChunkAccess access = level.getChunk(packet.pos());
+
+                final GServerChunkManager chunkManager = access.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
+                final GServerDataHolder data = chunkManager.getOrCreate(packet.pos(), packet.dir(), packet.depth());
+
+                final ByteBuffer gData = data.getGraffitiData();
+                gData.position(0);
+                gData.put(packet.textureData());
+                chunkManager.markDirty(data, packet.pos(), packet.dir());
+
                 return;
             }
         }

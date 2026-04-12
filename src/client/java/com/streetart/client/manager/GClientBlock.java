@@ -31,7 +31,7 @@ public class GClientBlock extends GBlock<GClientData> {
     }
 
     public void closeAll() {
-        for (final List<GClientData> tiles : this.blockData.values()) {
+        for (final List<GClientData> tiles : this.getBlockData().values()) {
             for (final GClientData tile : tiles) {
 
                 tile.close();
@@ -43,7 +43,7 @@ public class GClientBlock extends GBlock<GClientData> {
     public void spawnParticles(Level level) {
         for (Map.Entry<Direction, List<GClientData>> value : this.getBlockData().entrySet()) {
             Direction dir = value.getKey();
-            Vec3 pos = Vec3.atLowerCornerOf(this.blockPos);
+            Vec3 pos = Vec3.atLowerCornerOf(this.getBlockPos());
             Vec3 dx = switch (dir.getAxis()) {
                 case X -> Vec3.Y_AXIS;
                 case Y -> Vec3.Z_AXIS;
@@ -58,9 +58,9 @@ public class GClientBlock extends GBlock<GClientData> {
             for (final GClientData tile : value.getValue()) {
                 Vec3 tilePos;
                 if (dir.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
-                    tilePos = pos.add(dir.getUnitVec3().scale(tile.depth + 0.1));
+                    tilePos = pos.add(dir.getUnitVec3().scale(tile.getDepth() + 0.1));
                 } else {
-                    tilePos = pos.add(dir.getUnitVec3().scale(0.9 - tile.depth));
+                    tilePos = pos.add(dir.getUnitVec3().scale(0.9 - tile.getDepth()));
                 }
 
                 for (int i = 0; i < 15; i++) {

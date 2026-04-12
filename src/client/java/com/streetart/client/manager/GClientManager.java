@@ -74,7 +74,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
                     ClientPlayNetworking.send(new ServerBoundGraffitiUpdate(
                             data.pos,
                             data.dir,
-                            data.depth,
+                            data.getDepth(),
                             data.getTextureData()
                     ));
                     return true;
@@ -96,7 +96,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
                 List<GClientData> dataList = block.getBlockData().get(packet.dir());
                 if (dataList != null) {
                     dataList.removeIf(d -> {
-                        boolean remove = d.depth == packet.depth();
+                        boolean remove = d.getDepth() == packet.depth();
                         if (remove) {
                             d.close();
                         }

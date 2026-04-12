@@ -32,7 +32,7 @@ public abstract class GManager<D extends GData, B extends GBlock<D>> implements 
             depth = 1 - depth;
         }
 
-        return this.getOrCreate(pos, dir, depth);
+        return this.getOrCreate(pos.immutable(), dir, depth);
     }
 
     public @Nullable B popBlock(final BlockPos pos) {

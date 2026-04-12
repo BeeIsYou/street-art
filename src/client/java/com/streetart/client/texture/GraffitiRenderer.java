@@ -32,9 +32,9 @@ public class GraffitiRenderer {
         if (data.light != -1) {
             pose.pushPose();
             pose.translate(
-                    data.pos.getX() + data.dir.getStepX() * data.depth,
-                    data.pos.getY() + data.dir.getStepY() * data.depth,
-                    data.pos.getZ() + data.dir.getStepZ() * data.depth
+                    data.pos.getX() + data.dir.getStepX() * data.getDepth(),
+                    data.pos.getY() + data.dir.getStepY() * data.getDepth(),
+                    data.pos.getZ() + data.dir.getStepZ() * data.getDepth()
             );
             pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
             Vector2f uv = TileAtlasManager.getUV(data.id);
