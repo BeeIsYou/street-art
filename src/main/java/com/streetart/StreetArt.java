@@ -23,6 +23,7 @@ public class StreetArt implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		AllDataComponents.init();
 		AllItems.init();
 
 		ServerTickEvents.END_LEVEL_TICK.register(GraffitiGlobalManager::tickLevel);

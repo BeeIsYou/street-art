@@ -1,5 +1,6 @@
 package com.streetart;
 
+import com.streetart.components.Focused;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -31,6 +32,7 @@ public class AllItems {
                 for (DyeColor color : DyeColor.values()) {
                     ItemStack stack = new ItemStack(SPRAY_CAN);
                     stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color.getTextureDiffuseColor()));
+                    stack.set(AllDataComponents.FOCUSED, Focused.FALSE);
                     output.accept(stack);
                 }
             }).build();

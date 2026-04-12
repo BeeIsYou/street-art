@@ -1,50 +1,81 @@
 package com.streetart.client.manager;
 
-import com.streetart.AllItems;
+import com.streetart.SprayPaintInteractor;
 import com.streetart.client.StreetArtClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SpraySessionManager {
+    public static boolean active = false;
+    private static List<Vec2> lookXY = new ArrayList<>();
+
+    public static void playerTurned(Player player) {
+        if (active) {
+            lookXY.add(new Vec2(player.getXRot(), player.getYRot()));
+        }
+    }
+
     public static void tick(Minecraft client) {
         LocalPlayer player = client.player;
         if (player == null) {
+            active = false;
+            lookXY.clear();
             return;
         }
         ItemStack stack = player.getUseItem();
-        if (stack.is(AllItems.SPRAY_CAN) && stack.has(DataComponents.DYED_COLOR)) {
-            for (int i = 0; i < 16; i++) {
-                Vec3 view = player.calculateViewVector(player.getXRot(i / 16f), player.getYRot(i / 16f));
+        if (stack.getItem() instanceof SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
+            active = true;
 
-                double a1 = player.getRandom().nextGaussian() * 0.05f;
-                double a2 = player.getRandom().nextGaussian() * 0.05f;
+            int iterations = sprayPaint.iterationsPerTick(player, stack);
+            Vec3 from = player.getEyePosition();
+            for (int i = 0; i < iterations; i++) {
+                float pt = (float) i / iterations;
 
-                Vec3 rotated1 = new Vec3(
-                        view.x * Math.cos(a1) + view.z * -Math.sin(a1),
-                        view.y,
-                        view.x * Math.sin(a1) + view.z * Math.cos(a1)
-                );
-                Vec3 rotated2 = new Vec3(
-                        rotated1.x,
-                        rotated1.y * Math.cos(a2) + rotated1.z * -Math.sin(a2),
-                        rotated1.y * Math.sin(a2) + rotated1.z * Math.cos(a2)
-                );
+                Vec2 xyRot = sampleLerp(pt, new Vec2(player.getXRot(), player.getYRot()));
+                Vec3 originalView = player.calculateViewVector(xyRot.x, xyRot.y);
+
+                Vec3 view = sprayPaint.getLookVector(player, xyRot, originalView, stack, pt);
 
                 double range = player.blockInteractionRange();
-                Vec3 from = player.getEyePosition();
-                Vec3 to = from.add(rotated2.x * range, rotated2.y * range, rotated2.z * range);
+                Vec3 to = from.add(view.x * range, view.y * range, view.z * range);
                 BlockHitResult hitResult = player.level().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
 
                 if (hitResult.getType() == HitResult.Type.BLOCK) {
-                    StreetArtClient.textureManager.computeChanges(hitResult, stack.get(DataComponents.DYED_COLOR).rgb());
+                    StreetArtClient.textureManager.computeChanges(hitResult, sprayPaint.getColor(player, stack));
                 }
             }
+            lookXY.clear();
+            lookXY.add(new Vec2(player.getXRot(), player.getYRot()));
+        } else {
+            active = false;
+            lookXY.clear();
         }
+    }
+
+    private static Vec2 sampleLerp(float pt, Vec2 fallBack) {
+        if (lookXY.isEmpty()) {
+            return fallBack;
+        }
+        if (lookXY.size() == 1) {
+            return lookXY.getFirst();
+        }
+        float ipt = pt * lookXY.size();
+        int i = Mth.floor(ipt);
+        if (i >= lookXY.size() - 1) {
+            return lookXY.getLast();
+        }
+        float mix = (ipt - i);
+        return lookXY.get(i).scale(1 - mix).add(lookXY.get(i + 1).scale(mix));
     }
 }
