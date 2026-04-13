@@ -35,6 +35,8 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllItems.PAINT_BALLOON, "Paint Balloon");
 			translationBuilder.add(AllItems.CREATIVE_PRESSURE_WASHER, "Creative Pressure Washer");
 			translationBuilder.add(AllItems.SEALANT, "Sealant");
+			translationBuilder.add(AllItems.PERMIT_WAND, "Permit Wand");
+			translationBuilder.add(AllItems.DENY_WAND, "Deny Wand");
 
 			translationBuilder.add("lore.street_art.spray_can",
                     """
@@ -68,6 +70,20 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 							L-Click on a region to remove
 							Spray paint within will not degrade over time"""
 			);
+			translationBuilder.add("lore.street_art.permit_wand",
+					"""
+							Sorry I got lazy (Operator only)
+							Hold R-Click and drag to define a region
+							L-Click on a region to remove
+							Adventure mode players can modify paint on blocks within"""
+			);
+			translationBuilder.add("lore.street_art.deny_wand",
+					"""
+							Sorry I got lazy (Operator only)
+							Hold R-Click and drag to define a region
+							L-Click on a region to remove
+							Only opped players can modify paint on blocks within"""
+			);
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");
 
@@ -90,6 +106,8 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		public void generateItemModels(final ItemModelGenerators itemModelGenerators) {
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);
 		}
 	}
 }

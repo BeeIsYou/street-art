@@ -3,7 +3,7 @@ package com.streetart.arealib;
 import com.streetart.item.SprayPaintInteractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AdventureModePredicate;
 import net.minecraft.world.item.ItemStack;
@@ -52,5 +52,6 @@ public class AreaLiblessLib {
         return predicate != null && predicate.test(block);
     }
 
-    public void createRegion(final Level level, final MinecraftServer server, final AreaType type, final BlockPos a, final BlockPos b) {}
+    public void createRegion(final ServerLevel level, final AreaType type, final BlockPos a, final BlockPos b) {}
+    public void removeRegion(final ServerLevel level, final AreaType type, final BlockPos pos) {}
 }

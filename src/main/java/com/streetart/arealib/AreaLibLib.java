@@ -1,6 +1,7 @@
 package com.streetart.arealib;
 
 import com.streetart.StreetArt;
+import dev.doublekekse.area_lib.Area;
 import dev.doublekekse.area_lib.AreaLib;
 import dev.doublekekse.area_lib.areas.BoxArea;
 import dev.doublekekse.area_lib.component.SampledAreaComponentType;
@@ -8,7 +9,7 @@ import dev.doublekekse.area_lib.data.AreaSavedData;
 import dev.doublekekse.area_lib.registry.AreaComponentRegistry;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -70,8 +71,7 @@ public class AreaLibLib extends AreaLiblessLib {
         return !restricted;
     }
 
-    @Override
-    public void createRegion(final Level level, final MinecraftServer server, final AreaType type, final BlockPos a, final BlockPos b) {
+    public void createRegion(final ServerLevel level, final AreaType type, final BlockPos a, final BlockPos b) {
         final AreaSavedData data = AreaLib.getSavedData(level);
         final BoxArea area = new BoxArea(
                 data,
@@ -83,7 +83,17 @@ public class AreaLibLib extends AreaLiblessLib {
                 level.dimension().identifier(),
                 new AABB(a).minmax(new AABB(b))
         );
-        area.put(server, NO_DECAY, Unit.INSTANCE);
-        AreaLib.getSavedData(level).put(server, area);
+        area.put(level.getServer(), getComponent(type), Unit.INSTANCE);
+        AreaLib.getSavedData(level).put(level.getServer(), area);
+    }
+
+    public void removeRegion(final ServerLevel level, final AreaType type, final BlockPos pos) {
+        final AreaSavedData data = AreaLib.getSavedData(level);
+        for (final Area area : AreaLib.getSavedData(level).findAllAreasContaining(level, Vec3.atCenterOf(pos))) {
+            if (area.has(getComponent(type))) {
+                data.remove(level.getServer(), area);
+                return;
+            }
+        }
     }
 }

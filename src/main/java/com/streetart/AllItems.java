@@ -41,13 +41,21 @@ public class AllItems {
                     .component(AllDataComponents.COLOR, ColorComponent.BLUE)
     );
 
-    public static AreaModifierItem SEALANT = register("sealant", p -> new AreaModifierItem(p, AreaLiblessLib.AreaType.NO_DECAY),
-            new Item.Properties().stacksTo(1)
-    );
-
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)
                     .component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
+    );
+
+    public static AreaModifierItem SEALANT = register("sealant", AreaModifierItem.forType(AreaLiblessLib.AreaType.NO_DECAY),
+            new Item.Properties().stacksTo(1)
+    );
+
+    public static AreaModifierItem PERMIT_WAND = register("permit_wand", AreaModifierItem.forType(AreaLiblessLib.AreaType.MODIFYING_ALLOWED),
+            new Item.Properties().stacksTo(1)
+    );
+
+    public static AreaModifierItem DENY_WAND = register("deny_wand", AreaModifierItem.forType(AreaLiblessLib.AreaType.PROTECTED),
+            new Item.Properties().stacksTo(1)
     );
 
     public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
@@ -77,6 +85,8 @@ public class AllItems {
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.OP_BLOCKS).register(content -> {
             content.accept(CREATIVE_PRESSURE_WASHER);
             content.accept(SEALANT);
+            content.accept(PERMIT_WAND);
+            content.accept(DENY_WAND);
         });
     }
 
