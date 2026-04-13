@@ -2,22 +2,28 @@ package com.streetart;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 public class ArtUtil {
-    public static Vector2i calculatePixelCoordinates(BlockHitResult hitResult) {
+    public static Vector2i calculatePixelCoordinates(final BlockHitResult hitResult) {
         final BlockPos pos = hitResult.getBlockPos();
         final Vec3 clickPosition = hitResult.getLocation();
-        Vector3f relative = new Vector3f(
+        final Vector3f relative = new Vector3f(
                 (float)(clickPosition.x - pos.getX()),
                 (float)(clickPosition.y - pos.getY()),
                 (float)(clickPosition.z - pos.getZ())
         );
-        Vec2 plane = switch (hitResult.getDirection()) {
+        final Vec2 plane = switch (hitResult.getDirection()) {
             case DOWN -> new Vec2(relative.x, 1-relative.z);
             case UP -> new Vec2(relative.x, relative.z);
             case NORTH -> new Vec2(1-relative.x, 1-relative.y);
@@ -25,12 +31,12 @@ public class ArtUtil {
             case WEST -> new Vec2(relative.z, 1-relative.y);
             case EAST -> new Vec2(1-relative.z, 1-relative.y);
         };
-        int x = (int)(plane.x * 16);
-        int y = (int)(plane.y * 16);
+        final int x = (int)(plane.x * 16);
+        final int y = (int)(plane.y * 16);
         return new Vector2i(x, y);
     }
 
-    public static double calculateDepth(BlockHitResult hitResult) {
+    public static double calculateDepth(final BlockHitResult hitResult) {
         final Vec3 relativePos = hitResult.getLocation().subtract(Vec3.atLowerCornerOf(hitResult.getBlockPos()));
         double depth = switch (hitResult.getDirection().getAxis()) {
             case X -> relativePos.x;
@@ -43,4 +49,50 @@ public class ArtUtil {
         }
         return depth;
     }
+
+    public static List<ShapeFaces> doThingsWithVoxelShape(final VoxelShape shape) {
+        final List<ShapeFaces> faces = new ArrayList<>();
+        shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
+            final int ix1 = Mth.floor(x1 * 16);
+            final int iy1 = Mth.floor(y1 * 16);
+            final int iz1 = Mth.floor(z1 * 16);
+            final int ix2 = Mth.ceil(x2 * 16);
+            final int iy2 = Mth.ceil(y2 * 16);
+            final int iz2 = Mth.ceil(z2 * 16);
+            faces.add(new ShapeFaces(
+                    new Face(y2, ix1, iz1, ix2, iz2),
+                    new Face(1 - y1, ix1, 16 - iz2, ix2, 16 - iz1),
+                    new Face(1 - z1, 16 - ix2, 16 - iy2, 16 - ix1, 16 - iy1),
+                    new Face(x2, 16 - iz2, 16 - iy2, 16 - iz1, 16 - iy1),
+                    new Face(z2, ix1, 16 - iy2, ix2, 16 - iy1),
+                    new Face(1 - x1, iz1, 16 - iy2, iz2, 16 - iy1)
+            ));
+        });
+        return faces;
+    }
+
+    public record ShapeFaces(Face up, Face down, Face north, Face east, Face south, Face west) {
+        public void forEach(final BiConsumer<Direction, Face> consumer) {
+            if (this.up != null) {
+                consumer.accept(Direction.UP, this.up);
+            }
+            if (this.down != null) {
+                consumer.accept(Direction.DOWN, this.down);
+            }
+            if (this.north != null) {
+                consumer.accept(Direction.NORTH, this.north);
+            }
+            if (this.east != null) {
+                consumer.accept(Direction.EAST, this.east);
+            }
+            if (this.south != null) {
+                consumer.accept(Direction.SOUTH, this.south);
+            }
+            if (this.west != null) {
+                consumer.accept(Direction.WEST, this.west);
+            }
+        }
+    }
+
+    public record Face(double depth, int x1, int y1, int x2, int y2) {}
 }

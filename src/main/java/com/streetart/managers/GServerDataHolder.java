@@ -33,11 +33,11 @@ public class GServerDataHolder extends GData {
         return this.graffitiData;
     }
 
-    public void handleChange(int color, TileChange tileChange) {
-        ByteBuffer buf = this.getGraffitiData();
+    public void handleChange(final int color, final TileChange tileChange) {
+        final ByteBuffer buf = this.getGraffitiData();
         buf.position(0);
         for (int i = 0; i < 256/8; i++) {
-            byte b = tileChange.modifiedPixels()[i];
+            final byte b = tileChange.modifiedPixels()[i];
 
             for (int j = 0; j < 8; j++) {
                 if (((b >>> j) & 1) == 1) {
@@ -45,6 +45,16 @@ public class GServerDataHolder extends GData {
                 } else {
                     buf.position(buf.position() + 4);
                 }
+            }
+        }
+    }
+
+    public void fillFromTo(final int color, final int x1, final int y1, final int x2, final int y2) {
+        final ByteBuffer buf = this.getGraffitiData();
+        for (int y = y1; y < y2; y++) {
+            for (int x = x1; x < x2; x++) {
+                buf.position((x + y*16)*4);
+                buf.putInt(color);
             }
         }
     }

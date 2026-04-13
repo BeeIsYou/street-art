@@ -1,5 +1,6 @@
 package com.streetart;
 
+import com.streetart.item.PaintBalloonItem;
 import com.streetart.item.PressureWasherItem;
 import com.streetart.item.SprayCanItem;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -22,6 +23,10 @@ public class AllItems {
 
     public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new,
             new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.RED.getTextureDiffuseColor()))
+    );
+
+    public static PaintBalloonItem PAINT_BALLOON = register("paint_balloon", PaintBalloonItem::new,
+            new Item.Properties().stacksTo(16)
     );
 
     public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
