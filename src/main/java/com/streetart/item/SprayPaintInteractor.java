@@ -1,5 +1,6 @@
 package com.streetart.item;
 
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
@@ -13,4 +14,6 @@ public interface SprayPaintInteractor {
     boolean hasColor(Player player, ItemStack itemStack);
 
     int getColor(Player player, ItemStack itemStack);
+
+    ParticleOptions getParticleAtPoint(Player player, ItemStack itemStack);
 }

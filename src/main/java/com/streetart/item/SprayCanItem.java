@@ -3,6 +3,8 @@ package com.streetart.item;
 import com.streetart.AllDataComponents;
 import com.streetart.component.ColorComponent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -89,5 +91,11 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
     @Override
     public int getColor(final Player player, final ItemStack itemStack) {
         return ColorComponent.getOrDefaultOpaque(itemStack, ColorComponent.BLACK.argb);
+    }
+
+    @Override
+    public ParticleOptions getParticleAtPoint(final Player player, final ItemStack itemStack) {
+        final int color = this.getColor(player, itemStack);
+        return new DustParticleOptions(color, 1);
     }
 }

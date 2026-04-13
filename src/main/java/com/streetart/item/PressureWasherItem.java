@@ -1,6 +1,8 @@
 package com.streetart.item;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -52,8 +54,8 @@ public class PressureWasherItem extends Item implements SprayPaintInteractor {
         final Vec3 up = player.calculateViewVector(originalRot.x + 90, originalRot.y);
         final Vec3 left = forward.cross(up);
 
-        double dx = player.getRandom().nextGaussian() * 0.04;
-        double dy = player.getRandom().nextGaussian() * 0.008;
+        double dx = player.getRandom().nextDouble() * 0.25  - 0.125;
+        double dy = player.getRandom().nextDouble() * 0.05 - 0.025;
 
         if (!rightClick) {
             final double temp = dx;
@@ -79,5 +81,10 @@ public class PressureWasherItem extends Item implements SprayPaintInteractor {
     @Override
     public int getColor(final Player player, final ItemStack itemStack) {
         return 0;
+    }
+
+    @Override
+    public ParticleOptions getParticleAtPoint(final Player player, final ItemStack itemStack) {
+        return ParticleTypes.FALLING_WATER;
     }
 }

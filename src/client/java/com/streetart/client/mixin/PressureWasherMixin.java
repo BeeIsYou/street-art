@@ -38,7 +38,7 @@ public class PressureWasherMixin implements ParticleThrower {
     }
 
     @Override
-    public ParticleOptions getParticleOptions(Player player, ItemStack itemStack) {
+    public ParticleOptions getParticleThrown(Player player, ItemStack itemStack) {
         return ParticleTypes.SPLASH;
     }
 }

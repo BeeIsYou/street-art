@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public interface ParticleThrower {
-    ParticleOptions getParticleOptions(Player player, ItemStack itemStack);
+    ParticleOptions getParticleThrown(Player player, ItemStack itemStack);
 
     default void throwParticles(Level level, Player player, ItemStack itemStack) {
         Vec3 origin = getParticleOrigin(
@@ -26,7 +26,7 @@ public interface ParticleThrower {
         );
         Vec3 look = getParticleDirection(player);
 
-        level.addParticle(this.getParticleOptions(player, itemStack),
+        level.addParticle(this.getParticleThrown(player, itemStack),
                 origin.x, origin.y, origin.z, look.x, look.y, look.z
         );
     }

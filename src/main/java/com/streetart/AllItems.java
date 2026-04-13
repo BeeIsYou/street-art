@@ -67,6 +67,7 @@ public class AllItems {
                         output.accept(stack);
                     }
                 }
+                output.accept(PRESSURE_WASHER);
             }).build();
 
     public static void init() {

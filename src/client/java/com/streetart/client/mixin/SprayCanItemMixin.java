@@ -21,9 +21,9 @@ public abstract class SprayCanItemMixin implements SprayPaintInteractor, Particl
     @Inject(method = "Lcom/streetart/item/SprayCanItem;onUseTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V",
         at = @At("HEAD")
     )
-    private void streetArt$evilSelfMixinForClientClassAccess(Level level, LivingEntity livingEntity, ItemStack itemStack,
-                                                           int ticksRemaining, CallbackInfo ci) {
-        if (level.isClientSide() && livingEntity instanceof Player player) {
+    private void streetArt$evilSelfMixinForClientClassAccess(final Level level, final LivingEntity livingEntity, final ItemStack itemStack,
+                                                             final int ticksRemaining, final CallbackInfo ci) {
+        if (level.isClientSide() && livingEntity instanceof final Player player) {
             this.throwParticles(level, player, itemStack);
         }
     }
@@ -39,8 +39,8 @@ public abstract class SprayCanItemMixin implements SprayPaintInteractor, Particl
     }
 
     @Override
-    public ParticleOptions getParticleOptions(Player player, ItemStack itemStack) {
-        int color = this.getColor(player, itemStack);
+    public ParticleOptions getParticleThrown(final Player player, final ItemStack itemStack) {
+        final int color = this.getColor(player, itemStack);
         return new DustParticleOptions(color, 1);
     }
 }

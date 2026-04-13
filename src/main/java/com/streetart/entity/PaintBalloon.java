@@ -79,7 +79,12 @@ public class PaintBalloon extends ThrowableItemProjectile {
                     this.random.nextGaussian() * 0.1
                 );
             }
-            this.level().playLocalSound(this, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 1, 1);
+            this.level().playLocalSound(
+                    this.getX(),
+                    this.getY(),
+                    this.getZ(),
+                    SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 1, 1, false
+            );
         }
     }
 

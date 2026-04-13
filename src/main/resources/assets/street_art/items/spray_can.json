@@ -15,7 +15,7 @@
           "tints": [
             {
               "type": "street_art:color",
-              "default": -1
+              "default": 1908001
             }
           ]
         }
@@ -27,7 +27,7 @@
       "tints": [
         {
           "type": "street_art:color",
-          "default": -1
+          "default": 1908001
         }
       ]
     },
