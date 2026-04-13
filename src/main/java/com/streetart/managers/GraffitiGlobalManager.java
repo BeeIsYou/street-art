@@ -83,6 +83,7 @@ public class GraffitiGlobalManager {
 
             GServerDataHolder tile = manager.getOrCreate(key.pos(), key.dir(), key.depth());
             tile.handleChange(packet.color(), change);
+            tile.refreshGrace();
             manager.addPatch(packet);
 
             chunk.markUnsaved();

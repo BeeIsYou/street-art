@@ -13,19 +13,25 @@ public class GServerDataHolder extends GData {
 
     public static final Codec<GServerDataHolder> CODEC = RecordCodecBuilder.create(i -> i.group(
                     Codec.BYTE_BUFFER.fieldOf("texture_data").forGetter(d -> d.graffitiData),
-                    Codec.DOUBLE.fieldOf("depth").forGetter(GData::getDepth))
-            .apply(i, GServerDataHolder::new)
+                    Codec.DOUBLE.fieldOf("depth").forGetter(GData::getDepth),
+                    Codec.INT.optionalFieldOf("grace", 0).forGetter(d -> d.graceTimer)
+            ).apply(i, GServerDataHolder::new)
     );
 
     private final ByteBuffer graffitiData;
+    /**
+     * Number of random tick attempts where no decay will happen
+     */
+    private int graceTimer;
 
     public GServerDataHolder(final double depth) {
-        this(ByteBuffer.allocate(4 * 16 * 16), depth);
+        this(ByteBuffer.allocate(4 * 16 * 16), depth, 0);
     }
 
-    public GServerDataHolder(final ByteBuffer buf, final double depth) {
+    public GServerDataHolder(final ByteBuffer buf, final double depth, final int graceTimer) {
         super(depth);
         this.graffitiData = buf;
+        this.graceTimer = graceTimer;
     }
 
     /**
@@ -85,10 +91,19 @@ public class GServerDataHolder extends GData {
         }
     }
 
+    public void refreshGrace() {
+        this.graceTimer = 50;
+    }
+
     /**
      * @return true if all values are updated to zero (transparent)
      */
     public boolean randomDecay(RandomSource random) {
+        if (this.graceTimer > 0) {
+            this.graceTimer--;
+            return false;
+        }
+
         for (int i = 0; i < 3; i++) {
             int x = random.nextInt(16);
             int y = random.nextInt(16);
