@@ -47,22 +47,4 @@ public class PaintBalloonItem extends Item implements ProjectileItem {
         itemStack.consume(1, player);
         return InteractionResult.SUCCESS;
     }
-
-   /* @Override
-    public InteractionResult useOn(final UseOnContext context) {
-        if (context.getLevel() instanceof final ServerLevel serverLevel) {
-            DyedItemColor dyedColor = context.getItemInHand().get(DataComponents.DYED_COLOR);
-            int color = 0;
-            if (dyedColor != null) {
-                color = dyedColor.rgb();
-            }
-            ArtUtil.paintExplosion(
-                    serverLevel,
-                    context.getClickLocation().add(context.getClickedFace().getUnitVec3().scale(0.5)),
-                    color
-            );
-        }
-
-        return InteractionResult.SUCCESS;
-    }*/
 }

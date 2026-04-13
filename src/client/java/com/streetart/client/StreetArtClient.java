@@ -1,6 +1,7 @@
 package com.streetart.client;
 
 import com.streetart.AllEntityTypes;
+import com.streetart.StreetArt;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
@@ -16,6 +17,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
@@ -49,5 +51,7 @@ public class StreetArtClient implements ClientModInitializer {
 		ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((_, _) -> StreetArtClient.textureManager.closeAll());
 
 		EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
+
+		ItemTintSources.ID_MAPPER.put(StreetArt.id("color"), ColorComponentTint.MAP_CODEC);
 	}
 }

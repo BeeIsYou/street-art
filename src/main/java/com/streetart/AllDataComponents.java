@@ -1,6 +1,7 @@
 package com.streetart;
 
 import com.streetart.component.ChargeComponent;
+import com.streetart.component.ColorComponent;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -8,13 +9,17 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import java.util.function.UnaryOperator;
 
 public class AllDataComponents {
+    public static final DataComponentType<ColorComponent> COLOR = register("color", builder -> builder
+            .persistent(ColorComponent.CODEC).networkSynchronized(ColorComponent.STREAM_CODEC)
+    );
+
     public static final DataComponentType<ChargeComponent> CHARGE = register("charge", builder -> builder
-            .persistent(ChargeComponent.CODEC).networkSynchronized(ChargeComponent.BYTE_CODEC)
+            .persistent(ChargeComponent.CODEC).networkSynchronized(ChargeComponent.STREAM_CODEC)
     );
 
     public static void init() {}
 
-    private static <T> DataComponentType<T> register(String id, final UnaryOperator<DataComponentType.Builder<T>> builder) {
+    private static <T> DataComponentType<T> register(final String id, final UnaryOperator<DataComponentType.Builder<T>> builder) {
         return Registry.register(
                 BuiltInRegistries.DATA_COMPONENT_TYPE,
                 StreetArt.id(id),

@@ -4,7 +4,7 @@
     "model": "street_art:item/paint_balloon",
     "tints": [
       {
-        "type": "minecraft:dye",
+        "type": "street_art:color",
         "default": 3949738
       }
     ]

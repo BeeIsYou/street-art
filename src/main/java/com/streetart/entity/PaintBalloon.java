@@ -1,9 +1,10 @@
 package com.streetart.entity;
 
+import com.streetart.AllDataComponents;
 import com.streetart.AllEntityTypes;
 import com.streetart.AllItems;
 import com.streetart.SplashUtil;
-import net.minecraft.core.component.DataComponents;
+import com.streetart.component.ColorComponent;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,7 +16,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -45,10 +45,10 @@ public class PaintBalloon extends ThrowableItemProjectile {
             final Vec3 splashOrigin = hitResult.getLocation()
                     .add(hitResult.getDirection().getUnitVec3().scale(0.3))
                     .subtract(this.getDeltaMovement().scale(0.3));
-            final DyedItemColor dyedColor = this.getItem().get(DataComponents.DYED_COLOR);
+            final ColorComponent dyedColor = this.getItem().get(AllDataComponents.COLOR);
             int color = 0;
             if (dyedColor != null) {
-                color = dyedColor.rgb();
+                color = dyedColor.argb;
             }
             SplashUtil.createPaintSplash(serverLevel, splashOrigin, 3, 1f, color);
         }
@@ -58,14 +58,14 @@ public class PaintBalloon extends ThrowableItemProjectile {
     @Override
     public void handleEntityEvent(final byte id) {
         if (id == 3) {
-            final DyedItemColor dyedColor = this.getItem().get(DataComponents.DYED_COLOR);
-            final boolean water = dyedColor == null || dyedColor.rgb() == 0;
+            final ColorComponent dyedColor = this.getItem().get(AllDataComponents.COLOR);
+            final boolean water = dyedColor == null || dyedColor.argb == 0;
 
             final ParticleOptions particle;
             if (water) {
                 particle = ParticleTypes.SPLASH;
             } else {
-                final int color = dyedColor.rgb();
+                final int color = dyedColor.argb;
                 particle = new DustParticleOptions(color, 1);
             }
 

@@ -14,7 +14,7 @@
           "model": "street_art:item/spray_can_item",
           "tints": [
             {
-              "type": "minecraft:dye",
+              "type": "street_art:color",
               "default": -1
             }
           ]
@@ -26,7 +26,7 @@
       "model": "street_art:item/spray_can_hand",
       "tints": [
         {
-          "type": "minecraft:dye",
+          "type": "street_art:color",
           "default": -1
         }
       ]

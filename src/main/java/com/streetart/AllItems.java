@@ -1,6 +1,7 @@
 package com.streetart;
 
 import com.streetart.component.ChargeComponent;
+import com.streetart.component.ColorComponent;
 import com.streetart.item.CreativePressureWasherItem;
 import com.streetart.item.PaintBalloonItem;
 import com.streetart.item.PressureWasherItem;
@@ -8,13 +9,14 @@ import com.streetart.item.SprayCanItem;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
 
@@ -24,7 +26,8 @@ public class AllItems {
     );
 
     public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new,
-            new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.RED.getTextureDiffuseColor()))
+            new Item.Properties().stacksTo(1)
+                    .component(AllDataComponents.COLOR, ColorComponent.RED)
     );
 
     public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
@@ -36,27 +39,31 @@ public class AllItems {
     );
 
     public static PaintBalloonItem PAINT_BALLOON = register("paint_balloon", PaintBalloonItem::new,
-            new Item.Properties().stacksTo(16).useCooldown(0.5f).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.BLUE.getTextureDiffuseColor()))
+            new Item.Properties().stacksTo(16).useCooldown(0.5f)
+                    .component(AllDataComponents.COLOR, ColorComponent.BLUE)
     );
 
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
-            new Item.Properties().stacksTo(1).component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
+            new Item.Properties().stacksTo(1)
+                    .component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
     );
 
     public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
             .icon(() -> new ItemStack(SPRAY_CAN))
             .title(Component.translatable("key.category.street_art"))
             .displayItems((parameters, output) -> {
-                for (DyeColor color : DyeColor.values()) {
-                    ItemStack stack = new ItemStack(SPRAY_CAN);
-                    stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color.getTextureDiffuseColor()));
-                    output.accept(stack);
+                for (ColorComponent color : ColorComponent.values()) {
+                    if (color != ColorComponent.CLEAR) {
+                        ItemStack stack = new ItemStack(SPRAY_CAN);
+                        stack.set(AllDataComponents.COLOR, color);
+                        output.accept(stack);
+                    }
                 }
                 output.accept(WATER_BALLOON);
-                for (DyeColor color : DyeColor.values()) {
-                    if (color != DyeColor.WHITE) { // i know what you are
+                for (ColorComponent color : ColorComponent.values()) {
+                    if (color != ColorComponent.CLEAR && color != ColorComponent.WHITE) { // i know what you are
                         ItemStack stack = new ItemStack(PAINT_BALLOON);
-                        stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color.getTextureDiffuseColor()));
+                        stack.set(AllDataComponents.COLOR, color);
                         output.accept(stack);
                     }
                 }

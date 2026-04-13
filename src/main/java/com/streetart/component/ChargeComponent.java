@@ -15,7 +15,7 @@ public record ChargeComponent(int amount, int max) {
             Codec.INT.fieldOf("max").forGetter(ChargeComponent::max)
     ).apply(instance, ChargeComponent::new));
 
-    public static final StreamCodec<ByteBuf, ChargeComponent> BYTE_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, ChargeComponent> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT,
             ChargeComponent::amount,
             ByteBufCodecs.INT,

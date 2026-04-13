@@ -1,7 +1,8 @@
 package com.streetart.item;
 
+import com.streetart.AllDataComponents;
+import com.streetart.component.ColorComponent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -82,11 +83,11 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
 
     @Override
     public boolean hasColor(final Player player, final ItemStack itemStack) {
-        return itemStack.has(DataComponents.DYED_COLOR);
+        return itemStack.has(AllDataComponents.COLOR);
     }
 
     @Override
     public int getColor(final Player player, final ItemStack itemStack) {
-        return itemStack.get(DataComponents.DYED_COLOR).rgb();
+        return ColorComponent.getOrDefaultOpaque(itemStack, ColorComponent.BLACK.argb);
     }
 }
