@@ -16,13 +16,14 @@ import net.minecraft.world.phys.AABB;
 
 public class ReachingOverSidesRenderer implements DebugRenderer.SimpleDebugRenderer {
     @Override
-    public void emitGizmos(double camX, double camY, double camZ, DebugValueAccess debugValues, Frustum frustum, float partialTicks) {
-        Minecraft minecraft = Minecraft.getInstance();
-        IntegratedServer server = minecraft.getSingleplayerServer();
+    public void emitGizmos(final double camX, final double camY, final double camZ, final DebugValueAccess debugValues, final Frustum frustum, final float partialTicks) {
+        final Minecraft minecraft = Minecraft.getInstance();
+        final IntegratedServer server = minecraft.getSingleplayerServer();
         if (server != null && minecraft.level != null) {
-            ServerLevel level = server.getLevel(minecraft.level.dimension());
+            final ServerLevel level = server.getLevel(minecraft.level.dimension());
+            // todo race condition?
             ((ChunkMapInvoker)level.getChunkSource().chunkMap).callForEachBlockTickingChunk(chunk -> {
-                GServerChunkManager manager = chunk.getAttached(AttachmentTypes.CHUNK_MANAGER);
+                final GServerChunkManager manager = chunk.getAttached(AttachmentTypes.CHUNK_MANAGER);
                 if (manager != null) {
                     manager.getGraffiti().keySet().forEach(block -> {
                         Gizmos.cuboid(

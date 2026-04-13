@@ -1,5 +1,6 @@
 package com.streetart.client;
 
+import com.streetart.AllEntityTypes;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
@@ -15,6 +16,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
 public class StreetArtClient implements ClientModInitializer {
 	public static GClientManager textureManager;
@@ -44,5 +47,7 @@ public class StreetArtClient implements ClientModInitializer {
 
 		// todo find clientside world leave event grrrrrrrrr
 		ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((_, _) -> StreetArtClient.textureManager.closeAll());
+
+		EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
 	}
 }

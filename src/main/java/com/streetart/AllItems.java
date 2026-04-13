@@ -27,11 +27,11 @@ public class AllItems {
     );
 
     public static PaintBalloonItem WATER_BALLOON = register("water_balloon", PaintBalloonItem::new,
-            new Item.Properties().stacksTo(16)
+            new Item.Properties().stacksTo(16).useCooldown(0.5f)
     );
 
     public static PaintBalloonItem PAINT_BALLOON = register("paint_balloon", PaintBalloonItem::new,
-            new Item.Properties().stacksTo(16).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.BLUE.getTextureDiffuseColor()))
+            new Item.Properties().stacksTo(16).useCooldown(0.5f).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.BLUE.getTextureDiffuseColor()))
     );
 
     public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
@@ -64,10 +64,10 @@ public class AllItems {
         });
     }
 
-    private static <T extends Item> T register(String name, Function<Item.Properties, T> factory, Item.Properties properties) {
-        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, StreetArt.id(name));
+    private static <T extends Item> T register(final String name, final Function<Item.Properties, T> factory, final Item.Properties properties) {
+        final ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, StreetArt.id(name));
 
-        T item = factory.apply(properties.setId(key));
+        final T item = factory.apply(properties.setId(key));
 
         Registry.register(BuiltInRegistries.ITEM, key, item);
 

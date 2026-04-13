@@ -27,6 +27,7 @@ public class StreetArt implements ModInitializer {
     public void onInitialize() {
         AllDataComponents.init();
         AllItems.init();
+        AllEntityTypes.init();
         AttachmentTypes.init();
 
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundGraffitiSet.TYPE, ClientBoundGraffitiSet.CODEC);
