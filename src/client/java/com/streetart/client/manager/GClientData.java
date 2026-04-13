@@ -1,8 +1,8 @@
 package com.streetart.client.manager;
 
-import com.google.common.primitives.Ints;
 import com.streetart.GData;
 import com.streetart.client.StreetArtClient;
+import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -27,15 +27,16 @@ public class GClientData extends GData implements AutoCloseable {
     public void update(final byte[] data) {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
-                final int i = (x + y*16) * 4;
-                final int argb = Ints.fromBytes(data[i], data[i+1], data[i+2], data[i+3]);
-                this.setPixel(x, y, argb);
+                final int i = (x + y * 16);
+
+                final ColorComponent component = ColorComponent.BY_ID.apply(data[i]);
+                this.setPixel(x, y, component.argb);
             }
         }
     }
 
     public void handleChange(final int color, final TileChange tileChange) {
-        for (int i = 0; i < 256/8; i++) {
+        for (int i = 0; i < 256 / 8; i++) {
             final byte b = tileChange.modifiedPixels()[i];
 
             for (int j = 0; j < 8; j++) {
@@ -61,7 +62,7 @@ public class GClientData extends GData implements AutoCloseable {
      */
     public boolean applyPixel(final Vector2i coordinates, final int color) {
         final int i = (coordinates.x + coordinates.y * 16);
-        if (0 <= i && i < 16*16) {
+        if (0 <= i && i < 16 * 16) {
             return this.setPixel(coordinates.x, coordinates.y, color);
         }
         return false;
@@ -73,7 +74,7 @@ public class GClientData extends GData implements AutoCloseable {
      * @return true if pixel changed
      */
     public boolean setPixel(final int x, final int y, final int color) {
-        boolean changed = StreetArtClient.textureManager.tileAtlasManager.getPixel(this.id, x, y) != color;
+        final boolean changed = StreetArtClient.textureManager.tileAtlasManager.getPixel(this.id, x, y) != color;
         StreetArtClient.textureManager.tileAtlasManager.setPixel(this.id, x, y, color);
         return changed;
     }

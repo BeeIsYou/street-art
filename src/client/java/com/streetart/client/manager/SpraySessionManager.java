@@ -3,6 +3,7 @@ package com.streetart.client.manager;
 import com.streetart.ArtUtil;
 import com.streetart.StreetArt;
 import com.streetart.client.StreetArtClient;
+import com.streetart.component.ColorComponent;
 import com.streetart.item.SprayPaintInteractor;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -50,8 +51,8 @@ public class SpraySessionManager {
         final ItemStack stack = player.getUseItem();
         if (stack.getItem() instanceof final SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
             active = true;
-            final int color = sprayPaint.getColor(player, stack);
-            final BiDirectionalGraffitiChange change = changes.computeIfAbsent(color, _ -> new BiDirectionalGraffitiChange(color, new HashMap<>()));
+            final ColorComponent color = sprayPaint.getColor(player, stack);
+            final BiDirectionalGraffitiChange change = changes.computeIfAbsent(color.id, _ -> new BiDirectionalGraffitiChange(ArtUtil.generateByteFromColor(color), new HashMap<>()));
 
             final boolean rightClick = minecraft.options.keyUse.isDown();
             final int iterations = sprayPaint.iterationsPerTick(player, stack);
@@ -76,7 +77,7 @@ public class SpraySessionManager {
                 if (hitResult.getType() == HitResult.Type.BLOCK &&
                         StreetArt.AREA_LIB.allowedToEdit(player, hitResult.getBlockPos())) {
                     final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
-                    if (StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color)) {
+                    if (StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color.argb)) {
                         change.markChanged(hitResult, coordinates.x, coordinates.y);
                     }
                     if (!madeParticle) {

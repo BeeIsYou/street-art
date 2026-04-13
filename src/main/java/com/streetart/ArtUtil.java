@@ -1,5 +1,6 @@
 package com.streetart;
 
+import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileKey;
 import com.streetart.managers.GServerChunkManager;
 import com.streetart.managers.GServerDataHolder;
@@ -7,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -14,6 +16,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -23,6 +27,15 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public class ArtUtil {
+
+    public static ColorComponent generateComponentFromByte(final byte content) {
+        return ColorComponent.BY_ID.apply(content);
+    }
+
+    public static byte generateByteFromColor(@NotNull final ColorComponent color) {
+        return color.id;
+    }
+
     public static Vector2i calculatePixelCoordinates(final BlockHitResult hitResult) {
         final BlockPos pos = hitResult.getBlockPos();
         final Vec3 clickPosition = hitResult.getLocation();
@@ -62,7 +75,7 @@ public class ArtUtil {
                                      final List<ShapeFaces> shapeFaces,
                                      final BlockPos pos,
                                      final Direction thisDir,
-                                     final int color,
+                                     final byte content,
                                      final Vector4f gradient
     ) {
         final ChunkAccess chunk = serverLevel.getChunk(pos);
@@ -79,7 +92,7 @@ public class ArtUtil {
                 if (dir == thisDir) {
                     final TileKey key = new TileKey(pos, dir, face.depth());
                     final GServerDataHolder data = manager.getOrCreate(key.pos(), key.dir(), key.depth());
-                    data.partialFillFromTo(color, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
+                    data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
                     manager.markDirty(data, pos, dir);
                 }
             });

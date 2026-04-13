@@ -89,13 +89,13 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
     }
 
     @Override
-    public int getColor(final Player player, final ItemStack itemStack) {
-        return ColorComponent.getOrDefaultOpaque(itemStack, ColorComponent.BLACK.argb);
+    public ColorComponent getColor(final Player player, final ItemStack itemStack) {
+        return ColorComponent.getOrDefaultComponent(itemStack, ColorComponent.CLEAR);
     }
 
     @Override
     public ParticleOptions getParticleAtPoint(final Player player, final ItemStack itemStack) {
-        final int color = this.getColor(player, itemStack);
-        return new DustParticleOptions(color, 1);
+        final ColorComponent color = this.getColor(player, itemStack);
+        return new DustParticleOptions(color.argb, 1);
     }
 }

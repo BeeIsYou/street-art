@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 
 public class GServerDataHolder extends GData {
 
+    private static final int PIXEL_BYTE_SIZE = 1;
+
     public static final Codec<GServerDataHolder> CODEC = RecordCodecBuilder.create(i -> i.group(
                     Codec.BYTE_BUFFER.fieldOf("texture_data").forGetter(d -> d.graffitiData),
                     Codec.DOUBLE.fieldOf("depth").forGetter(GData::getDepth),
@@ -19,13 +21,14 @@ public class GServerDataHolder extends GData {
     );
 
     private final ByteBuffer graffitiData;
+
     /**
      * Number of random tick attempts where no decay will happen
      */
     private int graceTimer;
 
     public GServerDataHolder(final double depth) {
-        this(ByteBuffer.allocate(4 * 16 * 16), depth, 0);
+        this(ByteBuffer.allocate(PIXEL_BYTE_SIZE * 16 * 16), depth, 0);
     }
 
     public GServerDataHolder(final ByteBuffer buf, final double depth, final int graceTimer) {
@@ -41,39 +44,33 @@ public class GServerDataHolder extends GData {
         return this.graffitiData;
     }
 
-    public void handleChange(final int color, final TileChange tileChange) {
+    public void handleChange(final byte content, final TileChange tileChange) {
         final ByteBuffer buf = this.getGraffitiData();
         buf.position(0);
-        for (int i = 0; i < 256/8; i++) {
+        for (int i = 0; i < 256 / 8; i++) {
             final byte b = tileChange.modifiedPixels()[i];
 
             for (int j = 0; j < 8; j++) {
                 if (((b >>> j) & 1) == 1) {
-                    buf.putInt(color);
+                    setByte(content, buf);
                 } else {
-                    buf.position(buf.position() + 4);
+                    buf.position(buf.position() + PIXEL_BYTE_SIZE);
                 }
             }
         }
     }
 
-    public void set(final int color, final int x, final int y) {
+    public void set(final byte content, final int x, final int y) {
         final ByteBuffer buf = this.getGraffitiData();
-        buf.position((x + y*16)*4);
-        buf.putInt(color);
+        buf.position((x + y * 16) * PIXEL_BYTE_SIZE);
+        setByte(content, buf);
     }
 
-    public void fillFromTo(final int color, final int x1, final int y1, final int x2, final int y2) {
-        final ByteBuffer buf = this.getGraffitiData();
-        for (int y = y1; y < y2; y++) {
-            for (int x = x1; x < x2; x++) {
-                buf.position((x + y*16)*4);
-                buf.putInt(color);
-            }
-        }
+    private static void setByte(final byte content, final ByteBuffer buf) {
+        buf.put(content);
     }
 
-    public void partialFillFromTo(final int color, final int x1, final int y1, final int x2, final int y2,
+    public void partialFillFromTo(final byte content, final int x1, final int y1, final int x2, final int y2,
                                   final Vector4f gradient, final RandomSource random) {
         final ByteBuffer buf = this.getGraffitiData();
         for (int y = y1; y < y2; y++) {
@@ -84,8 +81,8 @@ public class GServerDataHolder extends GData {
                 final float lx = gradient.z * px + gradient.w * (1 - px);
                 final float exposure = tx * py + lx * (1 - py);
                 if (random.nextFloat() < exposure) {
-                    buf.position((x + y*16)*4);
-                    buf.putInt(color);
+                    buf.position((x + y * 16) * PIXEL_BYTE_SIZE);
+                    setByte(content, buf);
                 }
             }
         }
@@ -98,17 +95,18 @@ public class GServerDataHolder extends GData {
     /**
      * @return true if all values are updated to zero (transparent)
      */
-    public boolean randomDecay(RandomSource random) {
+    public boolean randomDecay(final RandomSource random) {
         if (this.graceTimer > 0) {
             this.graceTimer--;
             return false;
         }
 
         for (int i = 0; i < 3; i++) {
-            int x = random.nextInt(16);
-            int y = random.nextInt(16);
-            this.set(0, x, y);
+            final int x = random.nextInt(16);
+            final int y = random.nextInt(16);
+            this.set((byte) 0, x, y);
         }
+
         return this.checkEmpty();
     }
 
@@ -116,13 +114,14 @@ public class GServerDataHolder extends GData {
      * @return true if all values are zero (transparent)
      */
     public boolean checkEmpty() {
-        ByteBuffer buf = this.getGraffitiData();
+        final ByteBuffer buf = this.getGraffitiData();
         buf.position(0);
         for (int i = 0; i < 16 * 16; i++) {
-            if (buf.getInt() != 0) {
+            if (buf.get() != 0) {
                 return false;
             }
         }
+
         return true;
     }
 }

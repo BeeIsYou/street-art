@@ -3,6 +3,7 @@ package com.streetart.client.manager;
 import com.streetart.ArtUtil;
 import com.streetart.GManager;
 import com.streetart.client.texture.TileAtlasManager;
+import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.BiDirectionalGraffitiChange;
@@ -81,7 +82,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     }
 
     public void handleDataUpdate(ClientBoundGraffitiSet packet, ClientPlayNetworking.Context context) {
-        if (packet.textureData().length == 16*16*4) {
+        if (packet.textureData().length == 16*16) {
             GClientData data = this.getOrCreate(packet.pos(), packet.dir(), packet.depth());
             data.update(packet.textureData());
             data.updateLight(context.client().level);
@@ -111,12 +112,14 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     }
 
     public void handleChange(BiDirectionalGraffitiChange packet, ClientPlayNetworking.Context context) {
+        ColorComponent colorComponent = ArtUtil.generateComponentFromByte(packet.content());
+        
         for (Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
             TileKey key = entry.getKey();
             TileChange change = entry.getValue();
 
             GClientData data = this.getOrCreate(key.pos(), key.dir(), key.depth());
-            data.handleChange(packet.color(), change);
+            data.handleChange(colorComponent.argb, change);
         }
     }
 

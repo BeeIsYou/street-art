@@ -1,6 +1,7 @@
 package com.streetart.client.mixin;
 
 import com.streetart.client.ParticleThrower;
+import com.streetart.component.ColorComponent;
 import com.streetart.item.SprayCanItem;
 import com.streetart.item.SprayPaintInteractor;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -40,7 +41,7 @@ public abstract class SprayCanItemMixin implements SprayPaintInteractor, Particl
 
     @Override
     public ParticleOptions getParticleThrown(final Player player, final ItemStack itemStack) {
-        final int color = this.getColor(player, itemStack);
-        return new DustParticleOptions(color, 1);
+        final ColorComponent color = this.getColor(player, itemStack);
+        return new DustParticleOptions(color.argb, 1);
     }
 }

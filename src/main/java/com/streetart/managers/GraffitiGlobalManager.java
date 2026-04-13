@@ -82,8 +82,8 @@ public class GraffitiGlobalManager {
             final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
 
             final GServerDataHolder tile = manager.getOrCreate(key.pos(), key.dir(), key.depth());
-            tile.handleChange(packet.color(), change);
-            if (packet.color() != 0) {
+            tile.handleChange(packet.content(), change);
+            if (packet.content() != 0) {
                 tile.refreshGrace();
             }
             manager.addPatch(packet);

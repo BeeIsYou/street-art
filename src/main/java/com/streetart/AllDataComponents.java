@@ -9,7 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import java.util.function.UnaryOperator;
 
 public class AllDataComponents {
-    public static final DataComponentType<ColorComponent> COLOR = register("color", builder -> builder
+    public static final DataComponentType<ColorComponent> COLOR = register("content", builder -> builder
             .persistent(ColorComponent.CODEC).networkSynchronized(ColorComponent.STREAM_CODEC)
     );
 

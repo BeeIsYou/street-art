@@ -14,11 +14,11 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.HashMap;
 
-public record BiDirectionalGraffitiChange(int color, HashMap<TileKey, TileChange> changes) implements CustomPacketPayload {
+public record BiDirectionalGraffitiChange(byte content, HashMap<TileKey, TileChange> changes) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<BiDirectionalGraffitiChange> TYPE  = new Type<>(StreetArt.id("graffiti_delta"));
     public static final StreamCodec<ByteBuf, BiDirectionalGraffitiChange> CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT,
-            BiDirectionalGraffitiChange::color,
+            ByteBufCodecs.BYTE,
+            BiDirectionalGraffitiChange::content,
             ByteBufCodecs.map(HashMap::new, TileKey.CODEC, TileChange.CODEC),
             BiDirectionalGraffitiChange::changes,
             BiDirectionalGraffitiChange::new

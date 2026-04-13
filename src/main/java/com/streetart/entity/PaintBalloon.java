@@ -1,13 +1,11 @@
 package com.streetart.entity;
 
-import com.streetart.AllDataComponents;
-import com.streetart.AllEntityTypes;
-import com.streetart.AllItems;
-import com.streetart.SplashUtil;
+import com.streetart.*;
 import com.streetart.component.ColorComponent;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -45,13 +43,11 @@ public class PaintBalloon extends ThrowableItemProjectile {
             final Vec3 splashOrigin = hitResult.getLocation()
                     .add(hitResult.getDirection().getUnitVec3().scale(0.3))
                     .subtract(this.getDeltaMovement().scale(0.3));
-            final ColorComponent dyedColor = this.getItem().get(AllDataComponents.COLOR);
-            int color = 0;
-            if (dyedColor != null) {
-                color = dyedColor.argb;
-            }
-            SplashUtil.createPaintSplash(serverLevel, splashOrigin, 3, 1f, color);
+
+            final ColorComponent component = ColorComponent.getOrDefaultComponent(this.getItem(), ColorComponent.CLEAR);
+            SplashUtil.createPaintSplash(serverLevel, splashOrigin, 3, 1f, ArtUtil.generateByteFromColor(component));
         }
+
         super.onHitBlock(hitResult);
     }
 

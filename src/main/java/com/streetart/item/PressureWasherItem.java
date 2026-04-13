@@ -1,5 +1,6 @@
 package com.streetart.item;
 
+import com.streetart.component.ColorComponent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -79,8 +80,8 @@ public class PressureWasherItem extends Item implements SprayPaintInteractor {
     }
 
     @Override
-    public int getColor(final Player player, final ItemStack itemStack) {
-        return 0;
+    public ColorComponent getColor(final Player player, final ItemStack itemStack) {
+        return ColorComponent.CLEAR;
     }
 
     @Override

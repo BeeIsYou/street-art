@@ -22,9 +22,9 @@ public class SplashUtil {
      * @param range The distance in blocks for raycasts to travel
      * @param intensityScale scalar for how many "hits" are required for full coverage. bigger = more. 1 -> 10 hits, 1% of the raycasts
      */
-    public static void createPaintSplash(final ServerLevel level, final Vec3 origin, final double range, final float intensityScale, final int color) {
+    public static void createPaintSplash(final ServerLevel level, final Vec3 origin, final double range, final float intensityScale, final byte content) {
         final SplashExposure exposure = collectBlocks(level, origin, range);
-        applyPaint(level, exposure, intensityScale, color);
+        applyPaint(level, exposure, intensityScale, content);
     }
 
     /**
@@ -98,14 +98,14 @@ public class SplashUtil {
         );
     }
 
-    public static void applyPaint(final ServerLevel level, final SplashExposure exposure, final float intensityScale, final int color) {
+    public static void applyPaint(final ServerLevel level, final SplashExposure exposure, final float intensityScale, final byte content) {
         for (final Map.Entry<BlockPos, EnumMap<Direction, Integer>> blockEntry : exposure.entrySet()) {
             final BlockPos pos = blockEntry.getKey();
             final List<ArtUtil.ShapeFaces> faces = ArtUtil.gatherShapeFaces(level.getBlockState(pos).getShape(level, pos));
             blockEntry.getValue().forEach((dir, hits) -> {
                 final Vector4f hitsGradient = getHitsGradient(exposure, pos, dir);
                 hitsGradient.mul(0.01f * intensityScale);
-                ArtUtil.latherInPaint(level, faces, pos, dir, color, hitsGradient);
+                ArtUtil.latherInPaint(level, faces, pos, dir, content, hitsGradient);
             });
         }
     }
