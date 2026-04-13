@@ -72,18 +72,20 @@ public class GraffitiGlobalManager {
         }
     }
 
-    public static void handleChange(BiDirectionalGraffitiChange packet, ServerPlayNetworking.Context context) {
+    public static void handleChange(final BiDirectionalGraffitiChange packet, final ServerPlayNetworking.Context context) {
         final ServerLevel level = context.player().level();
-        for (Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
-            TileKey key = entry.getKey();
-            TileChange change = entry.getValue();
+        for (final Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
+            final TileKey key = entry.getKey();
+            final TileChange change = entry.getValue();
 
             final LevelChunk chunk = level.getChunkAt(key.pos());
             final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
 
-            GServerDataHolder tile = manager.getOrCreate(key.pos(), key.dir(), key.depth());
+            final GServerDataHolder tile = manager.getOrCreate(key.pos(), key.dir(), key.depth());
             tile.handleChange(packet.color(), change);
-            tile.refreshGrace();
+            if (packet.color() != 0) {
+                tile.refreshGrace();
+            }
             manager.addPatch(packet);
 
             chunk.markUnsaved();

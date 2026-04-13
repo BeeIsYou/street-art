@@ -1,46 +1,35 @@
 package com.streetart.item;
 
-import com.streetart.AllDataComponents;
-import com.streetart.AttachmentTypes;
-import com.streetart.component.ChargeComponent;
-import com.streetart.managers.GServerChunkManager;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
-public class PressureWasherItem extends Item {
+public class PressureWasherItem extends Item implements SprayPaintInteractor {
     public PressureWasherItem(final Properties properties) {
         super(properties);
     }
 
     @Override
     public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
-        if (Commands.LEVEL_ADMINS.check(player.permissions())) {
-            if (player.isShiftKeyDown()) {
-                ChargeComponent.delta(player.getItemInHand(hand), 1);
-            } else {
-                ChargeComponent.delta(player.getItemInHand(hand), -1);
-            }
-            return InteractionResult.SUCCESS;
+        if (this.hasColor(player, player.getItemInHand(hand))) {
+            return ItemUtils.startUsingInstantly(level, player, hand);
         }
         return super.use(level, player, hand);
     }
 
     @Override
-    public InteractionResult useOn(final UseOnContext context) {
-        if (Commands.LEVEL_ADMINS.check(context.getPlayer().permissions())) {
-            return ItemUtils.startUsingInstantly(context.getLevel(), context.getPlayer(), context.getHand());
-        }
-        return super.useOn(context);
+    public boolean canDestroyBlock(final ItemStack itemStack, final BlockState state, final Level level, final BlockPos pos, final LivingEntity user) {
+        return false;
     }
 
     @Override
@@ -55,40 +44,40 @@ public class PressureWasherItem extends Item {
 
     @Override
     public void onUseTick(final Level level, final LivingEntity livingEntity, final ItemStack itemStack, final int ticksRemaining) {
-        if (livingEntity instanceof final ServerPlayer player) {
-            if (Commands.LEVEL_ADMINS.check(player.permissions())) {
-                final HitResult h = player.pick(player.blockInteractionRange(), 1, false);
-                if (h.getType() != HitResult.Type.MISS && h instanceof final BlockHitResult hit) {
-                    int charge = ChargeComponent.get(itemStack);
-                    BlockPos.betweenClosed(
-                            hit.getBlockPos().offset(-charge, -charge, -charge),
-                            hit.getBlockPos().offset(charge, charge, charge)
-                    ).forEach(blockPos -> {
-                        final GServerChunkManager manager = player.level().getChunk(blockPos).getAttached(AttachmentTypes.CHUNK_MANAGER);
-                        if (manager != null) {
-                            manager.markForRemoval(blockPos.immutable());
-                        }
-                    });
-                }
-            }
+        // evil self mixin here
+    }
+
+    @Override
+    public Vec3 getLookVector(final Player player, final Vec2 originalRot, final Vec3 forward, final ItemStack itemStack, final float pt, final boolean rightClick) {
+        final Vec3 up = player.calculateViewVector(originalRot.x + 90, originalRot.y);
+        final Vec3 left = forward.cross(up);
+
+        double dx = player.getRandom().nextGaussian() * 0.04;
+        double dy = player.getRandom().nextGaussian() * 0.008;
+
+        if (!rightClick) {
+            final double temp = dx;
+            dx = dy;
+            dy = temp;
         }
+        return forward
+                .add(left.scale(dx))
+                .add(up.scale(dy))
+                .normalize();
     }
 
     @Override
-    public boolean isBarVisible(final ItemStack stack) {
-        return super.isBarVisible(stack) || stack.has(AllDataComponents.CHARGE);
+    public int iterationsPerTick(final Player player, final ItemStack itemStack) {
+        return 64;
     }
 
     @Override
-    public int getBarWidth(final ItemStack stack) {
-        if (stack.has(AllDataComponents.CHARGE)) {
-            return ChargeComponent.width(stack);
-        }
-        return super.getBarWidth(stack);
+    public boolean hasColor(final Player player, final ItemStack itemStack) {
+        return true;
     }
 
     @Override
-    public int getBarColor(final ItemStack stack) {
-        return DyeColor.LIGHT_BLUE.getTextureDiffuseColor();
+    public int getColor(final Player player, final ItemStack itemStack) {
+        return 0;
     }
 }

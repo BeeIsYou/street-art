@@ -1,6 +1,7 @@
 package com.streetart;
 
 import com.streetart.component.ChargeComponent;
+import com.streetart.item.CreativePressureWasherItem;
 import com.streetart.item.PaintBalloonItem;
 import com.streetart.item.PressureWasherItem;
 import com.streetart.item.SprayCanItem;
@@ -26,6 +27,10 @@ public class AllItems {
             new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.RED.getTextureDiffuseColor()))
     );
 
+    public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
+            new Item.Properties().stacksTo(1)
+    );
+
     public static PaintBalloonItem WATER_BALLOON = register("water_balloon", PaintBalloonItem::new,
             new Item.Properties().stacksTo(16).useCooldown(0.5f)
     );
@@ -34,7 +39,7 @@ public class AllItems {
             new Item.Properties().stacksTo(16).useCooldown(0.5f).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.BLUE.getTextureDiffuseColor()))
     );
 
-    public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
+    public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1).component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
     );
 
@@ -60,7 +65,7 @@ public class AllItems {
     public static void init() {
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, CREATIVE_TAB_KEY, CREATIVE_TAB);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.OP_BLOCKS).register(content -> {
-            content.accept(PRESSURE_WASHER);
+            content.accept(CREATIVE_PRESSURE_WASHER);
         });
     }
 

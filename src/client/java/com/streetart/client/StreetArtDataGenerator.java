@@ -15,27 +15,36 @@ import java.util.concurrent.CompletableFuture;
 
 public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 	@Override
-	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
-		FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
+	public void onInitializeDataGenerator(final FabricDataGenerator fabricDataGenerator) {
+		final FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
 
 		pack.addProvider(StreetArtLangProvider::new);
 		pack.addProvider(StreetArtModelProvider::new);
 	}
 
 	private static class StreetArtLangProvider extends FabricLanguageProvider {
-		protected StreetArtLangProvider(FabricPackOutput packOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+		protected StreetArtLangProvider(final FabricPackOutput packOutput, final CompletableFuture<HolderLookup.Provider> registryLookup) {
 			super(packOutput, registryLookup);
 		}
 
 		@Override
-		public void generateTranslations(HolderLookup.Provider provider, TranslationBuilder translationBuilder) {
+		public void generateTranslations(final HolderLookup.Provider provider, final TranslationBuilder translationBuilder) {
 			translationBuilder.add(AllItems.SPRAY_CAN, "Spray Can");
 			translationBuilder.add(AllItems.WATER_BALLOON, "Water Balloon");
 			translationBuilder.add(AllItems.PAINT_BALLOON, "Paint Balloon");
-			translationBuilder.add(AllItems.PRESSURE_WASHER, "Pressure Washer");
+			translationBuilder.add(AllItems.CREATIVE_PRESSURE_WASHER, "Creative Pressure Washer");
 
 			translationBuilder.add("lore.street_art.spray_can",
-					"The perfect tool for freeform expression!\nHold left click to spray in a smaller cone"
+                    """
+                            The perfect tool for freeform expression!
+                            Hold right click to spray in a large cone
+                            Hold left click to spray in a small cone"""
+			);
+			translationBuilder.add("lore.street_art.pressure_washer",
+					"""
+                            The perfect tool for freeform expression!
+                            Hold right click to clean in a horizontal line
+                            Hold left click to clean in a vertical line"""
 			);
 			translationBuilder.add("lore.street_art.water_balloom",
 					"Throw to wash away a small area of paint"
@@ -43,7 +52,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add("lore.street_art.paint_balloom",
 					"Throw to spread a small area of paint"
 			);
-			translationBuilder.add("lore.street_art.pressure_washer",
+			translationBuilder.add("lore.street_art.creative_pressure_washer",
                     """
                             The perfect tool for crushing freeform expression! Operator only
                             R-Click the air to reduce radius
@@ -58,17 +67,17 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 	}
 
 	private static class StreetArtModelProvider extends FabricModelProvider {
-		public StreetArtModelProvider(FabricPackOutput output) {
+		public StreetArtModelProvider(final FabricPackOutput output) {
 			super(output);
 		}
 
 		@Override
-		public void generateBlockStateModels(BlockModelGenerators blockModelGenerators) {
+		public void generateBlockStateModels(final BlockModelGenerators blockModelGenerators) {
 
 		}
 
 		@Override
-		public void generateItemModels(ItemModelGenerators itemModelGenerators) {
+		public void generateItemModels(final ItemModelGenerators itemModelGenerators) {
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 		}
 	}

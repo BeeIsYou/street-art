@@ -23,7 +23,7 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
         if (this.hasColor(player, player.getItemInHand(hand))) {
             return ItemUtils.startUsingInstantly(level, player, hand);
         }
@@ -31,35 +31,35 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
     }
 
     @Override
-    public boolean canDestroyBlock(ItemStack itemStack, BlockState state, Level level, BlockPos pos, LivingEntity user) {
+    public boolean canDestroyBlock(final ItemStack itemStack, final BlockState state, final Level level, final BlockPos pos, final LivingEntity user) {
         return false;
     }
 
     @Override
-    public int getUseDuration(ItemStack itemStack, LivingEntity user) {
+    public int getUseDuration(final ItemStack itemStack, final LivingEntity user) {
         return 1200;
     }
 
     @Override
-    public ItemUseAnimation getUseAnimation(ItemStack itemStack) {
+    public ItemUseAnimation getUseAnimation(final ItemStack itemStack) {
         return ItemUseAnimation.SPEAR;
     }
 
     @Override
-    public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity target, InteractionHand type) {
+    public InteractionResult interactLivingEntity(final ItemStack itemStack, final Player player, final LivingEntity target, final InteractionHand type) {
         target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 100, 0));
         return InteractionResult.CONSUME;
     }
 
     @Override
-    public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int ticksRemaining) {
+    public void onUseTick(final Level level, final LivingEntity livingEntity, final ItemStack itemStack, final int ticksRemaining) {
         // evil self mixin here
     }
 
     @Override
-    public Vec3 getLookVector(Player player, Vec2 originalRot, Vec3 forward, ItemStack itemStack, float pt, boolean rightClick) {
-        Vec3 left = player.calculateViewVector(originalRot.x + 90, originalRot.y);
-        Vec3 up = forward.cross(left);
+    public Vec3 getLookVector(final Player player, final Vec2 originalRot, final Vec3 forward, final ItemStack itemStack, final float pt, final boolean rightClick) {
+        final Vec3 up = player.calculateViewVector(originalRot.x + 90, originalRot.y);
+        final Vec3 left = forward.cross(up);
 
         double dx = player.getRandom().nextGaussian() * 0.04;
         double dy = player.getRandom().nextGaussian() * 0.04;
@@ -76,17 +76,17 @@ public class SprayCanItem extends Item implements SprayPaintInteractor {
     }
 
     @Override
-    public int iterationsPerTick(Player player, ItemStack itemStack) {
+    public int iterationsPerTick(final Player player, final ItemStack itemStack) {
         return 32;
     }
 
     @Override
-    public boolean hasColor(Player player, ItemStack itemStack) {
+    public boolean hasColor(final Player player, final ItemStack itemStack) {
         return itemStack.has(DataComponents.DYED_COLOR);
     }
 
     @Override
-    public int getColor(Player player, ItemStack itemStack) {
+    public int getColor(final Player player, final ItemStack itemStack) {
         return itemStack.get(DataComponents.DYED_COLOR).rgb();
     }
 }

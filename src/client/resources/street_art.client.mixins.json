@@ -3,11 +3,13 @@
   "package": "com.streetart.client.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "CreativePressureWasherMixin",
     "DebugRendererMixin",
     "DustParticleMixin",
     "LevelRendererAccessor",
     "LocalPlayerMixin",
     "MinecraftMixin",
+    "PressureWasherMixin",
     "SprayCanItemMixin"
   ],
   "injectors": {
@@ -15,8 +17,5 @@
   },
   "overwrites": {
     "requireAnnotations": true
-  },
-  "mixins": [
-    "PressureWasherMixin"
-  ]
+  }
 }
