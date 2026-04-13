@@ -89,7 +89,7 @@ public class GServerDataHolder extends GData {
     }
 
     public void refreshGrace() {
-        this.graceTimer = 50;
+        this.graceTimer = 8;
     }
 
     /**
@@ -101,7 +101,7 @@ public class GServerDataHolder extends GData {
             return false;
         }
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 6; i++) {
             final int x = random.nextInt(16);
             final int y = random.nextInt(16);
             this.set((byte) 0, x, y);

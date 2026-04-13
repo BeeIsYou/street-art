@@ -1,11 +1,9 @@
 package com.streetart;
 
+import com.streetart.arealib.AreaLiblessLib;
 import com.streetart.component.ChargeComponent;
 import com.streetart.component.ColorComponent;
-import com.streetart.item.CreativePressureWasherItem;
-import com.streetart.item.PaintBalloonItem;
-import com.streetart.item.PressureWasherItem;
-import com.streetart.item.SprayCanItem;
+import com.streetart.item.*;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
@@ -43,6 +41,10 @@ public class AllItems {
                     .component(AllDataComponents.COLOR, ColorComponent.BLUE)
     );
 
+    public static AreaModifierItem SEALANT = register("sealant", p -> new AreaModifierItem(p, AreaLiblessLib.AreaType.NO_DECAY),
+            new Item.Properties().stacksTo(1)
+    );
+
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)
                     .component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
@@ -74,6 +76,7 @@ public class AllItems {
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, CREATIVE_TAB_KEY, CREATIVE_TAB);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.OP_BLOCKS).register(content -> {
             content.accept(CREATIVE_PRESSURE_WASHER);
+            content.accept(SEALANT);
         });
     }
 
