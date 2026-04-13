@@ -30,6 +30,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generateTranslations(final HolderLookup.Provider provider, final TranslationBuilder translationBuilder) {
 			translationBuilder.add(AllItems.SPRAY_CAN, "Spray Can");
+			translationBuilder.add(AllItems.PRESSURE_WASHER, "Pressure Washer");
 			translationBuilder.add(AllItems.WATER_BALLOON, "Water Balloon");
 			translationBuilder.add(AllItems.PAINT_BALLOON, "Paint Balloon");
 			translationBuilder.add(AllItems.CREATIVE_PRESSURE_WASHER, "Creative Pressure Washer");
@@ -54,9 +55,10 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			);
 			translationBuilder.add("lore.street_art.creative_pressure_washer",
                     """
-                            The perfect tool for crushing freeform expression! Operator only
-                            R-Click the air to reduce radius
-                            Sneak + R-Click in the air to increase radius"""
+                            The superior tool for crushing freeform expression! (Operator only)
+                            R-Click a block to remove all paint from all faces in a radius
+                            R-Click the air to reduce the radius
+                            Sneak + R-Click in the air to increase the radius"""
 			);
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");
