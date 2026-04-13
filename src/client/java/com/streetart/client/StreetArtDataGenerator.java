@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.core.HolderLookup;
 
 import java.util.concurrent.CompletableFuture;
@@ -29,10 +30,18 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generateTranslations(HolderLookup.Provider provider, TranslationBuilder translationBuilder) {
 			translationBuilder.add(AllItems.SPRAY_CAN, "Spray Can");
+			translationBuilder.add(AllItems.WATER_BALLOON, "Water Balloon");
+			translationBuilder.add(AllItems.PAINT_BALLOON, "Paint Balloon");
 			translationBuilder.add(AllItems.PRESSURE_WASHER, "Pressure Washer");
 
 			translationBuilder.add("lore.street_art.spray_can",
 					"The perfect tool for freeform expression!\nHold left click to spray in a smaller cone"
+			);
+			translationBuilder.add("lore.street_art.water_balloom",
+					"Throw to wash away a small area of paint"
+			);
+			translationBuilder.add("lore.street_art.paint_balloom",
+					"Throw to spread a small area of paint"
 			);
 			translationBuilder.add("lore.street_art.pressure_washer",
                     """
@@ -60,6 +69,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 		@Override
 		public void generateItemModels(ItemModelGenerators itemModelGenerators) {
+			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 		}
 	}
 }

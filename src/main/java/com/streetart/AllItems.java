@@ -26,8 +26,12 @@ public class AllItems {
             new Item.Properties().stacksTo(1).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.RED.getTextureDiffuseColor()))
     );
 
-    public static PaintBalloonItem PAINT_BALLOON = register("paint_balloon", PaintBalloonItem::new,
+    public static PaintBalloonItem WATER_BALLOON = register("water_balloon", PaintBalloonItem::new,
             new Item.Properties().stacksTo(16)
+    );
+
+    public static PaintBalloonItem PAINT_BALLOON = register("paint_balloon", PaintBalloonItem::new,
+            new Item.Properties().stacksTo(16).component(DataComponents.DYED_COLOR, new DyedItemColor(DyeColor.BLUE.getTextureDiffuseColor()))
     );
 
     public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
@@ -42,6 +46,14 @@ public class AllItems {
                     ItemStack stack = new ItemStack(SPRAY_CAN);
                     stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color.getTextureDiffuseColor()));
                     output.accept(stack);
+                }
+                output.accept(WATER_BALLOON);
+                for (DyeColor color : DyeColor.values()) {
+                    if (color != DyeColor.WHITE) { // i know what you are
+                        ItemStack stack = new ItemStack(PAINT_BALLOON);
+                        stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color.getTextureDiffuseColor()));
+                        output.accept(stack);
+                    }
                 }
             }).build();
 
