@@ -72,7 +72,7 @@ public class SpraySessionManager {
 
                 final double range = player.blockInteractionRange();
                 final Vec3 to = snapshot.pos.add(view.x * range, view.y * range, view.z * range);
-                final BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+                final BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 
                 if (hitResult.getType() == HitResult.Type.BLOCK &&
                         StreetArt.AREA_LIB.allowedToEdit(player, hitResult.getBlockPos())) {

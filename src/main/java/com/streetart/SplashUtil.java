@@ -48,7 +48,7 @@ public class SplashUtil {
             final BlockHitResult result = level.clip(new ClipContext(
                     origin,
                     origin.add(dirVec.scale(range)),
-                    ClipContext.Block.OUTLINE,
+                    ClipContext.Block.COLLIDER,
                     ClipContext.Fluid.NONE,
                     CollisionContext.empty())
             );
