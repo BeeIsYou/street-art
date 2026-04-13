@@ -31,10 +31,11 @@ public class StreetArt implements ModInitializer {
 
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundGraffitiSet.TYPE, ClientBoundGraffitiSet.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundInvalidateBlock.TYPE, ClientBoundInvalidateBlock.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
 
         PayloadTypeRegistry.serverboundPlay().register(ServerBoundRequestDataPacket.TYPE, ServerBoundRequestDataPacket.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(ServerBoundGraffitiUpdate.TYPE, ServerBoundGraffitiUpdate.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ServerBoundGraffitiUpdate.TYPE, ServerBoundGraffitiUpdate.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(ServerBoundRequestDataPacket.TYPE, GraffitiGlobalManager::handleRequestPacket);
         ServerPlayNetworking.registerGlobalReceiver(ServerBoundGraffitiUpdate.TYPE, GraffitiGlobalManager::handleServerUpdatePacket);

@@ -2,6 +2,8 @@ package com.streetart.managers;
 
 import com.streetart.AttachmentTypes;
 import com.streetart.StreetArt;
+import com.streetart.graffiti_data.TileChange;
+import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ServerBoundGraffitiUpdate;
@@ -72,18 +74,19 @@ public class GraffitiGlobalManager {
 
     public static void handleChange(BiDirectionalGraffitiChange packet, ServerPlayNetworking.Context context) {
         final ServerLevel level = context.player().level();
-        for (Map.Entry<BiDirectionalGraffitiChange.TileKey, BiDirectionalGraffitiChange.TileChange> entry : packet.changes().entrySet()) {
-            BiDirectionalGraffitiChange.TileKey key = entry.getKey();
-            BiDirectionalGraffitiChange.TileChange change = entry.getValue();
+        for (Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
+            TileKey key = entry.getKey();
+            TileChange change = entry.getValue();
 
             final LevelChunk chunk = level.getChunkAt(key.pos());
             final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
 
             GServerDataHolder tile = manager.getOrCreate(key.pos(), key.dir(), key.depth());
             tile.handleChange(packet.color(), change);
+            manager.addPatch(packet);
 
             chunk.markUnsaved();
-            manager.markDirty(tile, key.pos(), key.dir());
+//            manager.markDirty(tile, key.pos(), key.dir());
         }
     }
 }

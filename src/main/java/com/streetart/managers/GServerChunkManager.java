@@ -3,6 +3,7 @@ package com.streetart.managers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.GManager;
+import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -28,6 +29,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
 
     private final Map<BlockPos, GServerBlock> graffiti;
     private final List<TempData> dirtyData = new ArrayList<>();
+    private final List<BiDirectionalGraffitiChange> patches = new ArrayList<>();
 
     public GServerChunkManager() {
         this.graffiti = new HashMap<>();
@@ -46,7 +48,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
     }
 
     public void markDirty(final GServerDataHolder data, final BlockPos pos, final Direction dir) {
-        this.dirtyData.add(new TempData(data, pos, dir, Type.DIRTY));
+        this.dirtyData.add(new TempData(data, pos, dir, Type.FULL_RESEND));
     }
 
     public void markForRemoval(final BlockPos pos) {
@@ -69,6 +71,10 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
         }
     }
 
+    public void addPatch(BiDirectionalGraffitiChange patch) {
+        this.patches.add(patch);
+    }
+
     public boolean tick(final ServerLevel level, final ChunkPos pos) {
         final boolean shouldSaveData = !this.dirtyData.isEmpty();
 
@@ -77,7 +83,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
 
             CustomPacketPayload packet = null;
             switch (type) {
-                case DIRTY -> {
+                case FULL_RESEND -> {
                     packet = new ClientBoundGraffitiSet(
                             tempData.pos,
                             tempData.dir,
@@ -110,6 +116,13 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
             return true;
         });
 
+        this.patches.removeIf(patch -> {
+            for (final ServerPlayer player : PlayerLookup.tracking(level, pos)) {
+                ServerPlayNetworking.send(player, patch);
+            }
+            return true;
+        });
+
         return shouldSaveData;
     }
 
@@ -127,6 +140,6 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
     }
 
     public enum Type {
-        SMOTHERED, REMOVED, DIRTY
+        SMOTHERED, REMOVED, FULL_RESEND
     }
 }

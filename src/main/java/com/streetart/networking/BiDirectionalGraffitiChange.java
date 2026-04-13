@@ -2,6 +2,8 @@ package com.streetart.networking;
 
 import com.streetart.ArtUtil;
 import com.streetart.StreetArt;
+import com.streetart.graffiti_data.TileChange;
+import com.streetart.graffiti_data.TileKey;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,48 +38,4 @@ public record BiDirectionalGraffitiChange(int color, HashMap<TileKey, TileChange
         this.markChanged(hitResult.getBlockPos(), hitResult.getDirection(), ArtUtil.calculateDepth(hitResult), x, y);
     }
 
-    public record TileKey(BlockPos pos, Direction dir, double depth) {
-        public static final StreamCodec<ByteBuf, TileKey> CODEC = StreamCodec.composite(
-                BlockPos.STREAM_CODEC, TileKey::pos,
-                Direction.STREAM_CODEC, TileKey::dir,
-                ByteBufCodecs.DOUBLE, TileKey::depth,
-                TileKey::new
-        );
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || this.getClass() != o.getClass()) return false;
-
-            TileKey that = (TileKey) o;
-            return Double.compare(this.depth, that.depth) == 0 && this.pos.equals(that.pos) && this.dir == that.dir;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = this.pos.hashCode();
-            result = 31 * result + this.dir.hashCode();
-            result = 31 * result + Double.hashCode(this.depth);
-            return result;
-        }
-    }
-
-    /**
-     * An individual plane being modified
-     * @param modifiedPixels a 1024 bit (32 byte) mask for where to apply
-     */
-    public record TileChange(byte[] modifiedPixels) {
-        public static final StreamCodec<ByteBuf, TileChange> CODEC = StreamCodec.composite(
-                ByteBufCodecs.BYTE_ARRAY, TileChange::modifiedPixels,
-                TileChange::new
-        );
-
-        public static TileChange empty() {
-            return new TileChange(new byte[32]);
-        }
-
-        public void markChanged(int x, int y) {
-            int i = x + y * 16;
-            this.modifiedPixels[i >> 3] |= (byte) (1 << (i & 7));
-        }
-    }
 }

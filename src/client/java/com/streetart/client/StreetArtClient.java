@@ -3,6 +3,7 @@ package com.streetart.client;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
+import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import com.streetart.networking.ServerBoundRequestDataPacket;
@@ -28,6 +29,7 @@ public class StreetArtClient implements ClientModInitializer {
 
 				ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, StreetArtClient.textureManager::handleDataUpdate);
 				ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, StreetArtClient.textureManager::handleBlockInvalidate);
+				ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, StreetArtClient.textureManager::handleChange);
 
 				ClientTickEvents.END_LEVEL_TICK.register(StreetArtClient.textureManager::updateLights);
 				ClientTickEvents.END_CLIENT_TICK.register(StreetArtClient.textureManager::tick);

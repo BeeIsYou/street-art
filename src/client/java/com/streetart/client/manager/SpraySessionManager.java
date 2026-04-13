@@ -74,8 +74,9 @@ public class SpraySessionManager {
                 if (hitResult.getType() == HitResult.Type.BLOCK &&
                         StreetArt.AREA_LIB.allowedToEdit(player, hitResult.getBlockPos())) {
                     Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
-                    StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color);
-                    change.markChanged(hitResult, coordinates.x, coordinates.y);
+                    if (StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color)) {
+                        change.markChanged(hitResult, coordinates.x, coordinates.y);
+                    }
                 }
             }
 

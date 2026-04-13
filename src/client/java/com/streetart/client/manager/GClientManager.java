@@ -3,6 +3,9 @@ package com.streetart.client.manager;
 import com.streetart.ArtUtil;
 import com.streetart.GManager;
 import com.streetart.client.texture.TileAtlasManager;
+import com.streetart.graffiti_data.TileChange;
+import com.streetart.graffiti_data.TileKey;
+import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -45,8 +48,11 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         return this.graffiti;
     }
 
-    public void applyPixelChange(BlockHitResult hitResult, Vector2i coordinates, int color) {
-        this.getOrCreate(
+    /**
+     * @return true if pixel changed
+     */
+    public boolean applyPixelChange(BlockHitResult hitResult, Vector2i coordinates, int color) {
+        return this.getOrCreate(
                 hitResult.getBlockPos(),
                 hitResult.getDirection(),
                 ArtUtil.calculateDepth(hitResult)
@@ -65,11 +71,11 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
 
     public void tick(Minecraft minecraft) {
         if (minecraft.getConnection() != null) {
-            this.syncTimer++;
-            if (this.syncTimer > 10) {
+//            this.syncTimer++;
+//            if (this.syncTimer > 10) {
                 SpraySessionManager.sync();
-                this.syncTimer = 0;
-            }
+//                this.syncTimer = 0;
+//            }
         }
         this.tileAtlasManager.checkDirty();
     }
@@ -101,6 +107,16 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         if (block != null) {
             block.spawnParticles(context.client().level);
             block.close();
+        }
+    }
+
+    public void handleChange(BiDirectionalGraffitiChange packet, ClientPlayNetworking.Context context) {
+        for (Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
+            TileKey key = entry.getKey();
+            TileChange change = entry.getValue();
+
+            GClientData data = this.getOrCreate(key.pos(), key.dir(), key.depth());
+            data.handleChange(packet.color(), change);
         }
     }
 

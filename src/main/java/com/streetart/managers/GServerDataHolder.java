@@ -3,7 +3,7 @@ package com.streetart.managers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.GData;
-import com.streetart.networking.BiDirectionalGraffitiChange;
+import com.streetart.graffiti_data.TileChange;
 
 import java.nio.ByteBuffer;
 
@@ -33,7 +33,7 @@ public class GServerDataHolder extends GData {
         return this.graffitiData;
     }
 
-    public void handleChange(int color, BiDirectionalGraffitiChange.TileChange tileChange) {
+    public void handleChange(int color, TileChange tileChange) {
         ByteBuffer buf = this.getGraffitiData();
         buf.position(0);
         for (int i = 0; i < 256/8; i++) {
