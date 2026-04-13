@@ -1,5 +1,6 @@
 package com.streetart;
 
+import com.streetart.component.ChargeComponent;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -7,6 +8,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import java.util.function.UnaryOperator;
 
 public class AllDataComponents {
+    public static final DataComponentType<ChargeComponent> CHARGE = register("charge", builder -> builder
+            .persistent(ChargeComponent.CODEC).networkSynchronized(ChargeComponent.BYTE_CODEC)
+    );
+
     public static void init() {}
 
     private static <T> DataComponentType<T> register(String id, final UnaryOperator<DataComponentType.Builder<T>> builder) {

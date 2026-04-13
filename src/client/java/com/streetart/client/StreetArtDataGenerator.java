@@ -32,10 +32,13 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllItems.PRESSURE_WASHER, "Pressure Washer");
 
 			translationBuilder.add("lore.street_art.spray_can",
-					"The perfect tool for freeform expression! Hold left click to spray in a smaller cone"
+					"The perfect tool for freeform expression!\nHold left click to spray in a smaller cone"
 			);
 			translationBuilder.add("lore.street_art.pressure_washer",
-					"The perfect tool for crushing freeform expression! Operator only"
+                    """
+                            The perfect tool for crushing freeform expression! Operator only
+                            R-Click the air to reduce radius
+                            Sneak + R-Click in the air to increase radius"""
 			);
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");

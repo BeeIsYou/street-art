@@ -1,5 +1,6 @@
 package com.streetart;
 
+import com.streetart.component.ChargeComponent;
 import com.streetart.item.PaintBalloonItem;
 import com.streetart.item.PressureWasherItem;
 import com.streetart.item.SprayCanItem;
@@ -30,7 +31,7 @@ public class AllItems {
     );
 
     public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
-            new Item.Properties().stacksTo(1)
+            new Item.Properties().stacksTo(1).component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
     );
 
     public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
