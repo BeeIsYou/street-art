@@ -1,11 +1,9 @@
 package com.streetart;
 
+import com.streetart.arealib.AreaLiblessLib;
 import com.streetart.component.ChargeComponent;
 import com.streetart.component.ColorComponent;
-import com.streetart.item.CreativePressureWasherItem;
-import com.streetart.item.PaintBalloonItem;
-import com.streetart.item.PressureWasherItem;
-import com.streetart.item.SprayCanItem;
+import com.streetart.item.*;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
@@ -48,6 +46,18 @@ public class AllItems {
                     .component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
     );
 
+    public static AreaModifierItem SEALANT = register("sealant", AreaModifierItem.forType(AreaLiblessLib.AreaType.NO_DECAY),
+            new Item.Properties().stacksTo(1)
+    );
+
+    public static AreaModifierItem PERMIT_WAND = register("permit_wand", AreaModifierItem.forType(AreaLiblessLib.AreaType.MODIFYING_ALLOWED),
+            new Item.Properties().stacksTo(1)
+    );
+
+    public static AreaModifierItem DENY_WAND = register("deny_wand", AreaModifierItem.forType(AreaLiblessLib.AreaType.PROTECTED),
+            new Item.Properties().stacksTo(1)
+    );
+
     public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
             .icon(() -> new ItemStack(SPRAY_CAN))
             .title(Component.translatable("key.category.street_art"))
@@ -74,6 +84,9 @@ public class AllItems {
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, CREATIVE_TAB_KEY, CREATIVE_TAB);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.OP_BLOCKS).register(content -> {
             content.accept(CREATIVE_PRESSURE_WASHER);
+            content.accept(SEALANT);
+            content.accept(PERMIT_WAND);
+            content.accept(DENY_WAND);
         });
     }
 

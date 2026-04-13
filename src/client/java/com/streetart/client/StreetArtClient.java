@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -53,5 +54,9 @@ public class StreetArtClient implements ClientModInitializer {
 		EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
 
 		ItemTintSources.ID_MAPPER.put(StreetArt.id("color"), ColorComponentTint.MAP_CODEC);
+
+		if (FabricLoader.getInstance().isModLoaded("area_lib")) {
+			ClientAreaLibStuff.init();
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package com.streetart;
 
+import com.streetart.component.AreaSelectComponent;
 import com.streetart.component.ChargeComponent;
 import com.streetart.component.ColorComponent;
 import net.minecraft.core.Registry;
@@ -15,6 +16,10 @@ public class AllDataComponents {
 
     public static final DataComponentType<ChargeComponent> CHARGE = register("charge", builder -> builder
             .persistent(ChargeComponent.CODEC).networkSynchronized(ChargeComponent.STREAM_CODEC)
+    );
+
+    public static final DataComponentType<AreaSelectComponent> AREA_SELECT = register("area_select", builder -> builder
+            .networkSynchronized(AreaSelectComponent.BYTE_CODEC)
     );
 
     public static void init() {}

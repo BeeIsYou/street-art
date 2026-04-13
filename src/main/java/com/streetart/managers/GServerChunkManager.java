@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -76,10 +77,16 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
         this.patches.add(patch);
     }
 
-    public void tickDecay(final ServerLevel level, final ChunkPos pos) {
+    public void tickDecay(final ServerLevel level, final ChunkPos chunkPos) {
         for (int i = 0; i < level.getSectionsCount(); i++) {
-            for (int j = 0; j < 3; j++) {
-                final BlockPos randomPos = level.getBlockRandomPos(pos.getMinBlockX(), level.getSectionYFromSectionIndex(i), pos.getMinBlockZ(), 15);
+            int sectionY = level.getSectionYFromSectionIndex(i);
+            for (int j = 0; j < 12; j++) {
+                final BlockPos randomPos = level.getBlockRandomPos(
+                        chunkPos.getMinBlockX(),
+                        SectionPos.sectionToBlockCoord(sectionY),
+                        chunkPos.getMinBlockZ(),
+                        15
+                );
                 if (StreetArt.AREA_LIB.decays(level, randomPos)) {
                     final GServerBlock block = this.getGraffiti().get(randomPos);
                     if (block != null) {

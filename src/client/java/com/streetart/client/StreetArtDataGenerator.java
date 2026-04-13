@@ -34,16 +34,19 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllItems.WATER_BALLOON, "Water Balloon");
 			translationBuilder.add(AllItems.PAINT_BALLOON, "Paint Balloon");
 			translationBuilder.add(AllItems.CREATIVE_PRESSURE_WASHER, "Creative Pressure Washer");
+			translationBuilder.add(AllItems.SEALANT, "Sealant");
+			translationBuilder.add(AllItems.PERMIT_WAND, "Permit Wand");
+			translationBuilder.add(AllItems.DENY_WAND, "Deny Wand");
 
 			translationBuilder.add("lore.street_art.spray_can",
                     """
-                            The perfect tool for freeform expression!
+                            The perfect tool for freeform expression
                             Hold right click to spray in a large cone
                             Hold left click to spray in a small cone"""
 			);
 			translationBuilder.add("lore.street_art.pressure_washer",
 					"""
-                            The perfect tool for freeform expression!
+                            The perfect tool for cleaning up freeform expression
                             Hold right click to clean in a horizontal line
                             Hold left click to clean in a vertical line"""
 			);
@@ -55,10 +58,31 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			);
 			translationBuilder.add("lore.street_art.creative_pressure_washer",
                     """
-                            The superior tool for crushing freeform expression! (Operator only)
+                            The superior tool for crushing freeform expression (Operator only)
                             R-Click a block to remove all paint from all faces in a radius
                             R-Click the air to reduce the radius
                             Sneak + R-Click in the air to increase the radius"""
+			);
+			translationBuilder.add("lore.street_art.sealant",
+					"""
+							Preserves your art for generations to come (Operator only)
+							Hold R-Click and drag to define a region
+							L-Click on a region to remove
+							Spray paint within will not degrade over time"""
+			);
+			translationBuilder.add("lore.street_art.permit_wand",
+					"""
+							Sorry I got lazy (Operator only)
+							Hold R-Click and drag to define a region
+							L-Click on a region to remove
+							Adventure mode players can modify paint on blocks within"""
+			);
+			translationBuilder.add("lore.street_art.deny_wand",
+					"""
+							Sorry I got lazy (Operator only)
+							Hold R-Click and drag to define a region
+							L-Click on a region to remove
+							Only opped players can modify paint on blocks within"""
 			);
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");
@@ -81,6 +105,9 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generateItemModels(final ItemModelGenerators itemModelGenerators) {
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);
 		}
 	}
 }
