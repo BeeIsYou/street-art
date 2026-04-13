@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.GData;
 import com.streetart.graffiti_data.TileChange;
 import net.minecraft.util.RandomSource;
-import org.joml.Vector4i;
+import org.joml.Vector4f;
 
 import java.nio.ByteBuffer;
 
@@ -51,6 +51,12 @@ public class GServerDataHolder extends GData {
         }
     }
 
+    public void set(final int color, final int x, final int y) {
+        final ByteBuffer buf = this.getGraffitiData();
+        buf.position((x + y*16)*4);
+        buf.putInt(color);
+    }
+
     public void fillFromTo(final int color, final int x1, final int y1, final int x2, final int y2) {
         final ByteBuffer buf = this.getGraffitiData();
         for (int y = y1; y < y2; y++) {
@@ -62,7 +68,7 @@ public class GServerDataHolder extends GData {
     }
 
     public void partialFillFromTo(final int color, final int x1, final int y1, final int x2, final int y2,
-                                  final Vector4i gradient, final RandomSource random) {
+                                  final Vector4f gradient, final RandomSource random) {
         final ByteBuffer buf = this.getGraffitiData();
         for (int y = y1; y < y2; y++) {
             for (int x = x1; x < x2; x++) {
@@ -71,11 +77,37 @@ public class GServerDataHolder extends GData {
                 final float tx = gradient.x * px + gradient.y * (1 - px);
                 final float lx = gradient.z * px + gradient.w * (1 - px);
                 final float exposure = tx * py + lx * (1 - py);
-                if (random.nextFloat() * 100 < exposure) {
+                if (random.nextFloat() < exposure) {
                     buf.position((x + y*16)*4);
                     buf.putInt(color);
                 }
             }
         }
+    }
+
+    /**
+     * @return true if all values are updated to zero (transparent)
+     */
+    public boolean randomDecay(RandomSource random) {
+        for (int i = 0; i < 3; i++) {
+            int x = random.nextInt(16);
+            int y = random.nextInt(16);
+            this.set(0, x, y);
+        }
+        return this.checkEmpty();
+    }
+
+    /**
+     * @return true if all values are zero (transparent)
+     */
+    public boolean checkEmpty() {
+        ByteBuffer buf = this.getGraffitiData();
+        buf.position(0);
+        for (int i = 0; i < 16 * 16; i++) {
+            if (buf.getInt() != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -6,7 +6,9 @@ import com.streetart.GBlock;
 import com.streetart.GManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +26,24 @@ public class GServerBlock extends GBlock<GServerDataHolder> {
 
     public GServerBlock(final Map<Direction, List<GServerDataHolder>> blockData, final BlockPos pos) {
         super(blockData, pos);
+    }
+
+    /**
+     * @return true if no more data exists within the block
+     */
+    public boolean randomDecay(ServerLevel level) {
+        Iterator<Map.Entry<Direction, List<GServerDataHolder>>> it1 = this.getBlockData().entrySet().iterator();
+        while (it1.hasNext()) {
+            Map.Entry<Direction, List<GServerDataHolder>> entry = it1.next();
+
+            entry.getValue().removeIf(gServerDataHolder -> gServerDataHolder.randomDecay(level.getRandom()));
+
+            if (entry.getValue().isEmpty()) {
+                it1.remove();
+            }
+        }
+
+        return this.getBlockData().isEmpty();
     }
 
     @Override

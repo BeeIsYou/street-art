@@ -3,6 +3,7 @@ package com.streetart.managers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.GManager;
+import com.streetart.StreetArt;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
@@ -71,11 +72,35 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
         }
     }
 
-    public void addPatch(BiDirectionalGraffitiChange patch) {
+    public void addPatch(final BiDirectionalGraffitiChange patch) {
         this.patches.add(patch);
     }
 
+    public void tickDecay(final ServerLevel level, final ChunkPos pos) {
+        for (int i = 0; i < level.getSectionsCount(); i++) {
+            for (int j = 0; j < 3; j++) {
+                final BlockPos randomPos = level.getBlockRandomPos(pos.getMinBlockX(), level.getSectionYFromSectionIndex(i), pos.getMinBlockZ(), 15);
+                if (StreetArt.AREA_LIB.decays(level, randomPos)) {
+                    final GServerBlock block = this.getGraffiti().get(randomPos);
+                    if (block != null) {
+                        if (block.randomDecay(level)) {
+                            this.markForRemoval(randomPos);
+                        } else {
+                            block.getBlockData().forEach((dir, datas) -> {
+                                for (final GServerDataHolder data : datas) {
+                                    this.markDirty(data, randomPos, dir);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public boolean tick(final ServerLevel level, final ChunkPos pos) {
+        this.tickDecay(level, pos);
+
         final boolean shouldSaveData = !this.dirtyData.isEmpty();
 
         this.dirtyData.removeIf(tempData -> {
