@@ -2,10 +2,10 @@ package com.streetart.client.manager;
 
 import com.streetart.GData;
 import com.streetart.client.StreetArtClient;
+import com.streetart.client.rendering.LightMath;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import org.joml.Vector2i;
@@ -15,7 +15,15 @@ public class GClientData extends GData implements AutoCloseable {
     public final BlockPos pos;
     public final int id;
 
-    public int light = -1;
+    public int color0 = -1;
+    public int color1 = -1;
+    public int color2 = -1;
+    public int color3 = -1;
+
+    public int light0 = -1;
+    public int light1 = -1;
+    public int light2 = -1;
+    public int light3 = -1;
 
     public GClientData(final Direction dir, final double depth, final BlockPos pos, final int id) {
         super(depth);
@@ -51,9 +59,7 @@ public class GClientData extends GData implements AutoCloseable {
     }
 
     public void updateLight(final ClientLevel level) {
-        this.light = LevelRenderer.getLightCoords(level,
-                this.getDepth() == 1 ? this.pos.relative(this.dir) : this.pos
-        );
+        LightMath.OhGodSoMuchMath(this, level);
     }
 
     /**

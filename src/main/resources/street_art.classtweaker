@@ -1,0 +1,10 @@
+classTweaker v1 official
+accessible class net/minecraft/client/renderer/block/BlockModelLighter$AdjacencyInfo
+accessible field net/minecraft/client/renderer/block/BlockModelLighter$AdjacencyInfo corners [Lnet/minecraft/core/Direction;
+accessible class net/minecraft/client/renderer/block/BlockModelLighter$AmbientVertexRemap
+accessible class net/minecraft/client/renderer/block/BlockModelLighter$SizeInfo
+accessible field net/minecraft/client/renderer/block/BlockModelLighter$SizeInfo index I
+accessible field net/minecraft/client/renderer/block/BlockModelLighter$AdjacencyInfo vert0Weights [Lnet/minecraft/client/renderer/block/BlockModelLighter$SizeInfo;
+accessible field net/minecraft/client/renderer/block/BlockModelLighter$AdjacencyInfo vert1Weights [Lnet/minecraft/client/renderer/block/BlockModelLighter$SizeInfo;
+accessible field net/minecraft/client/renderer/block/BlockModelLighter$AdjacencyInfo vert2Weights [Lnet/minecraft/client/renderer/block/BlockModelLighter$SizeInfo;
+accessible field net/minecraft/client/renderer/block/BlockModelLighter$AdjacencyInfo vert3Weights [Lnet/minecraft/client/renderer/block/BlockModelLighter$SizeInfo;

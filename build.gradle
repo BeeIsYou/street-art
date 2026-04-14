@@ -30,6 +30,7 @@ loom {
 		}
 	}
 
+	accessWidenerPath = file("src/main/resources/street_art.classtweaker")
 }
 
 fabricApi {
