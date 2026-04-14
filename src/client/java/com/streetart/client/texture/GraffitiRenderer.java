@@ -23,32 +23,31 @@ public class GraffitiRenderer {
         pose.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
         final RenderType graffitiAtlas = RenderTypes.entityCutout(StreetArtClient.tileAtlasManager.atlasLocation);
-        for (final GClientManager entry : StreetArtClient.textureManager.values()) {
-            entry.forEach(data -> renderGraffiti(storage, pose, graffitiAtlas, data));
-        }
+        storage.submitCustomGeometry(pose, graffitiAtlas, (_pose, buffer) -> {
+            final PoseStack.Pose original = _pose.copy();
+            for (final GClientManager entry : StreetArtClient.textureManager.values()) {
+                entry.forEach(data -> renderGraffiti(_pose, original, buffer, data));
+            }
+        });
     }
 
-    private static void renderGraffiti(final SubmitNodeStorage storage, final PoseStack pose,
-                                       final RenderType graffitiAtlas, final GClientData data) {
+    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final VertexConsumer buffer, final GClientData data) {
         if (data.light0 != -1) {
-            pose.pushPose();
             pose.translate(
-                    data.pos.getX() + data.dir.getStepX() * data.getDepth(),
-                    data.pos.getY() + data.dir.getStepY() * data.getDepth(),
-                    data.pos.getZ() + data.dir.getStepZ() * data.getDepth()
+                    (float) (data.pos.getX() + data.dir.getStepX() * data.getDepth()),
+                    (float) (data.pos.getY() + data.dir.getStepY() * data.getDepth()),
+                    (float) (data.pos.getZ() + data.dir.getStepZ() * data.getDepth())
             );
             pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
             final Vector2f uv = TileAtlasManager.getUV(data.id);
-            storage.submitCustomGeometry(pose, graffitiAtlas,
-                    (_pose, buffer) -> GraffitiRenderer.renderDecal(
-                            _pose, buffer,
+            GraffitiRenderer.renderDecal(
+                            pose, buffer,
                             uv.x, uv.y,
                             uv.x + TileAtlasManager.U_SIZE, uv.y + TileAtlasManager.V_SIZE,
                             data.light0, data.light1, data.light2, data.light3,
                             data.color0, data.color1, data.color2, data.color3
-                    )
             );
-            pose.popPose();
+            pose.set(original);
         }
     }
 
