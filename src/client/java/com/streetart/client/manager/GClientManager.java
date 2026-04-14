@@ -123,6 +123,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         for (final GClientBlock graffitis : this.getGraffiti().values()) {
             graffitis.close();
         }
+
         this.graffiti.clear();
     }
 

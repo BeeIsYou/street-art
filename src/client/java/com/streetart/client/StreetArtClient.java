@@ -11,6 +11,7 @@ import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -48,18 +49,14 @@ public class StreetArtClient implements ClientModInitializer {
                     });
 
                     ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, (l, ll) -> {
-                        final GClientManager manager = textureManager.get(ChunkPos.containing(l.pos()));
-                        if (manager != null) {
-                            manager.handleBlockInvalidate(l, ll);
-                        }
+                        final GClientManager manager = textureManager.computeIfAbsent(ChunkPos.containing(l.pos()), _ -> new GClientManager());
+                        manager.handleBlockInvalidate(l, ll);
                     });
 
                     ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, (l, ll) -> {
                         for (final Map.Entry<TileKey, TileChange> entries : l.changes().entrySet()) {
-                            final GClientManager manager = textureManager.get(ChunkPos.containing(entries.getKey().pos()));
-                            if (manager != null) {
-                                manager.handleChange(l, ll);
-                            }
+                            final GClientManager manager = textureManager.computeIfAbsent(ChunkPos.containing(entries.getKey().pos()), _ -> new GClientManager());
+                            manager.handleChange(l, ll);
                         }
                     });
 
@@ -72,6 +69,14 @@ public class StreetArtClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(SpraySessionManager::tick);
+        ClientTickEvents.END_CLIENT_TICK.register((l) -> {
+            if (l.level == null) {
+                textureManager.entrySet().removeIf((e) -> {
+                    e.getValue().closeAll();
+                    return true;
+                });
+            }
+        });
 
         ClientChunkEvents.CHUNK_UNLOAD.register((l, ll) -> {
             final GClientManager manager = textureManager.remove(ll.getPos());
