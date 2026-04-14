@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.manager.GClientData;
+import com.streetart.client.manager.GClientManager;
 import com.streetart.client.mixin.LevelRendererAccessor;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
 import net.minecraft.client.renderer.SubmitNodeStorage;
@@ -21,10 +22,10 @@ public class GraffitiRenderer {
         final Vec3 camPos = context.levelState().cameraRenderState.pos;
         pose.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
-        final RenderType graffitiAtlas = RenderTypes.entityCutout(StreetArtClient.textureManager.tileAtlasManager.atlasLocation);
-        StreetArtClient.textureManager.forEach(data -> {
-            renderGraffiti(storage, pose, graffitiAtlas, data);
-        });
+        final RenderType graffitiAtlas = RenderTypes.entityCutout(StreetArtClient.tileAtlasManager.atlasLocation);
+        for (final GClientManager entry : StreetArtClient.textureManager.values()) {
+            entry.forEach(data -> renderGraffiti(storage, pose, graffitiAtlas, data));
+        }
     }
 
     private static void renderGraffiti(final SubmitNodeStorage storage, final PoseStack pose,

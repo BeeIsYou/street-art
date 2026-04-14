@@ -5,10 +5,12 @@ import com.streetart.StreetArt;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
+import com.streetart.client.texture.TileAtlasManager;
+import com.streetart.graffiti_data.TileChange;
+import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -18,45 +20,76 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.world.level.ChunkPos;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class StreetArtClient implements ClientModInitializer {
-	public static GClientManager textureManager;
 
-	@Override
-	public void onInitializeClient() {
-		LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register(GraffitiRenderer::render);
+    public static Map<ChunkPos, GClientManager> textureManager;
 
-		ClientLifecycleEvents.CLIENT_STARTED.register(
-			_ -> {
-				StreetArtClient.textureManager = new GClientManager(Minecraft.getInstance().getTextureManager());
+    public static TileAtlasManager tileAtlasManager;
 
-				ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, StreetArtClient.textureManager::handleDataUpdate);
-				ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, StreetArtClient.textureManager::handleBlockInvalidate);
-				ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, StreetArtClient.textureManager::handleChange);
+    @Override
+    public void onInitializeClient() {
+        LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register(GraffitiRenderer::render);
 
-				ClientTickEvents.END_CLIENT_TICK.register(StreetArtClient.textureManager::tick);
-			}
-		);
+        ClientLifecycleEvents.CLIENT_STARTED.register(
+                _ -> {
+                    textureManager = new HashMap<>();
+                    tileAtlasManager = new TileAtlasManager(Minecraft.getInstance().getTextureManager());
 
-		ClientPlayNetworking.registerGlobalReceiver(ClientBoundGameRuleSync.TYPE, (p, c) -> {
-			ClientBoundGameRuleSync.CLIENT_CURRENT = p;
-		});
+                    ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, (l, ll) -> {
+                        final GClientManager man = textureManager.computeIfAbsent(ChunkPos.containing(l.pos()), _ -> new GClientManager());
+                        man.handleDataUpdate(l, ll);
+                    });
 
-		ClientTickEvents.END_CLIENT_TICK.register(SpraySessionManager::tick);
+                    ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, (l, ll) -> {
+                        final GClientManager manager = textureManager.get(ChunkPos.containing(l.pos()));
+                        if (manager != null) {
+                            manager.handleBlockInvalidate(l, ll);
+                        }
+                    });
 
-		ClientChunkEvents.CHUNK_LOAD.register((l, ll) -> {
-			ClientPlayNetworking.send(new ServerBoundRequestDataPacket(ll.getPos()));
-		});
+                    ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, (l, ll) -> {
+                        for (final Map.Entry<TileKey, TileChange> entries : l.changes().entrySet()) {
+                            final GClientManager manager = textureManager.get(ChunkPos.containing(entries.getKey().pos()));
+                            if (manager != null) {
+                                manager.handleChange(l, ll);
+                            }
+                        }
+                    });
 
-		// todo find clientside world leave event grrrrrrrrr
-		ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((_, _) -> StreetArtClient.textureManager.closeAll());
+                    ClientTickEvents.END_CLIENT_TICK.register((m) -> StreetArtClient.textureManager.values().forEach(man -> man.tick(m)));
+                }
+        );
 
-		EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
+        ClientPlayNetworking.registerGlobalReceiver(ClientBoundGameRuleSync.TYPE, (p, c) -> {
+            ClientBoundGameRuleSync.CLIENT_CURRENT = p;
+        });
 
-		ItemTintSources.ID_MAPPER.put(StreetArt.id("color"), ColorComponentTint.MAP_CODEC);
+        ClientTickEvents.END_CLIENT_TICK.register(SpraySessionManager::tick);
 
-		if (FabricLoader.getInstance().isModLoaded("area_lib")) {
-			ClientAreaLibStuff.init();
-		}
-	}
+        ClientChunkEvents.CHUNK_UNLOAD.register((l, ll) -> {
+            final GClientManager manager = textureManager.remove(ll.getPos());
+            if (manager != null) {
+                manager.closeAll();
+            }
+        });
+
+        ClientChunkEvents.CHUNK_LOAD.register((l, ll) -> {
+            ClientPlayNetworking.send(new ServerBoundRequestDataPacket(ll.getPos()));
+        });
+
+        EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
+
+        ItemTintSources.ID_MAPPER.put(StreetArt.id("color"), ColorComponentTint.MAP_CODEC);
+
+        if (FabricLoader.getInstance().isModLoaded("area_lib")) {
+            ClientAreaLibStuff.init();
+        }
+    }
 }

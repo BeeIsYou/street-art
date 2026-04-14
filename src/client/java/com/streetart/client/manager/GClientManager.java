@@ -2,7 +2,7 @@ package com.streetart.client.manager;
 
 import com.streetart.ArtUtil;
 import com.streetart.GManager;
-import com.streetart.client.texture.TileAtlasManager;
+import com.streetart.client.StreetArtClient;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
@@ -11,7 +11,6 @@ import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
@@ -24,18 +23,10 @@ import java.util.function.Consumer;
 
 public class GClientManager extends GManager<GClientData, GClientBlock> {
     private final Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
-    public final TileAtlasManager tileAtlasManager;
 
-    private final int syncTimer = 0;
-
-    public GClientManager(final TextureManager textureManager) {
-        this.tileAtlasManager = new TileAtlasManager(textureManager);
-
-        // how many people will put me down for doing THIS
-    }
 
     public int nextID() {
-        return this.tileAtlasManager.allocateID();
+        return StreetArtClient.tileAtlasManager.allocateID();
     }
 
     @Override
@@ -50,6 +41,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
 
     /**
      * Will not create new data if color == 0
+     *
      * @return true if pixel changed
      */
     public boolean applyPixelChange(final BlockHitResult hitResult, final Vector2i coordinates, final int color) {
@@ -76,17 +68,14 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
 
     public void tick(final Minecraft minecraft) {
         if (minecraft.getConnection() != null) {
-//            this.syncTimer++;
-//            if (this.syncTimer > 10) {
-                SpraySessionManager.sync();
-//                this.syncTimer = 0;
-//            }
+            SpraySessionManager.sync();
         }
-        this.tileAtlasManager.checkDirty();
+
+        StreetArtClient.tileAtlasManager.checkDirty();
     }
 
     public void handleDataUpdate(final ClientBoundGraffitiSet packet, final ClientPlayNetworking.Context context) {
-        if (packet.textureData().length == 16*16) {
+        if (packet.textureData().length == 16 * 16) {
             final GClientData data = this.getOrCreate(packet.pos(), packet.dir(), packet.depth());
             data.update(packet.textureData());
             data.updateLight(context.client().level);
@@ -117,7 +106,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
 
     public void handleChange(final BiDirectionalGraffitiChange packet, final ClientPlayNetworking.Context context) {
         final ColorComponent colorComponent = ArtUtil.generateComponentFromByte(packet.content());
-        
+
         for (final Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
             final TileKey key = entry.getKey();
             final TileChange change = entry.getValue();

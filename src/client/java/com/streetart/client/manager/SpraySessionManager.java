@@ -14,6 +14,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -77,7 +78,9 @@ public class SpraySessionManager {
                 if (hitResult.getType() == HitResult.Type.BLOCK &&
                         PermissionUtil.modificationAllowed(hitResult.getBlockPos(), player.level(), stack, player)) {
                     final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
-                    if (StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color.argb)) {
+
+                    GClientManager man = StreetArtClient.textureManager.computeIfAbsent(ChunkPos.containing(hitResult.getBlockPos()), _ -> new GClientManager());
+                    if (man.applyPixelChange(hitResult, coordinates, color.argb)) {
                         change.markChanged(hitResult, coordinates.x, coordinates.y);
                     }
 

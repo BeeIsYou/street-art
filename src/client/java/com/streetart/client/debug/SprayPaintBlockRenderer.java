@@ -1,6 +1,7 @@
 package com.streetart.client.debug;
 
 import com.streetart.client.StreetArtClient;
+import com.streetart.client.manager.GClientManager;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.gizmos.GizmoStyle;
@@ -13,11 +14,13 @@ public class SprayPaintBlockRenderer implements DebugRenderer.SimpleDebugRendere
 
     @Override
     public void emitGizmos(double camX, double camY, double camZ, DebugValueAccess debugValues, Frustum frustum, float partialTicks) {
-        StreetArtClient.textureManager.getGraffiti().keySet().forEach(block -> {
-            Gizmos.cuboid(
-                    new AABB(block).inflate(0.05),
-                    GizmoStyle.fill(ARGB.colorFromFloat(0.5f, 1, 1, 1))
-            );
-        });
+        for (GClientManager entries : StreetArtClient.textureManager.values()) {
+            entries.getGraffiti().keySet().forEach(block -> {
+                Gizmos.cuboid(
+                        new AABB(block).inflate(0.05),
+                        GizmoStyle.fill(ARGB.colorFromFloat(0.5f, 1, 1, 1))
+                );
+            });
+        }
     }
 }
