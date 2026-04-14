@@ -2,7 +2,7 @@ package com.streetart.item;
 
 import com.streetart.AllDataComponents;
 import com.streetart.StreetArt;
-import com.streetart.arealib.AreaLiblessLib;
+import com.streetart.arealib.AreaLib;
 import com.streetart.component.AreaSelectComponent;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -22,14 +22,14 @@ import net.minecraft.world.phys.HitResult;
 import java.util.function.Function;
 
 public class AreaModifierItem extends Item {
-    public final AreaLiblessLib.AreaType areaType;
-    public AreaModifierItem(final Properties properties, final AreaLiblessLib.AreaType areaType) {
+    public final AreaLib.Type areaType;
+    public AreaModifierItem(final Properties properties, final AreaLib.Type type) {
         super(properties);
-        this.areaType = areaType;
+        this.areaType = type;
     }
 
-    public static Function<Properties, AreaModifierItem> forType(final AreaLiblessLib.AreaType areaType) {
-        return p -> new AreaModifierItem(p, areaType);
+    public static Function<Properties, AreaModifierItem> forType(final AreaLib.Type type) {
+        return p -> new AreaModifierItem(p, type);
     }
 
 

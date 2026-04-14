@@ -5,12 +5,12 @@ import com.streetart.component.ColorComponent;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -44,8 +44,18 @@ public class PaintBalloon extends ThrowableItemProjectile {
                     .add(hitResult.getDirection().getUnitVec3().scale(0.3))
                     .subtract(this.getDeltaMovement().scale(0.3));
 
-            final ColorComponent component = ColorComponent.getOrDefaultComponent(this.getItem(), ColorComponent.CLEAR);
-            SplashUtil.createPaintSplash(serverLevel, splashOrigin, 3, 1f, ArtUtil.generateByteFromColor(component));
+            final ItemStack item = this.getItem();
+            final ColorComponent component = ColorComponent.getOrDefaultComponent(item, ColorComponent.CLEAR);
+
+            final Player owner;
+            if (this.getOwner() instanceof final Player player) {
+                owner = player;
+            } else {
+                owner = null;
+            }
+
+            SplashUtil.createPaintSplash(serverLevel, splashOrigin, 3, 1f, ArtUtil.generateByteFromColor(component),
+                    b -> PermissionUtil.modificationAllowed(b, serverLevel, item, owner));
         }
 
         super.onHitBlock(hitResult);

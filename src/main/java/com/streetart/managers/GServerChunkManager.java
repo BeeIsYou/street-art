@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.GManager;
 import com.streetart.StreetArt;
+import com.streetart.arealib.AreaLib;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
@@ -87,7 +88,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
                         chunkPos.getMinBlockZ(),
                         15
                 );
-                if (StreetArt.AREA_LIB.decays(level, randomPos)) {
+                if (!StreetArt.AREA_LIB.isInRegion(level, randomPos, AreaLib.Type.NO_DECAY)) {
                     final GServerBlock block = this.getGraffiti().get(randomPos);
                     if (block != null) {
                         if (block.randomDecay(level)) {

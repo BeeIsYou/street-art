@@ -50,10 +50,10 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
                             Hold right click to clean in a horizontal line
                             Hold left click to clean in a vertical line"""
 			);
-			translationBuilder.add("lore.street_art.water_balloom",
+			translationBuilder.add("lore.street_art.water_balloon",
 					"Throw to wash away a small area of paint"
 			);
-			translationBuilder.add("lore.street_art.paint_balloom",
+			translationBuilder.add("lore.street_art.paint_balloon",
 					"Throw to spread a small area of paint"
 			);
 			translationBuilder.add("lore.street_art.creative_pressure_washer",

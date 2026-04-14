@@ -1,6 +1,6 @@
 package com.streetart.client;
 
-import com.streetart.arealib.AreaLibLib;
+import com.streetart.arealib.AreaLibPresent;
 import com.streetart.item.AreaModifierItem;
 import dev.doublekekse.area_lib.component.SampledAreaComponentType;
 import dev.doublekekse.area_lib.data.AreaClientData;
@@ -31,7 +31,7 @@ public class ClientAreaLibStuff {
                 return;
             }
 
-            final SampledAreaComponentType<Unit> areaType = AreaLibLib.getComponent(areaModifierItem.areaType);
+            final SampledAreaComponentType<Unit> areaType = AreaLibPresent.getComponent(areaModifierItem.areaType);
 
             final AreaSavedData savedData = AreaClientData.getClientLevelData();
             if (savedData == null) {

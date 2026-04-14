@@ -1,7 +1,7 @@
 package com.streetart.client.manager;
 
 import com.streetart.ArtUtil;
-import com.streetart.StreetArt;
+import com.streetart.PermissionUtil;
 import com.streetart.client.StreetArtClient;
 import com.streetart.component.ColorComponent;
 import com.streetart.item.SprayPaintInteractor;
@@ -75,7 +75,7 @@ public class SpraySessionManager {
                 final BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 
                 if (hitResult.getType() == HitResult.Type.BLOCK &&
-                        StreetArt.AREA_LIB.allowedToEdit(player, hitResult.getBlockPos())) {
+                        PermissionUtil.modificationAllowed(hitResult.getBlockPos(), player.level(), stack, player)) {
                     final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
                     if (StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color.argb)) {
                         change.markChanged(hitResult, coordinates.x, coordinates.y);

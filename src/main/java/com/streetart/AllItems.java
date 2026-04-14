@@ -1,6 +1,6 @@
 package com.streetart;
 
-import com.streetart.arealib.AreaLiblessLib;
+import com.streetart.arealib.AreaLib;
 import com.streetart.component.ChargeComponent;
 import com.streetart.component.ColorComponent;
 import com.streetart.item.*;
@@ -46,15 +46,15 @@ public class AllItems {
                     .component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
     );
 
-    public static AreaModifierItem SEALANT = register("sealant", AreaModifierItem.forType(AreaLiblessLib.AreaType.NO_DECAY),
+    public static AreaModifierItem SEALANT = register("sealant", AreaModifierItem.forType(AreaLib.Type.NO_DECAY),
             new Item.Properties().stacksTo(1)
     );
 
-    public static AreaModifierItem PERMIT_WAND = register("permit_wand", AreaModifierItem.forType(AreaLiblessLib.AreaType.MODIFYING_ALLOWED),
+    public static AreaModifierItem PERMIT_WAND = register("permit_wand", AreaModifierItem.forType(AreaLib.Type.MODIFYING_ALLOWED),
             new Item.Properties().stacksTo(1)
     );
 
-    public static AreaModifierItem DENY_WAND = register("deny_wand", AreaModifierItem.forType(AreaLiblessLib.AreaType.PROTECTED),
+    public static AreaModifierItem DENY_WAND = register("deny_wand", AreaModifierItem.forType(AreaLib.Type.PROTECTED),
             new Item.Properties().stacksTo(1)
     );
 

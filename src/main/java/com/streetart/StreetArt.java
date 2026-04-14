@@ -1,9 +1,12 @@
 package com.streetart;
 
-import com.streetart.arealib.AreaLibLib;
-import com.streetart.arealib.AreaLiblessLib;
+import com.streetart.arealib.AreaLib;
+import com.streetart.arealib.AreaLibPresent;
 import com.streetart.managers.GraffitiGlobalManager;
-import com.streetart.networking.*;
+import com.streetart.networking.BiDirectionalGraffitiChange;
+import com.streetart.networking.ClientBoundGraffitiSet;
+import com.streetart.networking.ClientBoundInvalidateBlock;
+import com.streetart.networking.ServerBoundRequestDataPacket;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -17,7 +20,7 @@ public class StreetArt implements ModInitializer {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static AreaLiblessLib AREA_LIB;
+    public static AreaLib AREA_LIB;
 
     public static Identifier id(final String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
@@ -36,17 +39,15 @@ public class StreetArt implements ModInitializer {
 
         PayloadTypeRegistry.serverboundPlay().register(ServerBoundRequestDataPacket.TYPE, ServerBoundRequestDataPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(ServerBoundGraffitiUpdate.TYPE, ServerBoundGraffitiUpdate.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(ServerBoundRequestDataPacket.TYPE, GraffitiGlobalManager::handleRequestPacket);
-        ServerPlayNetworking.registerGlobalReceiver(ServerBoundGraffitiUpdate.TYPE, GraffitiGlobalManager::handleServerUpdatePacket);
 
         ServerPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, GraffitiGlobalManager::handleChange);
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
-            AREA_LIB = new AreaLibLib();
+            AREA_LIB = new AreaLibPresent();
         } else {
-            AREA_LIB = new AreaLiblessLib();
+            AREA_LIB = new AreaLib();
         }
     }
 }
