@@ -8,6 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.IntFunction;
@@ -47,6 +48,10 @@ public enum ColorComponent implements StringRepresentable {
         this.argb = argb;
     }
 
+    public static ColorComponent fromDye(final DyeColor color) {
+        return values()[color.ordinal() + 1];
+    }
+
     public static int getOrDefaultOpaque(final ItemStack stack, final int defaultColor) {
         final ColorComponent color = stack.get(AllDataComponents.COLOR);
         if (color == null || color == ColorComponent.CLEAR) {
@@ -56,7 +61,7 @@ public enum ColorComponent implements StringRepresentable {
         return color.argb;
     }
 
-    public static ColorComponent getOrDefaultComponent(ItemStack stack, ColorComponent defaultComp) {
+    public static ColorComponent getOrDefaultComponent(final ItemStack stack, final ColorComponent defaultComp) {
         final ColorComponent color = stack.get(AllDataComponents.COLOR);
         if (color == null || color == ColorComponent.CLEAR) {
             return defaultComp;
