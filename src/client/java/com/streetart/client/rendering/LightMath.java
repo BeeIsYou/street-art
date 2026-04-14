@@ -17,32 +17,6 @@ public class LightMath {
     private static final ThreadLocal<BlockModelLighter.Cache> CACHE = ThreadLocal.withInitial(BlockModelLighter.Cache::new);
     private static final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
     private static final BlockModelLighter.Cache cache = CACHE.get();
-    private static final float[] AO_FACE_SHAPES = AOFaceShapes();
-
-    private static float[] AOFaceShapes() {
-        final float minX = 0.0F;
-        final float minY = 0.0F;
-        final float minZ = 0.0F;
-        final float maxX = 16.0F;
-        final float maxY = 16.0F;
-        final float maxZ = 16.0F;
-
-        final float[] shapes = new float[BlockModelLighter.SizeInfo.COUNT];
-        shapes[BlockModelLighter.SizeInfo.WEST.index] = minX;
-        shapes[BlockModelLighter.SizeInfo.EAST.index] = maxX;
-        shapes[BlockModelLighter.SizeInfo.DOWN.index] = minY;
-        shapes[BlockModelLighter.SizeInfo.UP.index] = maxY;
-        shapes[BlockModelLighter.SizeInfo.NORTH.index] = minZ;
-        shapes[BlockModelLighter.SizeInfo.SOUTH.index] = maxZ;
-        shapes[BlockModelLighter.SizeInfo.FLIP_WEST.index] = 1.0F - minX;
-        shapes[BlockModelLighter.SizeInfo.FLIP_EAST.index] = 1.0F - maxX;
-        shapes[BlockModelLighter.SizeInfo.FLIP_DOWN.index] = 1.0F - minY;
-        shapes[BlockModelLighter.SizeInfo.FLIP_UP.index] = 1.0F - maxY;
-        shapes[BlockModelLighter.SizeInfo.FLIP_NORTH.index] = 1.0F - minZ;
-        shapes[BlockModelLighter.SizeInfo.FLIP_SOUTH.index] = 1.0F - maxZ;
-
-        return shapes;
-    }
 
     /**
      * {@link BlockModelLighter#prepareQuadAmbientOcclusion(BlockAndTintGetter, BlockState, BlockPos, BakedQuad, QuadInstance)} please help me

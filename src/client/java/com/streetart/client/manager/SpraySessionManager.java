@@ -56,6 +56,7 @@ public class SpraySessionManager {
             final boolean rightClick = minecraft.options.keyUse.isDown();
             final int iterations = sprayPaint.iterationsPerTick(player, stack);
 
+            takeSnapshot(player);
             boolean madeParticle = false;
             for (int i = 0; i < iterations; i++) {
                 final float pt = (float) i / iterations;

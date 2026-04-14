@@ -7,6 +7,7 @@ import com.streetart.item.*;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -15,10 +16,14 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.UseEffects;
+import net.minecraft.world.level.block.DispenserBlock;
 
 import java.util.function.Function;
 
 public class AllItems {
+    private static final UseEffects NONE = new UseEffects(true, false, 1);
+
     public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
             BuiltInRegistries.CREATIVE_MODE_TAB.key(), StreetArt.id("creative_tab")
     );
@@ -26,10 +31,12 @@ public class AllItems {
     public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new,
             new Item.Properties().stacksTo(1)
                     .component(AllDataComponents.COLOR, ColorComponent.RED)
+                    .component(DataComponents.USE_EFFECTS, NONE)
     );
 
     public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
             new Item.Properties().stacksTo(1)
+                    .component(DataComponents.USE_EFFECTS, NONE)
     );
 
     public static PaintBalloonItem WATER_BALLOON = register("water_balloon", PaintBalloonItem::new,
@@ -44,18 +51,22 @@ public class AllItems {
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)
                     .component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))
+                    .component(DataComponents.USE_EFFECTS, NONE)
     );
 
     public static AreaModifierItem SEALANT = register("sealant", AreaModifierItem.forType(AreaLib.Type.NO_DECAY),
             new Item.Properties().stacksTo(1)
+                    .component(DataComponents.USE_EFFECTS, NONE)
     );
 
     public static AreaModifierItem PERMIT_WAND = register("permit_wand", AreaModifierItem.forType(AreaLib.Type.MODIFYING_ALLOWED),
             new Item.Properties().stacksTo(1)
+                    .component(DataComponents.USE_EFFECTS, NONE)
     );
 
     public static AreaModifierItem DENY_WAND = register("deny_wand", AreaModifierItem.forType(AreaLib.Type.PROTECTED),
             new Item.Properties().stacksTo(1)
+                    .component(DataComponents.USE_EFFECTS, NONE)
     );
 
     public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
@@ -88,6 +99,8 @@ public class AllItems {
             content.accept(PERMIT_WAND);
             content.accept(DENY_WAND);
         });
+        DispenserBlock.registerProjectileBehavior(WATER_BALLOON);
+        DispenserBlock.registerProjectileBehavior(PAINT_BALLOON);
     }
 
     private static <T extends Item> T register(final String name, final Function<Item.Properties, T> factory, final Item.Properties properties) {
