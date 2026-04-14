@@ -84,9 +84,11 @@ public class ArtUtil {
             faces.forEach((dir, face) -> {
                 if (dir == thisDir) {
                     final TileKey key = new TileKey(pos, dir, face.depth());
-                    final GServerDataHolder data = manager.getOrCreate(key.pos(), key.dir(), key.depth());
-                    data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
-                    manager.markDirty(data, pos, dir);
+                    final GServerDataHolder data = manager.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                    if (data != null) {
+                        data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
+                        manager.markDirty(data, pos, dir);
+                    }
                 }
             });
         }
