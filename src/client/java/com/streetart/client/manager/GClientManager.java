@@ -24,12 +24,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class GClientManager extends GManager<GClientData, GClientBlock> {
-    private Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
+    private final Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
     public final TileAtlasManager tileAtlasManager;
 
-    private int syncTimer = 0;
+    private final int syncTimer = 0;
 
-    public GClientManager(TextureManager textureManager) {
+    public GClientManager(final TextureManager textureManager) {
         this.tileAtlasManager = new TileAtlasManager(textureManager);
 
         // how many people will put me down for doing THIS
@@ -40,7 +40,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     }
 
     @Override
-    public GClientBlock newBlockData(BlockPos pos) {
+    public GClientBlock newBlockData(final BlockPos pos) {
         return new GClientBlock(pos);
     }
 
@@ -50,27 +50,32 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     }
 
     /**
+     * Will not create new data if color == 0
      * @return true if pixel changed
      */
-    public boolean applyPixelChange(BlockHitResult hitResult, Vector2i coordinates, int color) {
-        return this.getOrCreate(
-                hitResult.getBlockPos(),
+    public boolean applyPixelChange(final BlockHitResult hitResult, final Vector2i coordinates, final int color) {
+        final GClientData data = this.getOrConditionalCreate(hitResult.getBlockPos(),
                 hitResult.getDirection(),
-                ArtUtil.calculateDepth(hitResult)
-        ).applyPixel(coordinates, color);
+                ArtUtil.calculateDepth(hitResult),
+                color == 0
+        );
+        if (data == null) {
+            return false;
+        }
+        return data.applyPixel(coordinates, color);
     }
 
-    public void forEach(Consumer<GClientData> consumer) {
-        for (GClientBlock graffitis : this.getGraffiti().values()) {
-            for (Map.Entry<Direction, List<GClientData>> tiles : graffitis.getBlockData().entrySet()) {
-                for (GClientData tile : tiles.getValue()) {
+    public void forEach(final Consumer<GClientData> consumer) {
+        for (final GClientBlock graffitis : this.getGraffiti().values()) {
+            for (final Map.Entry<Direction, List<GClientData>> tiles : graffitis.getBlockData().entrySet()) {
+                for (final GClientData tile : tiles.getValue()) {
                     consumer.accept(tile);
                 }
             }
         }
     }
 
-    public void tick(Minecraft minecraft) {
+    public void tick(final Minecraft minecraft) {
         if (minecraft.getConnection() != null) {
 //            this.syncTimer++;
 //            if (this.syncTimer > 10) {
@@ -81,18 +86,18 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         this.tileAtlasManager.checkDirty();
     }
 
-    public void handleDataUpdate(ClientBoundGraffitiSet packet, ClientPlayNetworking.Context context) {
+    public void handleDataUpdate(final ClientBoundGraffitiSet packet, final ClientPlayNetworking.Context context) {
         if (packet.textureData().length == 16*16) {
-            GClientData data = this.getOrCreate(packet.pos(), packet.dir(), packet.depth());
+            final GClientData data = this.getOrCreate(packet.pos(), packet.dir(), packet.depth());
             data.update(packet.textureData());
             data.updateLight(context.client().level);
         } else {
-            GClientBlock block = this.getGraffiti().get(packet.pos());
+            final GClientBlock block = this.getGraffiti().get(packet.pos());
             if (block != null) {
-                List<GClientData> dataList = block.getBlockData().get(packet.dir());
+                final List<GClientData> dataList = block.getBlockData().get(packet.dir());
                 if (dataList != null) {
                     dataList.removeIf(d -> {
-                        boolean remove = d.getDepth() == packet.depth();
+                        final boolean remove = d.getDepth() == packet.depth();
                         if (remove) {
                             d.close();
                         }
@@ -103,34 +108,36 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         }
     }
 
-    public void handleBlockInvalidate(ClientBoundInvalidateBlock packet, ClientPlayNetworking.Context context) {
-        GClientBlock block = this.getGraffiti().remove(packet.pos());
+    public void handleBlockInvalidate(final ClientBoundInvalidateBlock packet, final ClientPlayNetworking.Context context) {
+        final GClientBlock block = this.getGraffiti().remove(packet.pos());
         if (block != null) {
             block.spawnParticles(context.client().level);
             block.close();
         }
     }
 
-    public void handleChange(BiDirectionalGraffitiChange packet, ClientPlayNetworking.Context context) {
-        ColorComponent colorComponent = ArtUtil.generateComponentFromByte(packet.content());
+    public void handleChange(final BiDirectionalGraffitiChange packet, final ClientPlayNetworking.Context context) {
+        final ColorComponent colorComponent = ArtUtil.generateComponentFromByte(packet.content());
         
-        for (Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
-            TileKey key = entry.getKey();
-            TileChange change = entry.getValue();
+        for (final Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
+            final TileKey key = entry.getKey();
+            final TileChange change = entry.getValue();
 
-            GClientData data = this.getOrCreate(key.pos(), key.dir(), key.depth());
-            data.handleChange(colorComponent.argb, change);
+            final GClientData data = this.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), packet.content() == ColorComponent.CLEAR.id);
+            if (data != null) {
+                data.handleChange(colorComponent.argb, change);
+            }
         }
     }
 
-    public void updateLights(ClientLevel level) {
+    public void updateLights(final ClientLevel level) {
         this.forEach(data -> {
             data.updateLight(level);
         });
     }
 
     public void closeAll() {
-        for (GClientBlock graffitis : this.getGraffiti().values()) {
+        for (final GClientBlock graffitis : this.getGraffiti().values()) {
             graffitis.close();
         }
         this.graffiti.clear();

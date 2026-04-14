@@ -80,7 +80,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
 
     public void tickDecay(final ServerLevel level, final ChunkPos chunkPos) {
         for (int i = 0; i < level.getSectionsCount(); i++) {
-            int sectionY = level.getSectionYFromSectionIndex(i);
+            final int sectionY = level.getSectionYFromSectionIndex(i);
             for (int j = 0; j < 12; j++) {
                 final BlockPos randomPos = level.getBlockRandomPos(
                         chunkPos.getMinBlockX(),
@@ -157,6 +157,18 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
         });
 
         return shouldSaveData;
+    }
+
+    /**
+     * @return true if block data is marked for removal
+     */
+    public boolean removeIfEmpty(final BlockPos pos) {
+        GServerBlock block = this.getGraffiti().get(pos);
+        if (block != null && block.isEmpty()) {
+            this.markForRemoval(pos);
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class SpraySessionManager {
@@ -52,7 +51,7 @@ public class SpraySessionManager {
         if (stack.getItem() instanceof final SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
             active = true;
             final ColorComponent color = sprayPaint.getColor(player, stack);
-            final BiDirectionalGraffitiChange change = changes.computeIfAbsent(color.id, _ -> new BiDirectionalGraffitiChange(ArtUtil.generateByteFromColor(color), new HashMap<>()));
+            final BiDirectionalGraffitiChange change = changes.computeIfAbsent(color.id, _ -> BiDirectionalGraffitiChange.create(color));
 
             final boolean rightClick = minecraft.options.keyUse.isDown();
             final int iterations = sprayPaint.iterationsPerTick(player, stack);
@@ -80,6 +79,7 @@ public class SpraySessionManager {
                     if (StreetArtClient.textureManager.applyPixelChange(hitResult, coordinates, color.argb)) {
                         change.markChanged(hitResult, coordinates.x, coordinates.y);
                     }
+
                     if (!madeParticle) {
                         madeParticle = true;
                         player.level().addParticle(sprayPaint.getParticleAtPoint(player, stack),

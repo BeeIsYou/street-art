@@ -1,6 +1,7 @@
 package com.streetart.managers;
 
 import com.streetart.AttachmentTypes;
+import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.BiDirectionalGraffitiChange;
@@ -47,12 +48,29 @@ public class GraffitiGlobalManager {
             final LevelChunk chunk = level.getChunkAt(key.pos());
             final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
 
-            final GServerDataHolder tile = manager.getOrCreate(key.pos(), key.dir(), key.depth());
-            tile.handleChange(packet.content(), change);
+            final GServerDataHolder tile = manager.getOrConditionalCreate(
+                    key.pos(),
+                    key.dir(),
+                    key.depth(),
+                    packet.content() == ColorComponent.CLEAR.id
+            );
+
+            if (tile == null) {
+                continue;
+            }
+
+            if (tile.handleChange(packet.content(), change)) {
+                manager.tryRemoveData(key.pos(), key.dir(), key.depth());
+            }
+
             if (packet.content() != 0) {
                 tile.refreshGrace();
+                manager.addPatch(packet);
+            } else {
+                if (!manager.removeIfEmpty(key.pos())) {
+                    manager.addPatch(packet);
+                }
             }
-            manager.addPatch(packet);
 
             chunk.markUnsaved();
 //            manager.markDirty(tile, key.pos(), key.dir());

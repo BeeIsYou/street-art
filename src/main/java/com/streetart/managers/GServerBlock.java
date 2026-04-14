@@ -29,6 +29,13 @@ public class GServerBlock extends GBlock<GServerDataHolder> {
     }
 
     /**
+     * !! will return false if holding empty lists or fully clear textures
+     */
+    public boolean isEmpty() {
+        return this.getBlockData().isEmpty();
+    }
+
+    /**
      * @return true if no more data exists within the block
      */
     public boolean randomDecay(ServerLevel level) {
@@ -43,7 +50,7 @@ public class GServerBlock extends GBlock<GServerDataHolder> {
             }
         }
 
-        return this.getBlockData().isEmpty();
+        return this.isEmpty();
     }
 
     @Override

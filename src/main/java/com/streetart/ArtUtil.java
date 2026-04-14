@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -16,8 +15,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -30,10 +27,6 @@ public class ArtUtil {
 
     public static ColorComponent generateComponentFromByte(final byte content) {
         return ColorComponent.BY_ID.apply(content);
-    }
-
-    public static byte generateByteFromColor(@NotNull final ColorComponent color) {
-        return color.id;
     }
 
     public static Vector2i calculatePixelCoordinates(final BlockHitResult hitResult) {

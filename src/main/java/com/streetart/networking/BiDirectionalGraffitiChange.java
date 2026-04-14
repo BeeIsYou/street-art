@@ -2,6 +2,7 @@ package com.streetart.networking;
 
 import com.streetart.ArtUtil;
 import com.streetart.StreetArt;
+import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
 import io.netty.buffer.ByteBuf;
@@ -24,17 +25,25 @@ public record BiDirectionalGraffitiChange(byte content, HashMap<TileKey, TileCha
             BiDirectionalGraffitiChange::new
     );
 
+    public static BiDirectionalGraffitiChange create(final ColorComponent color) {
+        return new BiDirectionalGraffitiChange(color.id, new HashMap<>());
+    }
+
+    public ColorComponent color() {
+        return ColorComponent.BY_ID.apply(this.content);
+    }
+
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 
-    public void markChanged(BlockPos pos, Direction dir, double depth, int x, int y) {
-        TileChange change = this.changes.computeIfAbsent(new TileKey(pos, dir, depth), _ -> TileChange.empty());
+    public void markChanged(final BlockPos pos, final Direction dir, final double depth, final int x, final int y) {
+        final TileChange change = this.changes.computeIfAbsent(new TileKey(pos, dir, depth), _ -> TileChange.empty());
         change.markChanged(x, y);
     }
 
-    public void markChanged(BlockHitResult hitResult, int x, int y) {
+    public void markChanged(final BlockHitResult hitResult, final int x, final int y) {
         this.markChanged(hitResult.getBlockPos(), hitResult.getDirection(), ArtUtil.calculateDepth(hitResult), x, y);
     }
 

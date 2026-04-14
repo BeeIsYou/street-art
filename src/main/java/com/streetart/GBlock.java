@@ -44,6 +44,21 @@ public abstract class GBlock<D extends GData> implements AutoCloseable {
         return Math.round(v * 16) / 16d;
     }
 
+    public D get(final Direction dir, final double depth) {
+        final List<D> dataList = this.getBlockData().get(dir);
+        if (dataList == null) {
+            return null;
+        }
+
+        final double snap = snapToGrid(depth);
+        for (final D data : dataList) {
+            if (data.getDepth() == snap) {
+                return data;
+            }
+        }
+        return null;
+    }
+
     public D getOrCreate(final Direction dir, final double depth, final GManager<D, ? extends GBlock<D>> graffitiManager) {
         final List<D> dataList = this.getBlockData().computeIfAbsent(dir, _ -> new ArrayList<>(6));
         final double snap = snapToGrid(depth);
@@ -56,6 +71,16 @@ public abstract class GBlock<D extends GData> implements AutoCloseable {
         final D created = this.createData(dir, snap, this.getBlockPos(), graffitiManager);
         dataList.add(created);
         return created;
+    }
+
+    public void remove(final Direction dir, final double depth) {
+        final List<D> dataList = this.getBlockData().get(dir);
+        if (dataList == null) {
+            return;
+        }
+
+        final double snap = snapToGrid(depth);
+        dataList.removeIf(data -> data.getDepth() == snap);
     }
 
     abstract public D createData(Direction dir, double depth, BlockPos pos, GManager<D, ? extends GBlock<D>> graffitiManager);
