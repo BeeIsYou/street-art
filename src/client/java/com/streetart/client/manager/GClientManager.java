@@ -125,6 +125,7 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
             final GClientData data = this.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), packet.content() == ColorComponent.CLEAR.id);
             if (data != null) {
                 data.handleChange(colorComponent.argb, change);
+                data.updateLight(context.client().level);
             }
         }
     }
