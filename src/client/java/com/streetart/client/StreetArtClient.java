@@ -37,7 +37,6 @@ public class StreetArtClient implements ClientModInitializer {
 				ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, StreetArtClient.textureManager::handleBlockInvalidate);
 				ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, StreetArtClient.textureManager::handleChange);
 
-				ClientTickEvents.END_LEVEL_TICK.register(StreetArtClient.textureManager::updateLights);
 				ClientTickEvents.END_CLIENT_TICK.register(StreetArtClient.textureManager::tick);
 			}
 		);

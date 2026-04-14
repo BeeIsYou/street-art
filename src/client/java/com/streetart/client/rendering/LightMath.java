@@ -47,13 +47,12 @@ public class LightMath {
     /**
      * {@link BlockModelLighter#prepareQuadAmbientOcclusion(BlockAndTintGetter, BlockState, BlockPos, BakedQuad, QuadInstance)} please help me
      */
-    public static void OhGodSoMuchMath(final GClientData data, final BlockAndTintGetter level) {
+    public static void OhGodSoMuchMath(final GClientData data, final BlockAndTintGetter level, final BlockState state) {
         final Direction direction = data.dir;
         final boolean faceCubic = data.getDepth() == 1;
         final BlockPos centerPosition = data.pos;
         final BlockPos basePosition = faceCubic ? centerPosition.relative(direction) : centerPosition;
         final BlockModelLighter.AdjacencyInfo info = BlockModelLighter.AdjacencyInfo.fromFacing(direction);
-        final BlockState state = level.getBlockState(basePosition);
 
         pos.setWithOffset(basePosition, info.corners[0]);
         final BlockState state0 = level.getBlockState(pos);

@@ -11,7 +11,6 @@ import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -128,12 +127,6 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
                 data.handleChange(colorComponent.argb, change);
             }
         }
-    }
-
-    public void updateLights(final ClientLevel level) {
-        this.forEach(data -> {
-            data.updateLight(level);
-        });
     }
 
     public void closeAll() {

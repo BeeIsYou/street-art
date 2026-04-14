@@ -59,7 +59,7 @@ public class GClientData extends GData implements AutoCloseable {
     }
 
     public void updateLight(final ClientLevel level) {
-        LightMath.OhGodSoMuchMath(this, level);
+        LightMath.OhGodSoMuchMath(this, level, level.getBlockState(this.pos));
     }
 
     /**

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Every texture plane placed on a block
@@ -38,6 +39,10 @@ public abstract class GBlock<D extends GData> implements AutoCloseable {
 
     public Map<Direction, List<D>> getBlockData() {
         return this.blockData;
+    }
+
+    public void forEach(final Consumer<D> consumer) {
+        this.getBlockData().forEach((direction, list) -> list.forEach(consumer));
     }
 
     public static double snapToGrid(final double v) {
