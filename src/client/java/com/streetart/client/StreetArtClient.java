@@ -5,10 +5,7 @@ import com.streetart.StreetArt;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
-import com.streetart.networking.BiDirectionalGraffitiChange;
-import com.streetart.networking.ClientBoundGraffitiSet;
-import com.streetart.networking.ClientBoundInvalidateBlock;
-import com.streetart.networking.ServerBoundRequestDataPacket;
+import com.streetart.networking.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
@@ -40,6 +37,10 @@ public class StreetArtClient implements ClientModInitializer {
 				ClientTickEvents.END_CLIENT_TICK.register(StreetArtClient.textureManager::tick);
 			}
 		);
+
+		ClientPlayNetworking.registerGlobalReceiver(ClientBoundGameRuleSync.TYPE, (p, c) -> {
+			ClientBoundGameRuleSync.CLIENT_CURRENT = p;
+		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(SpraySessionManager::tick);
 

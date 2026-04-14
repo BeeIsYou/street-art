@@ -3,11 +3,9 @@ package com.streetart;
 import com.streetart.arealib.AreaLib;
 import com.streetart.arealib.AreaLibPresent;
 import com.streetart.managers.GraffitiGlobalManager;
-import com.streetart.networking.BiDirectionalGraffitiChange;
-import com.streetart.networking.ClientBoundGraffitiSet;
-import com.streetart.networking.ClientBoundInvalidateBlock;
-import com.streetart.networking.ServerBoundRequestDataPacket;
+import com.streetart.networking.*;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
@@ -31,11 +29,15 @@ public class StreetArt implements ModInitializer {
         AllDataComponents.init();
         AllItems.init();
         AllEntityTypes.init();
+        AllGameRules.init();
         AttachmentTypes.init();
 
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundGraffitiSet.TYPE, ClientBoundGraffitiSet.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundInvalidateBlock.TYPE, ClientBoundInvalidateBlock.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ClientBoundGameRuleSync.TYPE, ClientBoundGameRuleSync.CODEC);
+
+        ServerPlayerEvents.JOIN.register(ClientBoundGameRuleSync::onJoin);
 
         PayloadTypeRegistry.serverboundPlay().register(ServerBoundRequestDataPacket.TYPE, ServerBoundRequestDataPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);

@@ -2,6 +2,7 @@ package com.streetart.managers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.streetart.AllGameRules;
 import com.streetart.GManager;
 import com.streetart.StreetArt;
 import com.streetart.arealib.AreaLib;
@@ -79,9 +80,10 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
     }
 
     public void tickDecay(final ServerLevel level, final ChunkPos chunkPos) {
+        final int decaySpeed = level.getGameRules().get(AllGameRules.RANDOM_DECAY_SPEED);
         for (int i = 0; i < level.getSectionsCount(); i++) {
             final int sectionY = level.getSectionYFromSectionIndex(i);
-            for (int j = 0; j < 12; j++) {
+            for (int j = 0; j < decaySpeed; j++) {
                 final BlockPos randomPos = level.getBlockRandomPos(
                         chunkPos.getMinBlockX(),
                         SectionPos.sectionToBlockCoord(sectionY),
@@ -163,7 +165,7 @@ public class GServerChunkManager extends GManager<GServerDataHolder, GServerBloc
      * @return true if block data is marked for removal
      */
     public boolean removeIfEmpty(final BlockPos pos) {
-        GServerBlock block = this.getGraffiti().get(pos);
+        final GServerBlock block = this.getGraffiti().get(pos);
         if (block != null && block.isEmpty()) {
             this.markForRemoval(pos);
             return true;
