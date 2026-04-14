@@ -17,11 +17,6 @@ import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.level.Level;
 
 public class PaintBalloonItem extends Item implements ProjectileItem {
-    @Override
-    public Projectile asProjectile(final Level level, final Position position, final ItemStack itemStack, final Direction direction) {
-        return new PaintBalloon(level, position.x(), position.y(), position.z(), itemStack);
-    }
-
     public PaintBalloonItem(final Properties properties) {
         super(properties);
     }
@@ -47,5 +42,10 @@ public class PaintBalloonItem extends Item implements ProjectileItem {
         player.awardStat(Stats.ITEM_USED.get(this));
         itemStack.consume(1, player);
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public Projectile asProjectile(final Level level, final Position position, final ItemStack itemStack, final Direction direction) {
+        return new PaintBalloon(level, position.x(), position.y(), position.z(), itemStack);
     }
 }

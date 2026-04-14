@@ -12,13 +12,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.block.DispenserBlock;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Function;
 
 public class AllItems {
@@ -28,9 +27,9 @@ public class AllItems {
             BuiltInRegistries.CREATIVE_MODE_TAB.key(), StreetArt.id("creative_tab")
     );
 
-    public static SprayCanItem SPRAY_CAN = register("spray_can", SprayCanItem::new,
-            new Item.Properties().stacksTo(1)
-                    .component(AllDataComponents.COLOR, ColorComponent.RED)
+    public static Map<DyeColor, SprayCanItem> SPRAY_CANS = registerDyed("spray_can", SprayCanItem::new,
+            dye -> new Item.Properties().stacksTo(1)
+                    .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
                     .component(DataComponents.USE_EFFECTS, NONE)
     );
 
@@ -43,9 +42,9 @@ public class AllItems {
             new Item.Properties().stacksTo(16).useCooldown(0.5f)
     );
 
-    public static PaintBalloonItem PAINT_BALLOON = register("paint_balloon", PaintBalloonItem::new,
-            new Item.Properties().stacksTo(16).useCooldown(0.5f)
-                    .component(AllDataComponents.COLOR, ColorComponent.BLUE)
+    public static Map<DyeColor, PaintBalloonItem> PAINT_BALLOONS = registerDyed("paint_balloon", PaintBalloonItem::new,
+            dye -> new Item.Properties().stacksTo(16).useCooldown(0.5f)
+                    .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
     );
 
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
@@ -70,21 +69,17 @@ public class AllItems {
     );
 
     public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
-            .icon(() -> new ItemStack(SPRAY_CAN))
+            .icon(() -> new ItemStack(SPRAY_CANS.get(DyeColor.RED)))
             .title(Component.translatable("key.category.street_art"))
             .displayItems((parameters, output) -> {
-                for (ColorComponent color : ColorComponent.values()) {
-                    if (color != ColorComponent.CLEAR) {
-                        ItemStack stack = new ItemStack(SPRAY_CAN);
-                        stack.set(AllDataComponents.COLOR, color);
-                        output.accept(stack);
-                    }
+                for (DyeColor color : DyeColor.values()) {
+                    ItemStack stack = new ItemStack(SPRAY_CANS.get(color));
+                    output.accept(stack);
                 }
                 output.accept(WATER_BALLOON);
-                for (ColorComponent color : ColorComponent.values()) {
-                    if (color != ColorComponent.CLEAR && color != ColorComponent.WHITE) { // i know what you are
-                        ItemStack stack = new ItemStack(PAINT_BALLOON);
-                        stack.set(AllDataComponents.COLOR, color);
+                for (DyeColor color : DyeColor.values()) {
+                    if (color != DyeColor.WHITE) { // i know what you are
+                        ItemStack stack = new ItemStack(PAINT_BALLOONS.get(color));
                         output.accept(stack);
                     }
                 }
@@ -100,7 +95,19 @@ public class AllItems {
             content.accept(DENY_WAND);
         });
         DispenserBlock.registerProjectileBehavior(WATER_BALLOON);
-        DispenserBlock.registerProjectileBehavior(PAINT_BALLOON);
+        PAINT_BALLOONS.values().forEach(DispenserBlock::registerProjectileBehavior);
+    }
+
+    private static <T extends Item> EnumMap<DyeColor, T> registerDyed(final String baseName,
+                                                                      final Function<Item.Properties, T> factory,
+                                                                      final Function<DyeColor, Item.Properties> properties) {
+        final EnumMap<DyeColor, T> map = new EnumMap<>(DyeColor.class);
+
+        for (final DyeColor value : DyeColor.values()) {
+            map.put(value, register(value.getName() + "_" + baseName, factory, properties.apply(value)));
+        }
+
+        return map;
     }
 
     private static <T extends Item> T register(final String name, final Function<Item.Properties, T> factory, final Item.Properties properties) {
