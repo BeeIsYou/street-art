@@ -42,7 +42,7 @@ public class ClearCommand {
         }
 
         final int finalCount = count;
-        context.getSource().sendSuccess(() -> Component.literal("Explodiated graffiti from " + finalCount + " blocks"), false);
+        context.getSource().sendSuccess(() -> Component.translatable("commands.street_art.clear.success", finalCount), false);
         return count;
     }
 }

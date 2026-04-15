@@ -78,6 +78,16 @@ public class GServerDataHolder {
         buf.put(content);
     }
 
+    public void fillFromTo(final byte content, final int x1, final int y1, final int x2, final int y2) {
+        final ByteBuffer buf = this.getGraffitiData();
+        for (int y = y1; y < y2; y++) {
+            buf.position(y * 16 + x1);
+            for (int x = x1; x < x2; x++) {
+                setByte(content, buf);
+            }
+        }
+    }
+
     public void partialFillFromTo(final byte content, final int x1, final int y1, final int x2, final int y2,
                                   final Vector4f gradient, final RandomSource random) {
         final ByteBuffer buf = this.getGraffitiData();

@@ -21,7 +21,8 @@ import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class ArtUtil {
 
@@ -64,46 +65,89 @@ public class ArtUtil {
         return depth;
     }
 
-    public static void latherInPaint(final ServerLevel serverLevel,
+    /**
+     * Coats every exposed face of a block in paint
+     * @return true if any paint was applied
+     */
+    public static boolean latherInPaint(final ServerLevel serverLevel,
                                      final List<ShapeFaces> shapeFaces,
                                      final BlockPos pos,
-                                     final Direction thisDir,
-                                     final byte content,
-                                     final Vector4f gradient
+                                     final byte content
+    ) {
+        final ChunkAccess chunk = serverLevel.getChunk(pos);
+        final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
+
+        boolean changed = false;
+
+        for (final ShapeFaces faces : shapeFaces) {
+            changed |= faces.forEach((dir, face) -> {
+                final BlockPos offPos = pos.relative(dir);
+                final BlockState state = serverLevel.getBlockState(offPos);
+                if (Block.isShapeFullBlock(state.getCollisionShape(serverLevel, offPos).getFaceShape(dir.getOpposite()))) {
+                    return false;
+                }
+
+                final TileKey key = new TileKey(pos, dir, face.depth());
+                final GServerDataHolder data = manager.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                if (data != null) {
+                    data.fillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2());
+                    manager.markFullResend(data, pos, dir);
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        if (changed) {
+            chunk.markUnsaved();
+        }
+        return changed;
+    }
+
+    public static void latherDirectionInPaint(final ServerLevel serverLevel,
+                                              final List<ShapeFaces> shapeFaces,
+                                              final BlockPos pos,
+                                              final Direction thisDir,
+                                              final byte content,
+                                              final Vector4f gradient
     ) {
         final ChunkAccess chunk = serverLevel.getChunk(pos);
         final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
 
         final BlockPos offPos = pos.relative(thisDir);
         final BlockState state = serverLevel.getBlockState(offPos);
-        if (Block.isShapeFullBlock(state.getShape(serverLevel, offPos).getFaceShape(thisDir.getOpposite()))) {
+        if (Block.isShapeFullBlock(state.getCollisionShape(serverLevel, offPos).getFaceShape(thisDir.getOpposite()))) {
             return;
         }
 
+        boolean changed = false;
         for (final ShapeFaces faces : shapeFaces) {
-            faces.forEach((dir, face) -> {
-                if (dir == thisDir) {
-                    final TileKey key = new TileKey(pos, dir, face.depth());
-                    final GServerDataHolder data = manager.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
-                    if (data != null) {
-                        data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
-                        manager.markFullResend(data, pos, dir);
-                    }
+             changed |= faces.doWith(thisDir, face -> {
+                final TileKey key = new TileKey(pos, thisDir, face.depth());
+                final GServerDataHolder data = manager.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                if (data != null) {
+                    data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
+                    manager.markFullResend(data, pos, thisDir);
+                    return true;
                 }
+                return false;
             });
         }
-        chunk.markUnsaved();
+
+        if (changed) {
+            chunk.markUnsaved();
+        }
     }
 
     public static List<ShapeFaces> gatherShapeFaces(final VoxelShape shape) {
         final List<ShapeFaces> faces = new ArrayList<>();
         shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
-            final int ix1 = Mth.floor(x1 * 16);
-            final int iy1 = Mth.floor(y1 * 16);
-            final int iz1 = Mth.floor(z1 * 16);
-            final int ix2 = Mth.ceil(x2 * 16);
-            final int iy2 = Mth.ceil(y2 * 16);
-            final int iz2 = Mth.ceil(z2 * 16);
+            final int ix1 = Mth.clamp(Mth.floor(x1 * 16), 0, 16);
+            final int iy1 = Mth.clamp(Mth.floor(y1 * 16), 0, 16);
+            final int iz1 = Mth.clamp(Mth.floor(z1 * 16), 0, 16);
+            final int ix2 = Mth.clamp(Mth.ceil(x2 * 16), 0, 16);
+            final int iy2 = Mth.clamp(Mth.ceil(y2 * 16), 0, 16);
+            final int iz2 = Mth.clamp(Mth.ceil(z2 * 16), 0, 16);
             faces.add(new ShapeFaces(
                     new Face(y2, ix1, iz1, ix2, iz2),
                     new Face(1 - y1, ix1, 16 - iz2, ix2, 16 - iz1),
@@ -117,27 +161,45 @@ public class ArtUtil {
     }
 
     public record ShapeFaces(Face up, Face down, Face north, Face east, Face south, Face west) {
-        public void forEach(final BiConsumer<Direction, Face> consumer) {
+        public <T> T doWith(final Direction dir, final Function<Face, T> function) { // mildly horrifying sentence
+            return switch (dir) {
+                case DOWN -> function.apply(this.down);
+                case UP -> function.apply(this.up);
+                case NORTH -> function.apply(this.north);
+                case SOUTH -> function.apply(this.south);
+                case WEST -> function.apply(this.west);
+                case EAST -> function.apply(this.east);
+            };
+        }
+
+        /**
+         * @return true if any function call returns true
+         */
+        public boolean forEach(final BiFunction<Direction, Face, Boolean> function) {
+            boolean value = false;
             if (this.up != null) {
-                consumer.accept(Direction.UP, this.up);
+                value |= function.apply(Direction.UP, this.up);
             }
             if (this.down != null) {
-                consumer.accept(Direction.DOWN, this.down);
+                value |= function.apply(Direction.DOWN, this.down);
             }
             if (this.north != null) {
-                consumer.accept(Direction.NORTH, this.north);
+                value |= function.apply(Direction.NORTH, this.north);
             }
             if (this.east != null) {
-                consumer.accept(Direction.EAST, this.east);
+                value |= function.apply(Direction.EAST, this.east);
             }
             if (this.south != null) {
-                consumer.accept(Direction.SOUTH, this.south);
+                value |= function.apply(Direction.SOUTH, this.south);
             }
             if (this.west != null) {
-                consumer.accept(Direction.WEST, this.west);
+                value |= function.apply(Direction.WEST, this.west);
             }
+            return value;
         }
     }
 
-    public record Face(double depth, int x1, int y1, int x2, int y2) {}
+    public record Face(double depth, int x1, int y1, int x2, int y2) {
+
+    }
 }

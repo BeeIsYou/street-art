@@ -106,11 +106,11 @@ public class SplashUtil {
         for (final Map.Entry<BlockPos, EnumMap<Direction, Integer>> blockEntry : exposure.entrySet()) {
             final BlockPos pos = blockEntry.getKey();
             if (modificationAllowed.test(pos)) {
-                final List<ArtUtil.ShapeFaces> faces = ArtUtil.gatherShapeFaces(level.getBlockState(pos).getShape(level, pos));
+                final List<ArtUtil.ShapeFaces> faces = ArtUtil.gatherShapeFaces(level.getBlockState(pos).getCollisionShape(level, pos));
                 blockEntry.getValue().forEach((dir, hits) -> {
                     final Vector4f hitsGradient = getHitsGradient(exposure, pos, dir);
                     hitsGradient.mul(0.01f * intensityScale);
-                    ArtUtil.latherInPaint(level, faces, pos, dir, content, hitsGradient);
+                    ArtUtil.latherDirectionInPaint(level, faces, pos, dir, content, hitsGradient);
                 });
             }
         }

@@ -1,5 +1,6 @@
 package com.streetart.component;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.streetart.AllDataComponents;
 import io.netty.buffer.ByteBuf;
@@ -10,7 +11,10 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.IntFunction;
 
 public enum ColorComponent implements StringRepresentable {
@@ -33,6 +37,28 @@ public enum ColorComponent implements StringRepresentable {
     BLACK(16, "black", ARGB.opaque(1908001));
 
     public static final Codec<ColorComponent> CODEC = StringRepresentable.fromValues(ColorComponent::values);
+    private static final Map<String, ColorComponent> BY_NAME = new HashMap<>();
+    static {
+        for (final ColorComponent value : ColorComponent.values()) {
+            BY_NAME.put(value.getSerializedName(), value);
+        }
+    }
+
+    public static final ImmutableList<String> NAMES;
+    public static final ImmutableList<String> NON_CLEAR_NAMES;
+    static {
+        final ImmutableList.Builder<String> nameBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<String> nonClearNameBuilder = ImmutableList.builder();
+        for (final ColorComponent value : ColorComponent.values()) {
+            nameBuilder.add(value.getSerializedName());
+            if (value != ColorComponent.CLEAR) {
+                nonClearNameBuilder.add(value.getSerializedName());
+            }
+        }
+        NAMES = nameBuilder.build();
+        NON_CLEAR_NAMES = nonClearNameBuilder.build();
+    }
+
     public static final IntFunction<ColorComponent> BY_ID = ByIdMap.continuous(
             d -> d.id, values(), ByIdMap.OutOfBoundsStrategy.CLAMP
     );
@@ -68,6 +94,11 @@ public enum ColorComponent implements StringRepresentable {
         }
 
         return color;
+    }
+
+    @Nullable
+    public static ColorComponent fromString(final String name) {
+        return BY_NAME.get(name);
     }
 
     @Override
