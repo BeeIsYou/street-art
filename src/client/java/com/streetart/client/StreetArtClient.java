@@ -10,6 +10,7 @@ import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -71,6 +72,14 @@ public class StreetArtClient implements ClientModInitializer {
                     return true;
                 });
             }
+        });
+
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((l, ll) -> {
+            for (GClientManager entry : textureManager.values()) {
+                entry.closeAll();
+            }
+
+            textureManager.clear();
         });
 
         ClientChunkEvents.CHUNK_UNLOAD.register((l, ll) -> {
