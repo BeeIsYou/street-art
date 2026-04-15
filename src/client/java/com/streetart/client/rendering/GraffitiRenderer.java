@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2f;
 
@@ -26,18 +27,29 @@ public class GraffitiRenderer {
         storage.submitCustomGeometry(pose, graffitiAtlas, (_pose, buffer) -> {
             final PoseStack.Pose original = _pose.copy();
             for (final GClientManager entry : StreetArtClient.textureManager.values()) {
-                entry.forEach(data -> renderGraffiti(_pose, original, buffer, data));
+                entry.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, data));
             }
         });
     }
 
-    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final VertexConsumer buffer, final GClientData data) {
+    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final GClientData data) {
         if (data.light0 != -1) {
+            final double dist = camPos.distanceToSqr(data.pos.getX(), data.pos.getY(), data.pos.getZ());
+            final float offset;
+            if (dist < 16*16) {
+                offset = (float) (data.getDepth() + 0.001);
+            } else if (dist > 32*32) {
+                offset = (float) (data.getDepth() + 0.01);
+            } else {
+                offset = (float) (data.getDepth() + Mth.lerp((dist - 16*16) / (32*32 - 16*16), 0.001, 0.01));
+            }
+
             pose.translate(
-                    (float) (data.pos.getX() + data.dir.getStepX() * data.getDepth()),
-                    (float) (data.pos.getY() + data.dir.getStepY() * data.getDepth()),
-                    (float) (data.pos.getZ() + data.dir.getStepZ() * data.getDepth())
+                    data.pos.getX() + data.dir.getStepX() * offset,
+                    data.pos.getY() + data.dir.getStepY() * offset,
+                    data.pos.getZ() + data.dir.getStepZ() * offset
             );
+
             pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
             final Vector2f uv = TileAtlasManager.getUV(data.id);
             GraffitiRenderer.renderDecal(
@@ -63,7 +75,7 @@ public class GraffitiRenderer {
     }
 
     private static void vertex(final PoseStack.Pose pose, final VertexConsumer buffer, final float x, final float z, final float u, final float v, final int light, final int color) {
-        buffer.addVertex(pose, x, 0.01f, z)
+        buffer.addVertex(pose, x, 0f, z)
                 .setColor(color)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
