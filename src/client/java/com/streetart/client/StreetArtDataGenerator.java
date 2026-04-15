@@ -126,9 +126,6 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");
 
-			translationBuilder.add("street_art.toast.atlas_full.title", "Atlas Full");
-			translationBuilder.add("street_art.toast.atlas_full.body", "Spray Paint textures forced to clear");
-
 			translationBuilder.add("commands.street_art.clear.success", "Explodiated paint off of %s blocks");
 			translationBuilder.add("commands.street_art.fill.success", "It's all over %s blocks");
 		}

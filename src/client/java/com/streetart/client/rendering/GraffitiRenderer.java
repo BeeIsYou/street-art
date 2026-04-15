@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 public class GraffitiRenderer {
     public static void render(final LevelTerrainRenderContext context) {
@@ -27,12 +27,13 @@ public class GraffitiRenderer {
         storage.submitCustomGeometry(pose, graffitiAtlas, (_pose, buffer) -> {
             final PoseStack.Pose original = _pose.copy();
             for (final GClientManager entry : StreetArtClient.textureManager.values()) {
-                entry.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, data));
+                entry.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, StreetArtClient.tileAtlasManager, data));
             }
         });
     }
 
-    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final GClientData data) {
+    private static final Vector4f mutUV = new Vector4f();
+    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final TileAtlasManager tileAtlasManager, final GClientData data) {
         if (data.light0 != -1) {
             final double dist = camPos.distanceToSqr(data.pos.getX(), data.pos.getY(), data.pos.getZ());
             final float offset;
@@ -51,13 +52,13 @@ public class GraffitiRenderer {
             );
 
             pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
-            final Vector2f uv = TileAtlasManager.getUV(data.id);
+            tileAtlasManager.writeUVs(data.id, mutUV);
             GraffitiRenderer.renderDecal(
-                            pose, buffer,
-                            uv.x, uv.y,
-                            uv.x + TileAtlasManager.U_SIZE, uv.y + TileAtlasManager.V_SIZE,
-                            data.light0, data.light1, data.light2, data.light3,
-                            data.color0, data.color1, data.color2, data.color3
+                    pose, buffer,
+                    mutUV.x, mutUV.y,
+                    mutUV.z, mutUV.w,
+                    data.light0, data.light1, data.light2, data.light3,
+                    data.color0, data.color1, data.color2, data.color3
             );
             pose.set(original);
         }

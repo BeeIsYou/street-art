@@ -2,76 +2,99 @@ package com.streetart.client.rendering;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.streetart.StreetArt;
-import com.streetart.client.StreetArtClient;
-import com.streetart.client.manager.GClientManager;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import java.nio.ByteBuffer;
 import java.util.OptionalInt;
 import java.util.Random;
 
 public class TileAtlasManager {
-    // 128x128 = 16384 tiles
-    // A 1024x1024 texture, ~4.2MB
-    // if updating once per tick, uses 83MB/s memory bandwith
-    public static final int ENTRIES_X = 128;
-    public static final int ENTRIES_Y = 128;
-    public static final int ID_COUNT = ENTRIES_X * ENTRIES_Y;
+    private int entriesX = 128;
+    private int entriesY = 128;
+    private int idCount = this.entriesX * this.entriesY;
 
-    public static final float U_SIZE = 1f / ENTRIES_X;
-    public static final float V_SIZE = 1f / ENTRIES_Y;
+    private float uSize = 1f / this.entriesX;
+    private float vSize = 1f / this.entriesY;
 
     private int nextIndex = 0;
     private int useCount = 0;
-    private final IntSet freeIDs = new IntArraySet(ID_COUNT);
-    public final Identifier atlasLocation;
-    private final DynamicTexture atlasTexture;
+    private final IntSet freeIDs = new IntArraySet(this.idCount);
+
+    private final TextureManager textureManager;
+    public Identifier atlasLocation;
+    private DynamicTexture atlasTexture;
 
     private boolean dirty;
 
     public TileAtlasManager(final TextureManager textureManager) {
+        this.textureManager = textureManager;
         this.atlasLocation = StreetArt.id("atlas");
-        this.atlasTexture = new DynamicTexture(() -> "street_art:atlas", ENTRIES_X * 16, ENTRIES_Y * 16, true);
-        textureManager.register(this.atlasLocation, this.atlasTexture);
+        this.atlasTexture = new DynamicTexture(() -> "street_art:atlas_" + this.entriesX, this.entriesX * 16, this.entriesY * 16, true);
+        this.textureManager.register(this.atlasLocation, this.atlasTexture);
     }
 
     public int allocateID() {
-        if (this.nextIndex < ID_COUNT) {
+        if (this.nextIndex < this.idCount) {
             this.useCount++;
             return this.nextIndex++;
         }
         final OptionalInt id = this.freeIDs.intStream().findFirst();
         if (id.isEmpty()) {
-            this.panic();
-            this.nextIndex = 1;
-            this.useCount = 1;
-            return 0;
+            this.quadrupleSize();
+            return this.allocateID();
         }
         this.freeIDs.remove(id.getAsInt());
         this.useCount++;
         return id.getAsInt();
     }
 
-    private void panic() {
-        Minecraft.getInstance().getToastManager().addToast(new SystemToast(
-                new SystemToast.SystemToastId(10000L),
-                Component.translatable("street_art.toast.atlas_full.title"),
-                Component.translatable("street_art.toast.atlas_full.body")
-        ));
-
-        for (final GClientManager entries : StreetArtClient.textureManager.values()) {
-            entries.closeAll();
+    private void quadrupleSize() {
+        final DynamicTexture newTexture = new DynamicTexture(() -> "street_art:atlas_" + this.entriesX, this.entriesX * 32, this.entriesY * 32, true);
+        final NativeImage newPix = newTexture.getPixels();
+        final NativeImage oldPix = this.atlasTexture.getPixels();
+        // puts textures into the atlas in such a way that
+        for (int y = 0; y < this.entriesY; y++) {
+            if (y % 2 == 0) {
+                final int ny = y / 2;
+                for (int py = 0; py < 16; py++) {
+                    for (int px = 0; px < this.entriesX * 16; px++) {
+                        newPix.setPixel(
+                                px,
+                                ny * 16 + py,
+                                oldPix.getPixel(px, y * 16 + py)
+                        );
+                    }
+                }
+            } else {
+                final int ny = (y - 1) / 2;
+                for (int py = 0; py < 16; py++) {
+                    for (int px = 0; px < this.entriesX * 16; px++) {
+                        newPix.setPixel(
+                                px + this.entriesX * 16,
+                                ny * 16 + py,
+                                oldPix.getPixel(px, y * 16 + py)
+                        );
+                    }
+                }
+            }
         }
 
-        this.clear();
+        this.atlasTexture.close();
+        this.atlasTexture = newTexture;
+        this.textureManager.register(this.atlasLocation, this.atlasTexture);
+
+        this.entriesX *= 2;
+        this.entriesY *= 2;
+        this.idCount *= 4;
+        this.uSize /= 2;
+        this.vSize /= 2;
+
+        StreetArt.LOGGER.info("Resizing spray paint atlas to {}x{}", this.entriesX * 16, this.entriesY * 16);
     }
 
     public void freeID(final int id) {
@@ -87,16 +110,19 @@ public class TileAtlasManager {
     }
 
     public void clear() {
-        this.atlasTexture.setPixels(new NativeImage(ENTRIES_X * 16, ENTRIES_Y * 16, true));
+        this.atlasTexture.setPixels(new NativeImage(this.entriesX * 16, this.entriesY * 16, true));
         this.freeIDs.clear();
         this.nextIndex = 0;
         this.useCount = 0;
     }
 
-    public static Vector2f getUV(final int id) {
-        final float x = id % ENTRIES_X;
-        final float y = id / ENTRIES_Y; // intentionally do not cast
-        return new Vector2f(x / ENTRIES_X, y / ENTRIES_Y);
+    public void writeUVs(final int id, final Vector4f uv) {
+        final float x = id % this.entriesX;
+        final float y = id / this.entriesY; // intentionally do not cast
+        uv.set(
+            x / this.entriesX, y / this.entriesY,
+            x / this.entriesX + this.uSize, y / this.entriesY + this.vSize
+        );
     }
 
     public static final int COLOR_MASK = 0b00000000_00000011_00000011_00000011;
@@ -110,8 +136,8 @@ public class TileAtlasManager {
     }
 
     public void setPixel(final int id, int x, int y, int color) {
-        x += (id % ENTRIES_X) * 16;
-        y += (id / ENTRIES_X) * 16;
+        x += (id % this.entriesX) * 16;
+        y += (id / this.entriesX) * 16;
 
         if (color != 0) {
             color = color ^ (COLOR_MASK & this.nextRandom());
@@ -122,8 +148,8 @@ public class TileAtlasManager {
     }
 
     public int getPixel(final int id, int x, int y) {
-        x += (id % ENTRIES_X) * 16;
-        y += (id / ENTRIES_X) * 16;
+        x += (id % this.entriesX) * 16;
+        y += (id / this.entriesX) * 16;
         return this.atlasTexture.getPixels().getPixel(x, y);
     }
 
@@ -131,8 +157,8 @@ public class TileAtlasManager {
         final byte[] data = new byte[16*16*4];
         final ByteBuffer buffer = ByteBuffer.wrap(data);
 
-        final int tx = (id % ENTRIES_X) * 16;
-        final int ty = (id / ENTRIES_X) * 16;
+        final int tx = (id % this.entriesX) * 16;
+        final int ty = (id / this.entriesX) * 16;
         for (int y = ty; y < ty + 16; y++) {
             for (int x = tx; x < tx + 16; x++) {
                 buffer.putInt(this.atlasTexture.getPixels().getPixel(x, y));
@@ -142,7 +168,7 @@ public class TileAtlasManager {
     }
 
     public int getCapacity() {
-        return ID_COUNT;
+        return this.idCount;
     }
 
     public int getSize() {
