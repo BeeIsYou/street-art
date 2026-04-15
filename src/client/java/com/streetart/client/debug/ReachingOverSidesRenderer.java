@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gizmos.GizmoStyle;
 import net.minecraft.gizmos.Gizmos;
 import net.minecraft.server.level.ServerLevel;
@@ -25,12 +26,12 @@ public class ReachingOverSidesRenderer implements DebugRenderer.SimpleDebugRende
             ((ChunkMapInvoker)level.getChunkSource().chunkMap).callForEachBlockTickingChunk(chunk -> {
                 final GServerChunkManager manager = chunk.getAttached(AttachmentTypes.CHUNK_MANAGER);
                 if (manager != null) {
-                    manager.getGraffiti().keySet().forEach(block -> {
+                    for (final BlockPos graffiti : manager.allGraffitiBlocksPositions()) {
                         Gizmos.cuboid(
-                            new AABB(block).inflate(0.05),
-                            GizmoStyle.fill(ARGB.colorFromFloat(0.5f, 1, 0, 0))
+                                new AABB(graffiti).inflate(0.05),
+                                GizmoStyle.fill(ARGB.colorFromFloat(0.5f, 1, 0, 0))
                         );
-                    });
+                    }
                 }
             });
         }

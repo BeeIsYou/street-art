@@ -4,6 +4,8 @@ import com.streetart.AttachmentTypes;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
+import com.streetart.managers.data.GServerBlock;
+import com.streetart.managers.data.GServerDataHolder;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ServerBoundRequestDataPacket;
@@ -13,7 +15,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 
-import java.util.List;
 import java.util.Map;
 
 public class GraffitiGlobalManager {
@@ -24,18 +25,7 @@ public class GraffitiGlobalManager {
         final LevelChunk chunk = level.getChunk(pos.x(), pos.z());
         final GServerChunkManager manager = chunk.getAttached(AttachmentTypes.CHUNK_MANAGER);
         if (manager != null) {
-            for (final GServerBlock value : manager.getGraffiti().values()) {
-                for (final Map.Entry<Direction, List<GServerDataHolder>> entries : value.getBlockData().entrySet()) {
-                    for (final GServerDataHolder holder : entries.getValue()) {
-                        ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
-                                value.getBlockPos(),
-                                entries.getKey(),
-                                holder.getDepth(),
-                                holder.getGraffitiData().array()
-                        ));
-                    }
-                }
-            }
+            manager.handleRequest(context);
         }
     }
 
@@ -46,34 +36,11 @@ public class GraffitiGlobalManager {
             final TileChange change = entry.getValue();
 
             final LevelChunk chunk = level.getChunkAt(key.pos());
-            final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
-
-            final GServerDataHolder tile = manager.getOrConditionalCreate(
-                    key.pos(),
-                    key.dir(),
-                    key.depth(),
-                    packet.content() == ColorComponent.CLEAR.id
-            );
-
-            if (tile == null) {
+            if (!chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER).handleChange(packet, key, change)) {
                 continue;
             }
 
-            if (tile.handleChange(packet.content(), change)) {
-                manager.tryRemoveData(key.pos(), key.dir(), key.depth());
-            }
-
-            if (packet.content() != 0) {
-                tile.refreshGrace();
-                manager.addPatch(packet);
-            } else {
-                if (!manager.removeIfEmpty(key.pos())) {
-                    manager.addPatch(packet);
-                }
-            }
-
             chunk.markUnsaved();
-//            manager.markDirty(tile, key.pos(), key.dir());
         }
     }
 }

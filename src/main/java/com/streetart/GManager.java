@@ -14,6 +14,10 @@ import java.util.Map;
  */
 public abstract class GManager<D extends GData, B extends GBlock<D>> implements AutoCloseable {
 
+    public @Nullable B get(final BlockPos pos) {
+        return this.getGraffiti().get(pos);
+    }
+
     public @Nullable D get(final BlockPos pos, final Direction dir, final double depth) {
         final B blockData = this.getGraffiti().get(pos);
         if (blockData == null) {
@@ -48,11 +52,7 @@ public abstract class GManager<D extends GData, B extends GBlock<D>> implements 
         }
     }
 
-    public @Nullable B popBlock(final BlockPos pos) {
-        return this.getGraffiti().remove(pos);
-    }
-
     public abstract B newBlockData(BlockPos pos);
 
-    public abstract Map<BlockPos, B> getGraffiti();
+    protected abstract Map<BlockPos, B> getGraffiti();
 }

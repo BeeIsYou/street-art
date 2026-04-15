@@ -3,7 +3,7 @@ package com.streetart;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileKey;
 import com.streetart.managers.GServerChunkManager;
-import com.streetart.managers.GServerDataHolder;
+import com.streetart.managers.data.GServerDataHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;

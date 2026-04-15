@@ -1,8 +1,7 @@
-package com.streetart.managers;
+package com.streetart.managers.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.streetart.GData;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import net.minecraft.util.RandomSource;
@@ -10,16 +9,15 @@ import org.joml.Vector4f;
 
 import java.nio.ByteBuffer;
 
-public class GServerDataHolder extends GData {
+public class GServerDataHolder {
 
     private static final int PIXEL_BYTE_SIZE = 1;
 
     public static final Codec<GServerDataHolder> CODEC = RecordCodecBuilder.create(i -> i.group(
                     Codec.BYTE_BUFFER.fieldOf("texture_data").forGetter(d -> d.graffitiData),
-                    Codec.DOUBLE.fieldOf("depth").forGetter(GData::getDepth),
+                    Codec.DOUBLE.fieldOf("depth").forGetter(GServerDataHolder::getDepth),
                     Codec.INT.optionalFieldOf("grace", 0).forGetter(d -> d.graceTimer)
-            ).apply(i, GServerDataHolder::new)
-    );
+            ).apply(i, GServerDataHolder::new));
 
     private final ByteBuffer graffitiData;
 
@@ -28,12 +26,14 @@ public class GServerDataHolder extends GData {
      */
     private int graceTimer;
 
+    private final double depth;
+
     public GServerDataHolder(final double depth) {
         this(ByteBuffer.allocate(PIXEL_BYTE_SIZE * 16 * 16), depth, 0);
     }
 
     public GServerDataHolder(final ByteBuffer buf, final double depth, final int graceTimer) {
-        super(depth);
+        this. depth = depth;
         this.graffitiData = buf;
         this.graceTimer = graceTimer;
     }
@@ -131,5 +131,9 @@ public class GServerDataHolder extends GData {
         }
 
         return true;
+    }
+
+    public double getDepth() {
+        return this.depth;
     }
 }
