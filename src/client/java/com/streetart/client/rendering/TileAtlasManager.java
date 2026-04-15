@@ -16,6 +16,7 @@ import org.joml.Vector2f;
 
 import java.nio.ByteBuffer;
 import java.util.OptionalInt;
+import java.util.Random;
 
 public class TileAtlasManager {
     // 128x128 = 16384 tiles
@@ -98,9 +99,22 @@ public class TileAtlasManager {
         return new Vector2f(x / ENTRIES_X, y / ENTRIES_Y);
     }
 
-    public void setPixel(final int id, int x, int y, final int color) {
+    public static final int COLOR_MASK = 0b00000000_00000011_00000011_00000011;
+    private static int SEED = new Random().nextInt(); //kill me I DARE you
+
+    private int nextRandom() {
+        SEED ^= SEED << 13;
+        SEED ^= SEED >> 17;
+        SEED ^= SEED << 5;
+        return SEED;
+    }
+
+    public void setPixel(final int id, int x, int y, int color) {
         x += (id % ENTRIES_X) * 16;
         y += (id / ENTRIES_X) * 16;
+
+        color = color ^ (COLOR_MASK & this.nextRandom());
+
         this.atlasTexture.getPixels().setPixel(x, y, color);
         this.dirty = true;
     }
