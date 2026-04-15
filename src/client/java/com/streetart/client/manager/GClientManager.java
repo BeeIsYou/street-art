@@ -6,7 +6,6 @@ import com.streetart.client.StreetArtClient;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
-import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -104,18 +103,13 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
         }
     }
 
-    public void handleChange(final BiDirectionalGraffitiChange packet, final ClientPlayNetworking.Context context) {
-        final ColorComponent colorComponent = ArtUtil.generateComponentFromByte(packet.content());
+    public void handleChange(final byte content, final TileKey key, final TileChange change, final ClientPlayNetworking.Context context) {
+        final ColorComponent colorComponent = ArtUtil.generateComponentFromByte(content);
 
-        for (final Map.Entry<TileKey, TileChange> entry : packet.changes().entrySet()) {
-            final TileKey key = entry.getKey();
-            final TileChange change = entry.getValue();
-
-            final GClientData data = this.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), packet.content() == ColorComponent.CLEAR.id);
-            if (data != null) {
-                data.handleChange(colorComponent.argb, change);
-                data.updateLight(context.client().level);
-            }
+        final GClientData data = this.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), colorComponent == ColorComponent.CLEAR);
+        if (data != null) {
+            data.handleChange(colorComponent.argb, change);
+            data.updateLight(context.client().level);
         }
     }
 

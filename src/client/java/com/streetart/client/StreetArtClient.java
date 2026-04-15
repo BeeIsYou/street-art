@@ -51,7 +51,7 @@ public class StreetArtClient implements ClientModInitializer {
                     ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, (l, ll) -> {
                         for (final Map.Entry<TileKey, TileChange> entries : l.changes().entrySet()) {
                             final GClientManager manager = textureManager.computeIfAbsent(ChunkPos.containing(entries.getKey().pos()), _ -> new GClientManager());
-                            manager.handleChange(l, ll);
+                            manager.handleChange(l.content(), entries.getKey(), entries.getValue(), ll);
                         }
                     });
 
