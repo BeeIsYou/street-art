@@ -80,7 +80,7 @@ public class SpraySessionManager {
                     final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
 
                     GClientManager man = StreetArtClient.textureManager.computeIfAbsent(ChunkPos.containing(hitResult.getBlockPos()), _ -> new GClientManager());
-                    if (man.applyPixelChange(hitResult, coordinates, color.argb)) {
+                    if (man.applyPixelChangeAndLight(hitResult, coordinates, color.argb, minecraft.level)) {
                         change.markChanged(hitResult, coordinates.x, coordinates.y);
                     }
 

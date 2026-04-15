@@ -3,6 +3,7 @@ package com.streetart.client.manager;
 import com.streetart.ArtUtil;
 import com.streetart.GManager;
 import com.streetart.client.StreetArtClient;
+import com.streetart.client.rendering.LightMath;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
@@ -10,6 +11,7 @@ import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
@@ -44,13 +46,36 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
      * @return true if pixel changed
      */
     public boolean applyPixelChange(final BlockHitResult hitResult, final Vector2i coordinates, final int color) {
-        final GClientData data = this.getOrConditionalCreate(hitResult.getBlockPos(),
+        final GClientData data = this.getOrConditionalCreate(
+                hitResult.getBlockPos(),
                 hitResult.getDirection(),
                 ArtUtil.calculateDepth(hitResult),
                 color == 0
         );
         if (data == null) {
             return false;
+        }
+        return data.applyPixel(coordinates, color);
+    }
+
+    /**
+     * Will not create new data if color == 0. Also computes light if there was no light data
+     *
+     * @return true if pixel changed
+     */
+    public boolean applyPixelChangeAndLight(final BlockHitResult hitResult, final Vector2i coordinates, final int color,
+                                            final BlockAndTintGetter level) {
+        final GClientData data = this.getOrConditionalCreate(
+                hitResult.getBlockPos(),
+                hitResult.getDirection(),
+                ArtUtil.calculateDepth(hitResult),
+                color == 0
+        );
+        if (data == null) {
+            return false;
+        }
+        if (data.light0 == -1) {
+            new LightMath().OhGodSoMuchMath(data, level, level.getBlockState(hitResult.getBlockPos()));
         }
         return data.applyPixel(coordinates, color);
     }
