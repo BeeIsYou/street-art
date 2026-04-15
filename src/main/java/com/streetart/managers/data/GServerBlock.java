@@ -34,9 +34,10 @@ public class GServerBlock implements PublicFacingBlockData {
         this.blockData.smotheredFromDir(gatherer, this.blockPos, dir);
     }
 
-    /**
-     * @return true if no more data exists within the block
-     */
+    public List<TempData> compileData() {
+        return this.blockData.compileData(this.blockPos);
+    }
+
     public boolean randomDecay(final ServerLevel level) {
         return this.blockData.randomDecay(level.getRandom());
     }
@@ -57,9 +58,6 @@ public class GServerBlock implements PublicFacingBlockData {
         return this.blockPos;
     }
 
-    /**
-     * !! will return false if holding empty lists or fully clear textures
-     */
     public boolean isEmpty() {
         return this.blockData.isCompletelyEmpty();
     }

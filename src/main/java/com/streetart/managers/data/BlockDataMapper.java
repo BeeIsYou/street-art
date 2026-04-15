@@ -33,7 +33,7 @@ public class BlockDataMapper {
         this.blockData = map;
     }
 
-    public void smotheredFromDir(final List<TempData> gatherer, BlockPos pos, final Direction dir) {
+    public void smotheredFromDir(final List<TempData> gatherer, final BlockPos pos, final Direction dir) {
         final List<GServerDataHolder> data = this.blockData.get(dir);
         if (data != null) {
             for (final GServerDataHolder holder : data) {
@@ -105,6 +105,18 @@ public class BlockDataMapper {
                 this.blockData.remove(dir);
             }
         }
+    }
+
+    public List<TempData> compileData(final BlockPos pos) {
+        final List<TempData> compiled = new ArrayList<>();
+
+        this.blockData.forEach((dir, holder) -> {
+            for (final GServerDataHolder gServerDataHolder : holder) {
+                compiled.add(new TempData(gServerDataHolder, pos, dir));
+            }
+        });
+
+        return compiled;
     }
 
     public boolean isCompletelyEmpty() {

@@ -149,6 +149,7 @@ public class GServerChunkManager {
 
     public void tickDecay(final ServerLevel level, final ChunkPos chunkPos) {
         final int decaySpeed = level.getGameRules().get(AllGameRules.RANDOM_DECAY_SPEED);
+
         for (int i = 0; i < level.getSectionsCount(); i++) {
             final int sectionY = level.getSectionYFromSectionIndex(i);
             for (int j = 0; j < decaySpeed; j++) {
@@ -162,17 +163,11 @@ public class GServerChunkManager {
                 if (!StreetArt.AREA_LIB.isInRegion(level, randomPos, AreaLib.Type.NO_DECAY)) {
                     final GServerBlock block = this.graffiti.get(randomPos);
                     if (block != null) {
+
                         if (block.randomDecay(level)) {
                             this.markForRemoval(randomPos);
                         } else {
-                            for (final Direction dir : block.allValidDirections()) {
-                                final Iterable<GServerDataHolder> holders = block.dataFromDir(dir);
-                                if (holders != null) {
-                                    for (final GServerDataHolder holder : holders) {
-                                        this.markFullResend(holder, randomPos, dir);
-                                    }
-                                }
-                            }
+                            this.dirtyDatas.get(Type.FULL_RESEND).addAll(block.compileData());
                         }
                     }
                 }
@@ -182,19 +177,13 @@ public class GServerChunkManager {
 
     public void handleRequest(final ServerPlayNetworking.Context context) {
         for (final GServerBlock value : this.graffiti.values()) {
-            for (final Direction direction : value.allValidDirections()) {
-
-                final Iterable<GServerDataHolder> holders = value.dataFromDir(direction);
-                if (holders != null) {
-                    for (final GServerDataHolder holder : holders) {
-                        ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
-                                value.getBlockPos(),
-                                direction,
-                                holder.getDepth(),
-                                holder.getGraffitiData().array()
-                        ));
-                    }
-                }
+            for (final TempData compileDatum : value.compileData()) {
+                ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
+                        value.getBlockPos(),
+                        compileDatum.dir(),
+                        compileDatum.data().getDepth(),
+                        compileDatum.data().getGraffitiData().array()
+                ));
             }
         }
     }

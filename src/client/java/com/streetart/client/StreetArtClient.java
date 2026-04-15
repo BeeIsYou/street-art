@@ -75,7 +75,7 @@ public class StreetArtClient implements ClientModInitializer {
         });
 
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((l, ll) -> {
-            for (GClientManager entry : textureManager.values()) {
+            for (final GClientManager entry : textureManager.values()) {
                 entry.closeAll();
             }
 
