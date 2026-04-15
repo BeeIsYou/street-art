@@ -28,9 +28,10 @@ public class SectionCompilerMixin {
         final GClientManager manager = StreetArtClient.textureManager.get(ChunkPos.containing(pos));
 
         if (manager != null) {
+            final LightMath math = new LightMath();
             final GClientBlock block = manager.getGraffiti().get(pos);
             if (block != null) {
-                block.forEach(data -> LightMath.OhGodSoMuchMath(data, region, blockState));
+                block.forEach(data -> math.OhGodSoMuchMath(data, region, blockState));
             }
         }
     }

@@ -15,38 +15,43 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class LightMath {
     private static final ThreadLocal<BlockModelLighter.Cache> CACHE = ThreadLocal.withInitial(BlockModelLighter.Cache::new);
-    private static final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-    private static final BlockModelLighter.Cache cache = CACHE.get();
+    private final BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
+    private final BlockModelLighter.Cache cache;
+
+    public LightMath() {
+        this.cache = CACHE.get();
+    }
 
     /**
      * {@link BlockModelLighter#prepareQuadAmbientOcclusion(BlockAndTintGetter, BlockState, BlockPos, BakedQuad, QuadInstance)} please help me
      */
-    public static void OhGodSoMuchMath(final GClientData data, final BlockAndTintGetter level, final BlockState state) {
+    public void OhGodSoMuchMath(final GClientData data, final BlockAndTintGetter level, final BlockState state) {
         final Direction direction = data.dir;
         final boolean faceCubic = data.getDepth() == 1;
         final BlockPos centerPosition = data.pos;
         final BlockPos basePosition = faceCubic ? centerPosition.relative(direction) : centerPosition;
         final BlockModelLighter.AdjacencyInfo info = BlockModelLighter.AdjacencyInfo.fromFacing(direction);
+        final BlockPos.MutableBlockPos pos = this.scratchPos;
 
         pos.setWithOffset(basePosition, info.corners[0]);
         final BlockState state0 = level.getBlockState(pos);
-        final int light0 = cache.getLightCoords(state0, level, pos);
-        final float shade0 = cache.getShadeBrightness(state0, level, pos);
+        final int light0 = this.cache.getLightCoords(state0, level, pos);
+        final float shade0 = this.cache.getShadeBrightness(state0, level, pos);
 
         pos.setWithOffset(basePosition, info.corners[1]);
         final BlockState state1 = level.getBlockState(pos);
-        final int light1 = cache.getLightCoords(state1, level, pos);
-        final float shade1 = cache.getShadeBrightness(state1, level, pos);
+        final int light1 = this.cache.getLightCoords(state1, level, pos);
+        final float shade1 = this.cache.getShadeBrightness(state1, level, pos);
 
         pos.setWithOffset(basePosition, info.corners[2]);
         final BlockState state2 = level.getBlockState(pos);
-        final int light2 = cache.getLightCoords(state2, level, pos);
-        final float shade2 = cache.getShadeBrightness(state2, level, pos);
+        final int light2 = this.cache.getLightCoords(state2, level, pos);
+        final float shade2 = this.cache.getShadeBrightness(state2, level, pos);
 
         pos.setWithOffset(basePosition, info.corners[3]);
         final BlockState state3 = level.getBlockState(pos);
-        final int light3 = cache.getLightCoords(state3, level, pos);
-        final float shade3 = cache.getShadeBrightness(state3, level, pos);
+        final int light3 = this.cache.getLightCoords(state3, level, pos);
+        final float shade3 = this.cache.getShadeBrightness(state3, level, pos);
 
         final BlockState corner0 = level.getBlockState(pos.setWithOffset(basePosition, info.corners[0]).move(direction));
         final boolean translucent0 = !corner0.isViewBlocking(level, pos) || corner0.getLightDampening() == 0;
@@ -65,8 +70,8 @@ public class LightMath {
         } else {
             pos.setWithOffset(basePosition, info.corners[0]).move(info.corners[2]);
             final BlockState state02 = level.getBlockState(pos);
-            shadeCorner02 = cache.getShadeBrightness(state02, level, pos);
-            lightCorner02 = cache.getLightCoords(state02, level, pos);
+            shadeCorner02 = this.cache.getShadeBrightness(state02, level, pos);
+            lightCorner02 = this.cache.getLightCoords(state02, level, pos);
         }
 
         final float shadeCorner03;
@@ -77,8 +82,8 @@ public class LightMath {
         } else {
             pos.setWithOffset(basePosition, info.corners[0]).move(info.corners[3]);
             final BlockState state03 = level.getBlockState(pos);
-            shadeCorner03 = cache.getShadeBrightness(state03, level, pos);
-            lightCorner03 = cache.getLightCoords(state03, level, pos);
+            shadeCorner03 = this.cache.getShadeBrightness(state03, level, pos);
+            lightCorner03 = this.cache.getLightCoords(state03, level, pos);
         }
 
         final float shadeCorner12;
@@ -89,8 +94,8 @@ public class LightMath {
         } else {
             pos.setWithOffset(basePosition, info.corners[1]).move(info.corners[2]);
             final BlockState state12 = level.getBlockState(pos);
-            shadeCorner12 = cache.getShadeBrightness(state12, level, pos);
-            lightCorner12 = cache.getLightCoords(state12, level, pos);
+            shadeCorner12 = this.cache.getShadeBrightness(state12, level, pos);
+            lightCorner12 = this.cache.getLightCoords(state12, level, pos);
         }
 
         final float shadeCorner13;
@@ -101,20 +106,20 @@ public class LightMath {
         } else {
             pos.setWithOffset(basePosition, info.corners[1]).move(info.corners[3]);
             final BlockState state13 = level.getBlockState(pos);
-            shadeCorner13 = cache.getShadeBrightness(state13, level, pos);
-            lightCorner13 = cache.getLightCoords(state13, level, pos);
+            shadeCorner13 = this.cache.getShadeBrightness(state13, level, pos);
+            lightCorner13 = this.cache.getLightCoords(state13, level, pos);
         }
 
-        int lightCenter = cache.getLightCoords(state, level, centerPosition);
+        int lightCenter = this.cache.getLightCoords(state, level, centerPosition);
         pos.setWithOffset(centerPosition, direction);
         final BlockState nextState = level.getBlockState(pos);
         if (faceCubic || !nextState.isSolidRender()) {
-            lightCenter = cache.getLightCoords(nextState, level, pos);
+            lightCenter = this.cache.getLightCoords(nextState, level, pos);
         }
 
         final float shadeCenter = faceCubic
-                ? cache.getShadeBrightness(level.getBlockState(basePosition), level, basePosition)
-                : cache.getShadeBrightness(level.getBlockState(centerPosition), level, centerPosition);
+                ? this.cache.getShadeBrightness(level.getBlockState(basePosition), level, basePosition)
+                : this.cache.getShadeBrightness(level.getBlockState(centerPosition), level, centerPosition);
         final BlockModelLighter.AmbientVertexRemap remap = BlockModelLighter.AmbientVertexRemap.fromFacing(direction);
 
         final float tempShade1 = (shade3 + shade0 + shadeCorner03 + shadeCenter) * 0.25F;

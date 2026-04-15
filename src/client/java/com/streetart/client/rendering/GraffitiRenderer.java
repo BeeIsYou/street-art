@@ -1,4 +1,4 @@
-package com.streetart.client.texture;
+package com.streetart.client.rendering;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

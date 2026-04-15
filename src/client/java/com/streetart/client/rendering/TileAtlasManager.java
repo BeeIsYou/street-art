@@ -1,4 +1,4 @@
-package com.streetart.client.texture;
+package com.streetart.client.rendering;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.streetart.StreetArt;
