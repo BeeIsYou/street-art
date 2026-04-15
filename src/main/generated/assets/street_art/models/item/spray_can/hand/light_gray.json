@@ -1,0 +1,7 @@
+{
+  "parent": "street_art:item/spray_can/hand",
+  "textures": {
+    "layer0": "street_art:item/spray_can/hand/light_gray",
+    "particle": "street_art:item/spray_can/hand/light_gray"
+  }
+}

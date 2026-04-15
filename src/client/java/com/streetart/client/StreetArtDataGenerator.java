@@ -9,16 +9,15 @@ import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
-import net.minecraft.client.data.models.model.ItemModelUtils;
-import net.minecraft.client.data.models.model.ModelTemplates;
-import net.minecraft.client.data.models.model.TextureMapping;
-import net.minecraft.client.data.models.model.TextureSlot;
+import net.minecraft.client.data.models.model.*;
+import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
@@ -120,21 +119,47 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 		}
 
-		private static void theresProbablyABuiltinFunctionIMissed(final ItemModelGenerators itemModelGenerators, final Item item, final Identifier id) {
+		public static void generateDyedItemsNicely(final ItemModelGenerators itemModelGenerators, final Item item, final Identifier id) {
 			final TextureMapping mapping = new TextureMapping().put(TextureSlot.LAYER0, new Material(id, false));
 			final Identifier flatItem = ModelTemplates.FLAT_ITEM.create(id, mapping, itemModelGenerators.modelOutput);
 			itemModelGenerators.itemModelOutput.accept(item, ItemModelUtils.plainModel(flatItem));
 		}
 
+		public static final ModelTemplate SPRAY_CAN_HAND = new ModelTemplate(
+				Optional.of(StreetArt.id("item/spray_can/hand")),
+				Optional.of("_spray_can"),
+				TextureSlot.LAYER0, TextureSlot.PARTICLE
+		);
+
+		public static void generateSprayCan(final ItemModelGenerators itemModelGenerators, final Item item,
+											 final Identifier guiModel, final Identifier handModel) {
+			final TextureMapping flatMapping = new TextureMapping()
+					.put(TextureSlot.LAYER0, new Material(guiModel, false));
+			final Identifier flatItem = ModelTemplates.FLAT_ITEM.create(guiModel, flatMapping, itemModelGenerators.modelOutput);
+			final ItemModel.Unbaked flat = ItemModelUtils.plainModel(flatItem);
+
+			final TextureMapping handMapping = new TextureMapping()
+					.put(TextureSlot.LAYER0, new Material(handModel, false))
+					.put(TextureSlot.PARTICLE, new Material(handModel, false));
+			final Identifier handItem = SPRAY_CAN_HAND.create(handModel, handMapping, itemModelGenerators.modelOutput);
+			final ItemModel.Unbaked hand = ItemModelUtils.plainModel(handItem);
+
+			itemModelGenerators.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
+					flat, hand
+			));
+		}
+
 		@Override
 		public void generateItemModels(final ItemModelGenerators itemModelGenerators) {
 			AllItems.SPRAY_CANS.forEach((color, item) -> {
-				final Identifier id = StreetArt.id("item/spray_can/" + color.getName());
-				theresProbablyABuiltinFunctionIMissed(itemModelGenerators, item, id);
+//				final Identifier base = StreetArt.id("item/spray_can/" + color.getName());
+				final Identifier baseGui = StreetArt.id("item/spray_can/gui/" + color.getName());
+				final Identifier baseHand = StreetArt.id("item/spray_can/hand/" + color.getName());
+				generateSprayCan(itemModelGenerators, item, baseGui, baseHand);
 			});
 			AllItems.PAINT_BALLOONS.forEach((color, item) -> {
 				final Identifier id = StreetArt.id("item/paint_balloon/" + color.getName());
-				theresProbablyABuiltinFunctionIMissed(itemModelGenerators, item, id);
+				generateDyedItemsNicely(itemModelGenerators, item, id);
 			});
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
