@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:dried_kelp",
+    "minecraft:paper",
+    "minecraft:water_bucket"
+  ],
+  "result": {
+    "count": 8,
+    "id": "street_art:water_balloon"
+  }
+}

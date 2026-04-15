@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "street_art:paint_balloons",
+  "ingredients": [
+    "minecraft:dried_kelp",
+    "minecraft:paper",
+    "minecraft:brown_dye"
+  ],
+  "result": {
+    "count": 8,
+    "id": "street_art:brown_paint_balloon"
+  }
+}

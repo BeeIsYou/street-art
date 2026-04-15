@@ -1,32 +1,54 @@
 package com.streetart.client;
 
 import com.streetart.AllItems;
+import com.streetart.AllTags;
 import com.streetart.StreetArt;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.*;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
+	public static final List<Item> dyesInOrder = List.of(
+			Items.WHITE_DYE, Items.ORANGE_DYE, Items.MAGENTA_DYE, Items.LIGHT_BLUE_DYE,
+			Items.YELLOW_DYE, Items.LIME_DYE, Items.PINK_DYE, Items.GRAY_DYE,
+			Items.LIGHT_GRAY_DYE, Items.CYAN_DYE, Items.PURPLE_DYE, Items.BLUE_DYE,
+			Items.BROWN_DYE, Items.GREEN_DYE, Items.RED_DYE, Items.BLACK_DYE
+	);
+
 	@Override
 	public void onInitializeDataGenerator(final FabricDataGenerator fabricDataGenerator) {
 		final FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
 
 		pack.addProvider(StreetArtLangProvider::new);
 		pack.addProvider(StreetArtModelProvider::new);
+		pack.addProvider(StreetArtTagProvider::new);
+		pack.addProvider(StreetArtRecipeProvider::new);
 	}
 
 	private static class StreetArtLangProvider extends FabricLanguageProvider {
@@ -165,6 +187,90 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);
+		}
+	}
+
+	private static class StreetArtTagProvider extends FabricTagsProvider.ItemTagsProvider {
+		public StreetArtTagProvider(final FabricPackOutput output, final CompletableFuture<HolderLookup.Provider> registryLookupFuture) {
+			super(output, registryLookupFuture);
+		}
+
+		@Override
+		protected void addTags(final HolderLookup.Provider registries) {
+			final TagAppender<Item, Item> cans = this.valueLookupBuilder(AllTags.Items.SPRAY_CANS);
+			final TagAppender<Item, Item> ballons = this.valueLookupBuilder(AllTags.Items.PAINT_BALLOONS);
+			for (DyeColor value : DyeColor.values()) {
+				cans.add(AllItems.SPRAY_CANS.get(value));
+				ballons.add(AllItems.PAINT_BALLOONS.get(value));
+			}
+
+			this.valueLookupBuilder(AllTags.Items.PAINT_CREATORS)
+					.addTag(AllTags.Items.SPRAY_CANS)
+					.addTag(AllTags.Items.PAINT_BALLOONS);
+		}
+	}
+
+	private static class StreetArtRecipeProvider extends FabricRecipeProvider {
+		protected StreetArtRecipeProvider(final FabricPackOutput output, final CompletableFuture<HolderLookup.Provider> registriesFuture) {
+			super(output, registriesFuture);
+		}
+
+		@Override
+		protected RecipeProvider createRecipeProvider(final HolderLookup.Provider registries, final RecipeOutput output) {
+			return new RecipeProvider(registries, output) {
+				@Override
+				public void buildRecipes() {
+
+					for (int i = 0; i < dyesInOrder.size(); i++) {
+						final Item dye = dyesInOrder.get(i);
+						final DyeColor color = DyeColor.byId(i);
+						sprayCan(this, this.output, AllItems.SPRAY_CANS.get(color), dye);
+						paintBalloon(this, AllItems.PAINT_BALLOONS.get(color), dye)
+								.unlockedBy("has_dye", this.has(dye))
+								.group("street_art:paint_balloons")
+								.save(this.output);
+					}
+					paintBalloon(this, AllItems.WATER_BALLOON, Items.WATER_BUCKET)
+							.unlockedBy("has_paint_creator", this.has(AllTags.Items.PAINT_CREATORS))
+							.save(this.output);
+
+					this.shaped(RecipeCategory.DECORATIONS, AllItems.PRESSURE_WASHER)
+							.define('I', ConventionalItemTags.IRON_INGOTS)
+							.define('R', ConventionalItemTags.REDSTONE_DUSTS)
+							.define('P', Items.PISTON)
+							.define('B', Items.WATER_BUCKET)
+							.pattern("BII")
+							.pattern("PR ")
+							.unlockedBy("has_paint_creator", this.has(AllTags.Items.PAINT_CREATORS))
+							.save(this.output);
+				}
+			};
+		}
+
+		public static void sprayCan(final RecipeProvider prov, final RecipeOutput output,
+									final ItemLike result, final ItemLike dye) {
+			prov.shaped(RecipeCategory.DECORATIONS, result)
+					.define('N', ConventionalItemTags.IRON_NUGGETS)
+					.define('D', dye)
+					.define('I', ConventionalItemTags.IRON_INGOTS)
+					.pattern("N")
+					.pattern("D")
+					.pattern("I")
+					.group("street_art:spray_can")
+					.unlockedBy("has_needed_dye", prov.has(dye))
+					.save(output);
+		}
+
+		public static ShapelessRecipeBuilder paintBalloon(final RecipeProvider prov, final ItemLike result, final ItemLike dye) {
+			return prov.shapeless(RecipeCategory.DECORATIONS, result, 8)
+					.requires(Items.DRIED_KELP)
+					.requires(Items.PAPER)
+					.requires(dye);
+		}
+
+		@Override
+		public String getName() {
+			return "StreetArtRecipeProvider";
 		}
 	}
 }
