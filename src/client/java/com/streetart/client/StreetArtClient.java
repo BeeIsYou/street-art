@@ -1,7 +1,6 @@
 package com.streetart.client;
 
 import com.streetart.AllEntityTypes;
-import com.streetart.StreetArt;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.texture.GraffitiRenderer;
@@ -11,22 +10,18 @@ import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class StreetArtClient implements ClientModInitializer {
 
@@ -90,8 +85,6 @@ public class StreetArtClient implements ClientModInitializer {
         });
 
         EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
-
-        ItemTintSources.ID_MAPPER.put(StreetArt.id("color"), ColorComponentTint.MAP_CODEC);
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
             ClientAreaLibStuff.init();
