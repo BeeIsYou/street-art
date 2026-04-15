@@ -87,7 +87,7 @@ public class ArtUtil {
                     final GServerDataHolder data = manager.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                     if (data != null) {
                         data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
-                        manager.markDirty(data, pos, dir);
+                        manager.markFullResend(data, pos, dir);
                     }
                 }
             });

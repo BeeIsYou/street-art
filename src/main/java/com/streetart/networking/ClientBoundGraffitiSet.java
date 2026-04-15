@@ -1,6 +1,7 @@
 package com.streetart.networking;
 
 import com.streetart.StreetArt;
+import com.streetart.managers.data.TempData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,5 +23,23 @@ public record ClientBoundGraffitiSet(BlockPos pos, Direction dir, double depth, 
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    public static CustomPacketPayload getSetPacket(final TempData tempData) {
+        return new ClientBoundGraffitiSet(
+                tempData.pos(),
+                tempData.dir(),
+                tempData.data().getDepth(),
+                tempData.data().getGraffitiData().array()
+        );
+    }
+
+    public static CustomPacketPayload getSmotheredPacket(final TempData tempData) {
+        return new ClientBoundGraffitiSet(
+                tempData.pos(),
+                tempData.dir(),
+                tempData.data().getDepth(),
+                new byte[0]
+        );
     }
 }

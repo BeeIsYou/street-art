@@ -1,14 +1,19 @@
 package com.streetart;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.streetart.arealib.AreaLib;
 import com.streetart.arealib.AreaLibPresent;
+import com.streetart.commands.ClearCommand;
 import com.streetart.managers.GraffitiGlobalManager;
 import com.streetart.networking.*;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +42,20 @@ public class StreetArt implements ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundGameRuleSync.TYPE, ClientBoundGameRuleSync.CODEC);
 
-        ServerPlayerEvents.JOIN.register(ClientBoundGameRuleSync::onJoin);
-
         PayloadTypeRegistry.serverboundPlay().register(ServerBoundRequestDataPacket.TYPE, ServerBoundRequestDataPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(ServerBoundRequestDataPacket.TYPE, GraffitiGlobalManager::handleRequestPacket);
 
         ServerPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, GraffitiGlobalManager::handleChange);
+
+        ServerPlayerEvents.JOIN.register(ClientBoundGameRuleSync::onJoin);
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            final LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("streetart");
+            ClearCommand.register(root);
+            dispatcher.register(root);
+        });
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
             AREA_LIB = new AreaLibPresent();

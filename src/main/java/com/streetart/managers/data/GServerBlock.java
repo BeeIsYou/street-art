@@ -2,7 +2,6 @@ package com.streetart.managers.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.streetart.managers.GServerChunkManager;
 import com.streetart.managers.public_facing_interfaces.PublicFacingBlockData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -67,7 +66,7 @@ public class GServerBlock implements PublicFacingBlockData {
         if (data != null) {
             for (final GServerDataHolder holder : data) {
                 if (holder.getDepth() == 1) {
-                    gatherer.add(new TempData(holder, this.blockPos, dir, GServerChunkManager.Type.SMOTHERED));
+                    gatherer.add(new TempData(holder, this.blockPos, dir));
                 }
             }
         }

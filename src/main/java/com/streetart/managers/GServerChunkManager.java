@@ -26,10 +26,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class GServerChunkManager {
 
@@ -39,68 +38,77 @@ public class GServerChunkManager {
     );
 
     private final Map<BlockPos, GServerBlock> graffiti;
-    private final List<TempData> dirtyData = new ArrayList<>();
+    private final EnumMap<Type, List<TempData>> dirtyDatas;
     private final List<BiDirectionalGraffitiChange> patches = new ArrayList<>();
 
     public GServerChunkManager() {
         this.graffiti = new HashMap<>();
+        this.dirtyDatas = new EnumMap<>(Type.class);
+        for (final Type value : Type.values()) {
+            this.dirtyDatas.put(value, new ArrayList<>());
+        }
     }
 
     public GServerChunkManager(final List<GServerBlock> gServerBlocks) {
-        this.graffiti = new HashMap<>();
+        this();
         for (final GServerBlock b : gServerBlocks) {
             this.graffiti.put(b.getBlockPos(), b);
         }
     }
 
-    public boolean tick(final ServerLevel level, final ChunkPos pos) {
-        this.tickDecay(level, pos);
-
-        final boolean shouldSaveData = !this.dirtyData.isEmpty();
-
-        this.dirtyData.removeIf(tempData -> {
-            final Type type = tempData.type();
-
-            CustomPacketPayload packet = null;
-            switch (type) {
-                case FULL_RESEND -> {
-                    packet = new ClientBoundGraffitiSet(
-                            tempData.pos(),
-                            tempData.dir(),
-                            tempData.data().getDepth(),
-                            tempData.data().getGraffitiData().array());
-                }
-
-                case REMOVED -> {
-                    this.graffiti.remove(tempData.pos());
-                    packet = new ClientBoundInvalidateBlock(tempData.pos());
-                }
-
-                case SMOTHERED -> {
-                    final GServerBlock block = this.graffiti.get(tempData.pos());
-
-                    block.removeHolder(tempData.dir(), tempData.data());
-                    packet = new ClientBoundGraffitiSet(
-                            tempData.pos(),
-                            tempData.dir(),
-                            tempData.data().getDepth(),
-                            new byte[0]);
-                }
-            }
-
+    /**
+     * @return true if anything was sent
+     */
+    private boolean sendAllDirty(final ServerLevel level, final ChunkPos pos, final Type type) {
+        final List<TempData> typeDatas = this.dirtyDatas.get(type);
+        for (final TempData tempData : typeDatas) {
+            final CustomPacketPayload packet = type.getPacket(tempData);
             for (final ServerPlayer player : PlayerLookup.tracking(level, pos)) {
                 ServerPlayNetworking.send(player, packet);
             }
+        }
+        final boolean sent = !typeDatas.isEmpty();
+        typeDatas.clear();
+        return sent;
+    }
 
-            return true;
-        });
+    /**
+     * @param dataConsumer method to call for each data in the list
+     * @return true if anything was set
+     */
+    private boolean sendAllDirty(final ServerLevel level, final ChunkPos pos, final Type type, final Consumer<TempData> dataConsumer) {
+        final List<TempData> typeDatas = this.dirtyDatas.get(type);
+        for (final TempData tempData : typeDatas) {
+            final CustomPacketPayload packet = type.getPacket(tempData);
+            for (final ServerPlayer player : PlayerLookup.tracking(level, pos)) {
+                ServerPlayNetworking.send(player, packet);
+            }
+            dataConsumer.accept(tempData);
+        }
+        final boolean sent = !typeDatas.isEmpty();
+        typeDatas.clear();
+        return sent;
+    }
 
+    public boolean tick(final ServerLevel level, final ChunkPos pos) {
+        this.tickDecay(level, pos);
+
+        boolean shouldSaveData = false;
+
+        shouldSaveData |= this.sendAllDirty(level, pos, Type.FULL_RESEND);
+
+        shouldSaveData |= !this.patches.isEmpty();
         this.patches.removeIf(patch -> {
             for (final ServerPlayer player : PlayerLookup.tracking(level, pos)) {
                 ServerPlayNetworking.send(player, patch);
             }
             return true;
         });
+
+        shouldSaveData |= this.sendAllDirty(level, pos, Type.SMOTHERED);
+        shouldSaveData |= this.sendAllDirty(level, pos, Type.REMOVED,
+                tempData -> this.graffiti.remove(tempData.pos())
+        );
 
         return shouldSaveData;
     }
@@ -113,20 +121,25 @@ public class GServerChunkManager {
         return this.graffiti.keySet();
     }
 
-    public void markDirty(final GServerDataHolder data, final BlockPos pos, final Direction dir) {
-        this.dirtyData.add(new TempData(data, pos, dir, Type.FULL_RESEND));
+    public void markFullResend(final GServerDataHolder data, final BlockPos pos, final Direction dir) {
+        this.dirtyDatas.get(Type.FULL_RESEND).add(new TempData(data, pos, dir));
     }
 
-    public void markForRemoval(final BlockPos pos) {
+    /**
+     * @return true if a block existed at that position
+     */
+    public boolean markForRemoval(final BlockPos pos) {
         if (this.graffiti.containsKey(pos)) {
-            this.dirtyData.add(new TempData(null, pos, null, Type.REMOVED));
+            this.dirtyDatas.get(Type.REMOVED).add(new TempData(null, pos, null));
+            return true;
         }
+        return false;
     }
 
     public void markSmothered(final BlockPos pos, final Direction dir) {
         final GServerBlock block = this.graffiti.get(pos);
         if (block != null) {
-            block.handleSmothered(this.dirtyData, dir);
+            block.handleSmothered(this.dirtyDatas.get(Type.SMOTHERED), dir);
         }
     }
 
@@ -156,7 +169,7 @@ public class GServerChunkManager {
                                 final Iterable<GServerDataHolder> holders = block.dataFromDir(dir);
                                 if (holders != null) {
                                     for (final GServerDataHolder holder : holders) {
-                                        this.markDirty(holder, randomPos, dir);
+                                        this.markFullResend(holder, randomPos, dir);
                                     }
                                 }
                             }
@@ -258,6 +271,17 @@ public class GServerChunkManager {
     }
 
     public enum Type {
-        SMOTHERED, REMOVED, FULL_RESEND
+        FULL_RESEND(ClientBoundGraffitiSet::getSetPacket),
+        SMOTHERED(ClientBoundGraffitiSet::getSmotheredPacket),
+        REMOVED(ClientBoundInvalidateBlock::getPacket);
+        private final Function<TempData, CustomPacketPayload> packetConstructor;
+
+        Type(final Function<TempData, CustomPacketPayload> packetConstructor) {
+            this.packetConstructor = packetConstructor;
+        }
+
+        public CustomPacketPayload getPacket(final TempData tempData) {
+            return this.packetConstructor.apply(tempData);
+        }
     }
 }

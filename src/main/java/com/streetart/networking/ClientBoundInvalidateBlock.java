@@ -1,6 +1,7 @@
 package com.streetart.networking;
 
 import com.streetart.StreetArt;
+import com.streetart.managers.data.TempData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
@@ -16,5 +17,9 @@ public record ClientBoundInvalidateBlock(BlockPos pos) implements CustomPacketPa
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    public static CustomPacketPayload getPacket(final TempData tempData) {
+        return new ClientBoundInvalidateBlock(tempData.pos());
     }
 }
