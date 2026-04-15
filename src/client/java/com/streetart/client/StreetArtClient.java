@@ -66,7 +66,7 @@ public class StreetArtClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(SpraySessionManager::tick);
         ClientTickEvents.END_CLIENT_TICK.register((l) -> {
-            if (l.level == null) {
+            if (l.level == null && !textureManager.isEmpty()) {
                 textureManager.entrySet().removeIf((e) -> {
                     e.getValue().closeAll();
                     return true;
