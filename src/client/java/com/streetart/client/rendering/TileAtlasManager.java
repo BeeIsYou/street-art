@@ -113,7 +113,9 @@ public class TileAtlasManager {
         x += (id % ENTRIES_X) * 16;
         y += (id / ENTRIES_X) * 16;
 
-        color = color ^ (COLOR_MASK & this.nextRandom());
+        if (color != 0) {
+            color = color ^ (COLOR_MASK & this.nextRandom());
+        }
 
         this.atlasTexture.getPixels().setPixel(x, y, color);
         this.dirty = true;
