@@ -21,4 +21,8 @@ public class AllDebugEntries {
             StreetArt.id("looking_at_paint"),
             new LookingAtPaintEntry()
     );
+    public static final Identifier SCHMOOVEMENT = DebugScreenEntries.register(
+            StreetArt.id("schmoovement"),
+            new MovementEntry()
+    );
 }

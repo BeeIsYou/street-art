@@ -7,7 +7,10 @@
     "GameRulesMixin",
     "LevelMixin",
     "PlayerMixin",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "rollerblades.EntityMixin",
+    "rollerblades.LivingEntityMixin",
+    "rollerblades.PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
