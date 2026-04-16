@@ -20,5 +20,6 @@
     "requireAnnotations": true
   },
   "mixins": [
+    "LevelRendererMixin"
   ]
 }

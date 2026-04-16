@@ -104,7 +104,7 @@ public class SpraySessionManager {
         }
     }
 
-    public static void sync() {
+    public static void trySendServerUpdate() {
         changes.forEach((_, change) -> ClientPlayNetworking.send(change));
         changes.clear();
     }

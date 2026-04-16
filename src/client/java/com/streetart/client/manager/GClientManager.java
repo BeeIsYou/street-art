@@ -92,10 +92,8 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
 
     public void tick(final Minecraft minecraft) {
         if (minecraft.getConnection() != null) {
-            SpraySessionManager.sync();
+            SpraySessionManager.trySendServerUpdate();
         }
-
-        StreetArtClient.tileAtlasManager.checkDirty();
     }
 
     public void handleDataUpdate(final ClientBoundGraffitiSet packet, final ClientPlayNetworking.Context context) {
