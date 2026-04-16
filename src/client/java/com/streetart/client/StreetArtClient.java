@@ -5,6 +5,7 @@ import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.rendering.GraffitiRenderer;
 import com.streetart.client.rendering.TileAtlasManager;
+import com.streetart.client.rendering.rollerblades.RollerbladeRenderer;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
 import com.streetart.networking.*;
@@ -94,6 +95,8 @@ public class StreetArtClient implements ClientModInitializer {
         });
 
         EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
+
+        RollerbladeRenderer.init();
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
             ClientAreaLibStuff.init();

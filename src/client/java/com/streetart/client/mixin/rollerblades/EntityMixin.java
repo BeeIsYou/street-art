@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Entity.class)
 public class EntityMixin {
     @Inject(method = "spawnSprintParticle", at = @At("HEAD"), cancellable = true)
-    private void streetArt$noRollerbladeParticles(CallbackInfo ci) {
-        if ((Object)this instanceof LivingEntity entity && RollerBlades.canRoll(entity)) {
+    private void streetArt$noRollerbladeParticles(final CallbackInfo ci) {
+        if ((Object)this instanceof final LivingEntity entity && RollerBlades.canRoll(entity)) {
             ci.cancel();
         }
     }

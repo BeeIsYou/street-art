@@ -39,7 +39,7 @@ public class LivingEntityMixin {
     }
 
     @WrapOperation(method = "jumpFromGround", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSprinting()Z"))
-    private boolean streetArt$noRollerbladeSprintJump(LivingEntity instance, Operation<Boolean> operation) {
+    private boolean streetArt$noRollerbladeSprintJump(final LivingEntity instance, final Operation<Boolean> operation) {
         if (RollerBlades.canRoll(instance)) {
             return false;
         }

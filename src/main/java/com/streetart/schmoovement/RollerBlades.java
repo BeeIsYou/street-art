@@ -2,6 +2,8 @@ package com.streetart.schmoovement;
 
 import com.streetart.AllDataComponents;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EntityAttachments;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -163,5 +165,18 @@ public class RollerBlades {
             modifier.w = 3f;
         }
         return modifier;
+    }
+
+    // todo: find good mixin spot to make entities six foot
+    public static EntityDimensions modifyDimensions(final EntityDimensions dimensions, final LivingEntity entity) {
+        final float width = dimensions.width();
+        final float height = dimensions.height() + 3/16f;
+        return new EntityDimensions(
+                width,
+                height,
+                height * 0.85f,
+                EntityAttachments.createDefault(width, height),
+                dimensions.fixed()
+        );
     }
 }
