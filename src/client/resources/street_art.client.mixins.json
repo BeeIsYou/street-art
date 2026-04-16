@@ -23,6 +23,10 @@
     "LevelRendererMixin",
     "rollerblades.AbstractClientPlayerMixin",
     "rollerblades.CameraMixin",
+    "rollerblades.EntityMixin",
+    "rollerblades.HumanoidModelMixin",
+    "rollerblades.LivingEntityMixin",
+    "rollerblades.LivingEntityRendererMixin",
     "rollerblades.LocalPlayerMixin"
   ]
 }

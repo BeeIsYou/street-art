@@ -10,6 +10,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2d;
+import org.joml.Vector4f;
 
 public class RollerBlades {
     public static double WALKING_SPEED_SOFTCAP = 0.1;
@@ -142,5 +143,25 @@ public class RollerBlades {
 
         final double frac = (speed - minFov) / (maxFov - minFov);
         return walk * (1 + FOV_INTENSITY * frac);
+    }
+
+    /**
+     * @return (target speed, lerp factor, position scale, leg sweep)
+     */
+    public static Vector4f getAnimationModifier(final LivingEntity entity) {
+        final Vector4f modifier = new Vector4f(0.75f, 0.5f, 0.5f, 2f);
+        if (!entity.onGround()) {
+            modifier.x = 1;
+            modifier.y = 1;
+            modifier.z = 1;
+            modifier.w = 1;
+        } else if (entity.xxa == 0 && entity.zza == 0) {
+            modifier.x = 0f;
+        } else if (entity.isSprinting()) {
+            modifier.x = 1;
+            modifier.z = 0.33f;
+            modifier.w = 3f;
+        }
+        return modifier;
     }
 }
