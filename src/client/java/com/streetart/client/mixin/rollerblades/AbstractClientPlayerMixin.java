@@ -22,7 +22,24 @@ public abstract class AbstractClientPlayerMixin extends Player {
     @WrapOperation(method = "updateBob", at = @At(value = "INVOKE", target = "updateBob"))
     private void streetArt$limitBob(final ClientAvatarState instance, final float value, final Operation<Void> operation) {
         if (RollerBlades.canRoll(this)) {
-            operation.call(instance, value * 0.25f);
+            if (this.xxa == 0 && this.zza == 0) {
+                operation.call(instance, 0f);
+            } else {
+                operation.call(instance, value * 0.5f);
+            }
+        } else {
+            operation.call(instance, value);
+        }
+    }
+
+    @WrapOperation(method = "addWalkedDistance", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/ClientAvatarState;addWalkDistance(F)V"))
+    private void streetArt$slowBob(final ClientAvatarState instance, final float value, final Operation<Void> operation) {
+        if (RollerBlades.canRoll(this)) {
+            if (this.xxa == 0 && this.zza == 0) {
+                operation.call(instance, 0f);
+            } else {
+                operation.call(instance, value * 0.25f);
+            }
         } else {
             operation.call(instance, value);
         }

@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.streetart.AllItems;
 import com.streetart.client.rendering.rollerblades.LivingEntityRenderStateExtras;
-import com.streetart.client.rendering.rollerblades.OverwrittenWalkAnimationState;
+import com.streetart.misc.OverwrittenWalkAnimationState;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;

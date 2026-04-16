@@ -1,4 +1,4 @@
-package com.streetart.client.rendering.rollerblades;
+package com.streetart.misc;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.WalkAnimationState;
@@ -12,8 +12,7 @@ public class OverwrittenWalkAnimationState extends WalkAnimationState {
     protected float position;
     protected float positionScale;
     /**
-     * a higher sweep value means limbs will linger at the extremes more, and go through 0 faster<br>
-     * See {@link com.streetart.client.mixin.rollerblades.HumanoidModelMixin}
+     * a higher sweep value means limbs will linger at the extremes more, and go through 0 faster
      */
     protected float legSweep;
 

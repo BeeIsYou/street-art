@@ -1,5 +1,6 @@
 package com.streetart.client.rendering.rollerblades;
 
+import com.streetart.misc.OverwrittenWalkAnimationState;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 

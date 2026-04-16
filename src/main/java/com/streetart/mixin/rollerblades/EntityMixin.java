@@ -1,4 +1,4 @@
-package com.streetart.client.mixin.rollerblades;
+package com.streetart.mixin.rollerblades;
 
 import com.streetart.schmoovement.RollerBlades;
 import net.minecraft.world.entity.Entity;

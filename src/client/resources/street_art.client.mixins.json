@@ -7,26 +7,22 @@
     "DebugRendererMixin",
     "DustParticleMixin",
     "LevelRendererAccessor",
+    "LevelRendererMixin",
     "LocalPlayerMixin",
     "MinecraftMixin",
     "PressureWasherMixin",
     "SectionCompilerMixin",
-    "SprayCanItemMixin"
+    "SprayCanItemMixin",
+    "rollerblades.AbstractClientPlayerMixin",
+    "rollerblades.CameraMixin",
+    "rollerblades.HumanoidModelMixin",
+    "rollerblades.LivingEntityRendererMixin",
+    "rollerblades.LocalPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "overwrites": {
     "requireAnnotations": true
-  },
-  "mixins": [
-    "LevelRendererMixin",
-    "rollerblades.AbstractClientPlayerMixin",
-    "rollerblades.CameraMixin",
-    "rollerblades.EntityMixin",
-    "rollerblades.HumanoidModelMixin",
-    "rollerblades.LivingEntityMixin",
-    "rollerblades.LivingEntityRendererMixin",
-    "rollerblades.LocalPlayerMixin"
-  ]
+  }
 }

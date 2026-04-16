@@ -8,7 +8,9 @@
     "LevelMixin",
     "PlayerMixin",
     "ServerLevelMixin",
-    "rollerblades.LivingEntityMixin"
+    "rollerblades.EntityMixin",
+    "rollerblades.LivingEntityMixin",
+    "rollerblades.PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

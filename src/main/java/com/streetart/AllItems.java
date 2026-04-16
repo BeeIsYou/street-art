@@ -62,7 +62,7 @@ public class AllItems {
                                     Attributes.STEP_HEIGHT,
                                     new AttributeModifier(
                                             StreetArt.id("tripping"),
-                                            -1,
+                                            -0.75,
                                             AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
                                     ),
                                     EquipmentSlotGroup.FEET
