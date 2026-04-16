@@ -2,8 +2,6 @@ package com.streetart.schmoovement;
 
 import com.streetart.AllDataComponents;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.gizmos.GizmoStyle;
-import net.minecraft.gizmos.Gizmos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -13,14 +11,14 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2d;
 
-import java.awt.*;
-
 public class RollerBlades {
     public static double WALKING_SPEED_SOFTCAP = 0.1;
     public static double WALKING_SPEED_CAP = 0.2;
 
     public static double RUNNING_SPEED_SOFTCAP = 0.2;
     public static double RUNNING_SPEED_CAP = 0.4;
+
+    public static double FOV_INTENSITY = 1;
 
 
     public static boolean canRollUsing(final ItemStack itemStack, final EquipmentSlot slot) {
@@ -48,13 +46,17 @@ public class RollerBlades {
     public static double getBlockFriction(final float original, final LivingEntity entity) {
         final float baseLoss = 1 - original;
         if (entity.isCrouching()) {
-            return 1 - baseLoss * 0.25f;
+            return 1 - baseLoss * 0.5f;
         }
 
         final Vec3 delta = entity.getDeltaMovement();
         final float speedSqr = (float) delta.horizontalDistanceSqr();
+        if (entity.xxa == 0 && entity.zza == 0 && speedSqr < WALKING_SPEED_CAP * WALKING_SPEED_CAP) {
+            return 1 - baseLoss * 0.25f;
+        }
+
         if (speedSqr > RUNNING_SPEED_SOFTCAP * RUNNING_SPEED_SOFTCAP) {
-            return Math.max(original, 1 - baseLoss * (speedSqr - RUNNING_SPEED_SOFTCAP * RUNNING_SPEED_SOFTCAP));
+            return Math.max(original, 1 - baseLoss * (speedSqr - RUNNING_SPEED_SOFTCAP * RUNNING_SPEED_SOFTCAP) * 0.25);
         }
         return 1;
     }
@@ -90,12 +92,6 @@ public class RollerBlades {
         final double cap = player.isSprinting() ? RUNNING_SPEED_CAP : WALKING_SPEED_CAP;
 
         if (speed < softcap) {
-            Gizmos.line(
-                    player.position(),
-                    player.position().add(original.x, 0, original.y),
-                    Color.YELLOW.getRGB()
-            );
-            Gizmos.circle(player.position(), 0.25f, GizmoStyle.stroke(Color.GREEN.getRGB()));
             return original;
         }
 
@@ -114,7 +110,6 @@ public class RollerBlades {
 
 
         if (speed > cap) {
-            Gizmos.circle(player.position(), 0.25f, GizmoStyle.stroke(Color.RED.getRGB()));
             if (norm.length() > 1) {
                 capped.mul(original.length() / norm.length());
             }
@@ -130,12 +125,22 @@ public class RollerBlades {
         if (norm.length() > 1) {
             capped.mul(original.length() / norm.length());
         }
-        Gizmos.circle(player.position(), 0.25f, GizmoStyle.stroke(Color.ORANGE.getRGB()));
-        Gizmos.line(
-                player.position(),
-                player.position().add(capped.x, 0, capped.y),
-                Color.YELLOW.getRGB()
-        );
         return new Vec2((float) capped.x, (float) capped.y);
+    }
+
+    public static double getFovModifier(final Player player, final double original) {
+        final double walk = player.getAbilities().getWalkingSpeed();
+        final double speed = player.getDeltaMovement().horizontalDistance();
+        final double minFov = WALKING_SPEED_CAP * 1.03;
+        final double maxFov = RUNNING_SPEED_CAP * 0.97;
+        if (speed < minFov) {
+            return walk;
+        }
+        if (speed > maxFov) {
+            return walk * (1 + FOV_INTENSITY);
+        }
+
+        final double frac = (speed - minFov) / (maxFov - minFov);
+        return walk * (1 + FOV_INTENSITY * frac);
     }
 }

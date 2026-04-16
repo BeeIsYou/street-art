@@ -6,6 +6,8 @@ import com.mojang.authlib.GameProfile;
 import com.streetart.schmoovement.RollerBlades;
 import net.minecraft.client.entity.ClientAvatarState;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(AbstractClientPlayer.class)
 public abstract class AbstractClientPlayerMixin extends Player {
-    public AbstractClientPlayerMixin(Level level, GameProfile gameProfile) {
+    public AbstractClientPlayerMixin(final Level level, final GameProfile gameProfile) {
         super(level, gameProfile);
     }
 
@@ -24,5 +26,14 @@ public abstract class AbstractClientPlayerMixin extends Player {
         } else {
             operation.call(instance, value);
         }
+    }
+
+    @WrapOperation(method = "getFieldOfViewModifier", at = @At(value = "INVOKE", target = "getAttributeValue"))
+    private double streetArt$useRollerbladeFov(final AbstractClientPlayer instance, final Holder<Attribute> attribute, final Operation<Double> operation) {
+        final double original = operation.call(instance, attribute);
+        if (RollerBlades.canRoll(this)) {
+            return RollerBlades.getFovModifier(this, original);
+        }
+        return original;
     }
 }
