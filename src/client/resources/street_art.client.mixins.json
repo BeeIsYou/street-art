@@ -20,6 +20,8 @@
     "requireAnnotations": true
   },
   "mixins": [
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "rollerblades.AbstractClientPlayerMixin",
+    "rollerblades.LocalPlayerMixin"
   ]
 }

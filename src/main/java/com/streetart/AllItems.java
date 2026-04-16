@@ -12,7 +12,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Unit;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.block.DispenserBlock;
 
@@ -45,6 +51,23 @@ public class AllItems {
     public static Map<DyeColor, PaintBalloonItem> PAINT_BALLOONS = registerDyed("paint_balloon", PaintBalloonItem::new,
             dye -> new Item.Properties().stacksTo(16).useCooldown(0.5f)
                     .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
+    );
+
+    public static Item ROLLER_BLADES = register("roller_blades", Item::new,
+            new Item.Properties().stacksTo(1)
+                    .equippable(EquipmentSlot.FEET)
+                    .component(AllDataComponents.ROLLER_BLADES, Unit.INSTANCE)
+                    .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.builder()
+                            .add(
+                                    Attributes.STEP_HEIGHT,
+                                    new AttributeModifier(
+                                            StreetArt.id("tripping"),
+                                            -1,
+                                            AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                                    ),
+                                    EquipmentSlotGroup.FEET
+                            )
+                            .build())
     );
 
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
