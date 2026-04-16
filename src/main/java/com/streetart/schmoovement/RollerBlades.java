@@ -72,7 +72,7 @@ public class RollerBlades {
      *     <li>else : lerp between the other two results</li>
      * </ul>
      */
-    public static Vec2 handleInput(final Vec2 original, final Player player) {
+    public static Vec2 handleInput(final Vec2 original, final LivingEntity player) {
         final Vec2 norm = original.lengthSquared() > 1 ? original.normalized() : original;
         final Vector2d intent = new Vector2d(norm.x, norm.y);
 
@@ -157,8 +157,8 @@ public class RollerBlades {
             modifier.y = 1;
             modifier.z = 1;
             modifier.w = 1;
-        } else if (entity.xxa == 0 && entity.zza == 0) {
-            modifier.x = 0f;
+        /*} else if (entity.xxa == 0 && entity.zza == 0) {
+            modifier.x = 0f;*/
         } else if (entity.isSprinting()) {
             modifier.x = 1;
             modifier.z = 0.33f;

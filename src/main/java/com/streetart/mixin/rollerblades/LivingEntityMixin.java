@@ -11,6 +11,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.WalkAnimationState;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -70,4 +72,15 @@ public abstract class LivingEntityMixin extends Entity {
         }
         return operation.call(instance);
     }
+    
+    @WrapOperation(method = "aiStep", at = @At(value = "NEW", target = "Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 streetArt$modifyInputVector(double xxa, double yya, double zza, Operation<Vec3> operation) {
+        if (RollerBlades.canRoll((LivingEntity)(Object)this)) {
+            Vec2 move = RollerBlades.handleInput(new Vec2((float) xxa, (float) zza), (LivingEntity)(Object)this);
+            xxa = move.x;
+            zza = move.y;
+        }
+        return operation.call(xxa, yya, zza);
+    }
+    
 }
