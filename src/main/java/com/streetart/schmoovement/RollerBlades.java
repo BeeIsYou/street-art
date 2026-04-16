@@ -72,7 +72,12 @@ public class RollerBlades {
      *     <li>else : lerp between the other two results</li>
      * </ul>
      */
-    public static Vec2 handleInput(final Vec2 original, final LivingEntity player) {
+    public static Vec2 handleInput(Vec2 original, final LivingEntity player) {
+        if (!player.onGround()) {
+            if (original.y != 0) {
+                original = original.scale(1f / (Math.abs(original.x) + 1));
+            }
+        }
         final Vec2 norm = original.lengthSquared() > 1 ? original.normalized() : original;
         final Vector2d intent = new Vector2d(norm.x, norm.y);
 
@@ -134,8 +139,8 @@ public class RollerBlades {
     public static double getFovModifier(final Player player, final double original) {
         final double walk = player.getAbilities().getWalkingSpeed();
         final double speed = player.getDeltaMovement().horizontalDistance();
-        final double minFov = WALKING_SPEED_CAP * 1.03;
-        final double maxFov = RUNNING_SPEED_CAP * 0.97;
+        final double minFov = WALKING_SPEED_CAP * 1.1;
+        final double maxFov = RUNNING_SPEED_CAP * 0.9;
         if (speed < minFov) {
             return walk;
         }
