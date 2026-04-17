@@ -96,7 +96,7 @@ public class StreetArtClient implements ClientModInitializer {
 
         EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);
 
-        RollerbladeRenderer.init();
+        new RollerbladeRenderer().init();
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
             ClientAreaLibStuff.init();

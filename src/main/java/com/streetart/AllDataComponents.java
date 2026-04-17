@@ -3,10 +3,10 @@ package com.streetart;
 import com.streetart.component.AreaSelectComponent;
 import com.streetart.component.ChargeComponent;
 import com.streetart.component.ColorComponent;
+import com.streetart.component.RollerbladeComponent;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.Unit;
 
 import java.util.function.UnaryOperator;
 
@@ -19,8 +19,8 @@ public class AllDataComponents {
             .persistent(ChargeComponent.CODEC).networkSynchronized(ChargeComponent.STREAM_CODEC)
     );
 
-    public static final DataComponentType<Unit> ROLLER_BLADES = register("roller_blades", builder -> builder
-            .persistent(Unit.CODEC).networkSynchronized(Unit.STREAM_CODEC)
+    public static final DataComponentType<RollerbladeComponent> ROLLER_BLADES = register("roller_blade", builder -> builder
+            .persistent(RollerbladeComponent.CODEC).networkSynchronized(RollerbladeComponent.STREAM_CODEC)
     );
 
     public static final DataComponentType<AreaSelectComponent> AREA_SELECT = register("area_select", builder -> builder

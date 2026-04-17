@@ -72,7 +72,12 @@ public class RollerBlades {
      *     <li>else : lerp between the other two results</li>
      * </ul>
      */
-    public static Vec2 handleInput(final Vec2 original, final LivingEntity player) {
+    public static Vec2 handleInput(Vec2 original, final LivingEntity player) {
+        if (!player.onGround()) {
+            if (original.y != 0) {
+                original = original.scale(1f / (Math.abs(original.x) + 1));
+            }
+        }
         final Vec2 norm = original.lengthSquared() > 1 ? original.normalized() : original;
         final Vector2d intent = new Vector2d(norm.x, norm.y);
 
@@ -134,8 +139,8 @@ public class RollerBlades {
     public static double getFovModifier(final Player player, final double original) {
         final double walk = player.getAbilities().getWalkingSpeed();
         final double speed = player.getDeltaMovement().horizontalDistance();
-        final double minFov = WALKING_SPEED_CAP * 1.03;
-        final double maxFov = RUNNING_SPEED_CAP * 0.97;
+        final double minFov = WALKING_SPEED_CAP * 1.1;
+        final double maxFov = RUNNING_SPEED_CAP * 0.9;
         if (speed < minFov) {
             return walk;
         }
@@ -152,17 +157,17 @@ public class RollerBlades {
      */
     public static Vector4f getAnimationModifier(final LivingEntity entity) {
         final Vector4f modifier = new Vector4f(0.75f, 0.5f, 0.5f, 2f);
-        if (!entity.onGround()) {
-            modifier.x = 1;
-            modifier.y = 1;
-            modifier.z = 1;
-            modifier.w = 1;
+
         /*} else if (entity.xxa == 0 && entity.zza == 0) {
             modifier.x = 0f;*/
-        } else if (entity.isSprinting()) {
+        if (entity.isSprinting()) {
             modifier.x = 1;
             modifier.z = 0.33f;
             modifier.w = 3f;
+        }
+        if (!entity.onGround()) {
+            modifier.y = 0.1f;
+            modifier.w = 1.5f;
         }
         return modifier;
     }

@@ -2,7 +2,7 @@ package com.streetart.client.mixin.rollerblades;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.streetart.AllItems;
+import com.streetart.AllDataComponents;
 import com.streetart.client.rendering.rollerblades.LivingEntityRenderStateExtras;
 import com.streetart.misc.OverwrittenWalkAnimationState;
 import net.minecraft.client.model.EntityModel;
@@ -29,7 +29,7 @@ public abstract class LivingEntityRendererMixin {
     @Inject(method = "submit", at = @At(value = "INVOKE", ordinal = 1, target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"))
     private void streetArt$fiveFootEleven(final CallbackInfo ci, @Local(argsOnly = true) final LivingEntityRenderState state, @Local(argsOnly = true) final PoseStack poseStack) {
         if (state instanceof final HumanoidRenderState humanoidState) {
-            if (humanoidState.feetEquipment.is(AllItems.ROLLER_BLADES)) {
+            if (humanoidState.feetEquipment.has(AllDataComponents.ROLLER_BLADES)) {
                 poseStack.translate(0, -3/16f, 0);
             }
         }
