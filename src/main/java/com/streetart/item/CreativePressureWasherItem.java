@@ -59,7 +59,7 @@ public class CreativePressureWasherItem extends Item {
             if (Commands.LEVEL_ADMINS.check(player.permissions())) {
                 final HitResult h = player.pick(player.blockInteractionRange(), 1, false);
                 if (h.getType() != HitResult.Type.MISS && h instanceof final BlockHitResult hit) {
-                    int charge = ChargeComponent.get(itemStack);
+                    final int charge = ChargeComponent.get(itemStack);
                     BlockPos.betweenClosed(
                             hit.getBlockPos().offset(-charge, -charge, -charge),
                             hit.getBlockPos().offset(charge, charge, charge)
@@ -76,7 +76,9 @@ public class CreativePressureWasherItem extends Item {
 
     @Override
     public boolean isBarVisible(final ItemStack stack) {
-        return super.isBarVisible(stack) || stack.has(AllDataComponents.CHARGE);
+        final ChargeComponent component = stack.get(AllDataComponents.CHARGE);
+        final boolean charged = component != null && component.amount() > 0;
+        return charged || super.isBarVisible(stack);
     }
 
     @Override

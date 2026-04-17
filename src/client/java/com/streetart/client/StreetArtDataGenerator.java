@@ -163,17 +163,24 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 				TextureSlot.LAYER0, TextureSlot.PARTICLE
 		);
 
-		public static void generateSprayCan(final ItemModelGenerators itemModelGenerators, final Item item,
-											 final Identifier guiModel, final Identifier handModel) {
+		public static final ModelTemplate PRESSURE_WASHER_HAND = new ModelTemplate(
+				Optional.of(StreetArt.id("item/pressure_washer")),
+				Optional.empty(),
+				TextureSlot.LAYER0, TextureSlot.PARTICLE
+		);
+
+		public static void generateSplitGuiHand(final ItemModelGenerators itemModelGenerators, final Item item,
+												final Identifier guiLocation, final Identifier handLocation,
+												final ModelTemplate handModel) {
 			final TextureMapping flatMapping = new TextureMapping()
-					.put(TextureSlot.LAYER0, new Material(guiModel, false));
-			final Identifier flatItem = ModelTemplates.FLAT_ITEM.create(guiModel, flatMapping, itemModelGenerators.modelOutput);
+					.put(TextureSlot.LAYER0, new Material(guiLocation, false));
+			final Identifier flatItem = ModelTemplates.FLAT_ITEM.create(guiLocation, flatMapping, itemModelGenerators.modelOutput);
 			final ItemModel.Unbaked flat = ItemModelUtils.plainModel(flatItem);
 
 			final TextureMapping handMapping = new TextureMapping()
-					.put(TextureSlot.LAYER0, new Material(handModel, false))
-					.put(TextureSlot.PARTICLE, new Material(handModel, false));
-			final Identifier handItem = SPRAY_CAN_HAND.create(handModel, handMapping, itemModelGenerators.modelOutput);
+					.put(TextureSlot.LAYER0, new Material(handLocation, false))
+					.put(TextureSlot.PARTICLE, new Material(handLocation, false));
+			final Identifier handItem = handModel.create(handLocation, handMapping, itemModelGenerators.modelOutput);
 			final ItemModel.Unbaked hand = ItemModelUtils.plainModel(handItem);
 
 			itemModelGenerators.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
@@ -186,19 +193,27 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			AllItems.SPRAY_CANS.forEach((color, item) -> {
 				final Identifier baseGui = StreetArt.id("item/spray_can/gui/" + color.getName());
 				final Identifier baseHand = StreetArt.id("item/spray_can/hand/" + color.getName());
-				generateSprayCan(itemModelGenerators, item, baseGui, baseHand);
+				generateSplitGuiHand(itemModelGenerators, item, baseGui, baseHand, SPRAY_CAN_HAND);
 			});
 			AllItems.PAINT_BALLOONS.forEach((color, item) -> {
 				final Identifier id = StreetArt.id("item/paint_balloon/" + color.getName());
 				generateDyedItemsNicely(itemModelGenerators, item, id);
 			});
+			AllItems.ROLLERBLADES.forEach(item -> {
+				itemModelGenerators.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
+			});
+			generateSplitGuiHand(itemModelGenerators, AllItems.PRESSURE_WASHER,
+					StreetArt.id("item/pressure_washer/item"),
+					StreetArt.id("item/pressure_washer/hand"),
+					PRESSURE_WASHER_HAND);
+			generateSplitGuiHand(itemModelGenerators, AllItems.CREATIVE_PRESSURE_WASHER,
+					StreetArt.id("item/pressure_washer/creative_item"),
+					StreetArt.id("item/pressure_washer/creative_hand"),
+					PRESSURE_WASHER_HAND);
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);
-			AllItems.ROLLERBLADES.forEach(item -> {
-				itemModelGenerators.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
-			});
 		}
 	}
 

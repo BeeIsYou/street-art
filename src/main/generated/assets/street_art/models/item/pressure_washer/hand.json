@@ -1,0 +1,7 @@
+{
+  "parent": "street_art:item/pressure_washer",
+  "textures": {
+    "layer0": "street_art:item/pressure_washer/hand",
+    "particle": "street_art:item/pressure_washer/hand"
+  }
+}
