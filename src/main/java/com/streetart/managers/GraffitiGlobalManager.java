@@ -36,7 +36,7 @@ public class GraffitiGlobalManager {
             final TileChange change = entry.getValue();
 
             final LevelChunk chunk = level.getChunkAt(key.pos());
-            if (!chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER).handleChange(packet, key, change)) {
+            if (!chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER).handleChange(context.player(), packet, key, change)) {
                 continue;
             }
 

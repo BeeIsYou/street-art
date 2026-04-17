@@ -189,7 +189,7 @@ public class GServerChunkManager {
         }
     }
 
-    public boolean handleChange(final BiDirectionalGraffitiChange packet, final TileKey key, final TileChange change) {
+    public boolean handleChange(ServerPlayer player, final BiDirectionalGraffitiChange packet, final TileKey key, final TileChange change) {
         final GServerDataHolder tile = this.getOrConditionalCreateFace(
                 key.pos(),
                 key.dir(),
@@ -214,6 +214,9 @@ public class GServerChunkManager {
             }
         }
 
+        graffiti.get(key.pos())
+                .blame(player);
+
         return true;
     }
 
@@ -237,18 +240,6 @@ public class GServerChunkManager {
         }
 
         return false;
-    }
-
-    public @Nullable GServerBlock getOrConditionalCreateBlock(final BlockPos pos, final boolean clear) {
-        if (clear) {
-            return this.getBlock(pos);
-        } else {
-            return this.getOrCreateBlock(pos);
-        }
-    }
-
-    public GServerBlock getOrCreateBlock(final BlockPos pos) {
-        return this.graffiti.computeIfAbsent(pos, _ -> new GServerBlock(pos));
     }
 
     @Contract(pure = true)

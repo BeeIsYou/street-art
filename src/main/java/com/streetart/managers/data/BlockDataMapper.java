@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -123,10 +124,14 @@ public class BlockDataMapper {
         return this.blockData.isEmpty();
     }
 
+    public static BlockDataMapper deepCopy(final BlockDataMapper toCopy) {
+        return new BlockDataMapper(toCopy.blockData);
+    }
+
     /**
      * Pwetty pwease do not modify the entries inside
      */
-    public Iterator<Map.Entry<Direction, List<GServerDataHolder>>> getImmutableIterator() {
-        return Collections.unmodifiableCollection(this.blockData.entrySet()).iterator();
+    public Iterable<Map.Entry<Direction, List<GServerDataHolder>>> getImmutableIterator() {
+        return Collections.unmodifiableCollection(this.blockData.entrySet());
     }
 }

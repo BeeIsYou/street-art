@@ -85,12 +85,11 @@ public class CountCommand {
 
     private static int countBlock(final GServerBlock block, final CountType type, final @Nullable ColorComponent color) {
         int c = 0;
-        final Iterator<Map.Entry<Direction, List<GServerDataHolder>>> it = block.getImmutableIterator();
-        while (it.hasNext()) {
-            final Map.Entry<Direction, List<GServerDataHolder>> data = it.next();
 
-            for (final GServerDataHolder face : data.getValue()) {
+        for (Map.Entry<Direction, List<GServerDataHolder>> entries : block.getImmutableIterator()) {
+            for (final GServerDataHolder face : entries.getValue()) {
                 final int dc = countFace(face, type, color);
+
                 if (dc > 0) {
                     if (type == CountType.BLOCKS) {
                         return 1;
@@ -99,9 +98,11 @@ public class CountCommand {
                         continue;
                     }
                 }
+
                 c += dc;
             }
         }
+
         return c;
     }
 

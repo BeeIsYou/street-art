@@ -113,14 +113,17 @@ public class SpraySessionManager {
         if (positionSnapshots.isEmpty()) {
             return null;
         }
+
         if (positionSnapshots.size() == 1) {
             return positionSnapshots.getFirst();
         }
+
         final float ipt = pt * positionSnapshots.size();
         final int i = Mth.floor(ipt);
         if (i >= positionSnapshots.size() - 1) {
             return positionSnapshots.getLast();
         }
+
         final float mix = (ipt - i);
         final Vec2 lookA = positionSnapshots.get(i).look;
         final Vec2 lookB = positionSnapshots.get(i+1).look;
