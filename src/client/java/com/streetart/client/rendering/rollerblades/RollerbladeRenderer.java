@@ -22,7 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class RollerbladeRenderer implements ArmorRenderer {
-    private static final MeshDefinition MESH = createRollerbladeMesh(new CubeDeformation(0));
+    private static final MeshDefinition MESH = createRollerbladeMesh();
 
     public void init() {
         for (final Item rollerblade : AllItems.ROLLERBLADES) {
@@ -49,16 +49,15 @@ public class RollerbladeRenderer implements ArmorRenderer {
         }
     }
 
-    public static MeshDefinition createRollerbladeMesh(final CubeDeformation g) {
+    public static MeshDefinition createRollerbladeMesh() {
         final MeshDefinition mesh = new MeshDefinition();
         final PartDefinition root = mesh.getRoot();
+        final CubeDeformation noop = new CubeDeformation(0.0F);
 
         final CubeListBuilder cubes = CubeListBuilder.create()
-                .texOffs(0, 0).addBox(-2.5F, 8.0F, -2.5F, 5.0F, 5.0F, 5.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 10).addBox(-2.5F, 10.0F, -4.5F, 5.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 23).addBox(-1.0F, 13.0F, 1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 19).addBox(-1.0F, 13.0F, -2.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 15).addBox(-1.0F, 13.0F, -5.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F));
+                .texOffs(0, 0).addBox(-2.5F, 8.0F, -2.5F, 5.0F, 5.0F, 5.0F, noop)
+                .texOffs(0, 10).addBox(-2.5F, 10.0F, -4.5F, 5.0F, 3.0F, 2.0F, noop)
+                .texOffs(0, 15).addBox(-1.0F, 13.0F, -5.0F, 2.0F, 2.0F, 8.0F, noop);
 
         root.addOrReplaceChild("right_leg", cubes, PartPose.ZERO);
         root.addOrReplaceChild("left_leg", cubes, PartPose.ZERO);

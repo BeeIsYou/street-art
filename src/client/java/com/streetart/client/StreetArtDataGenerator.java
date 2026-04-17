@@ -28,6 +28,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -82,11 +83,18 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			);
 
 			AllItems.PAINT_BALLOONS.forEach((color, item) -> {
-				translationBuilder.add(item, StringUtils.capitalize(color.getName() + " Paint Balloon"));
-				translationBuilder.add("lore.street_art." + color.getName() + "_paint_balloon",
+				final String dyeName = WordUtils.capitalize(color.getName().replace("_", " "));
+				translationBuilder.add(item, StringUtils.capitalize(dyeName + " Paint Balloon"));
+				translationBuilder.add("lore.street_art." + dyeName + "_paint_balloon",
 						"Throw to spread a small area of paint"
 				);
 			});
+
+			translationBuilder.add(AllItems.RED_ROLLERBLADES, "Red Rollerblades");
+			translationBuilder.add("lore.street_art.red_rollerblades",
+					"""
+							Why called rollerblade if no sword"""
+			); // todo ran out of funny juice :(
 
 			translationBuilder.add(AllItems.CREATIVE_PRESSURE_WASHER, "Creative Pressure Washer");
 			translationBuilder.add("lore.street_art.creative_pressure_washer",
@@ -174,7 +182,6 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generateItemModels(final ItemModelGenerators itemModelGenerators) {
 			AllItems.SPRAY_CANS.forEach((color, item) -> {
-//				final Identifier base = StreetArt.id("item/spray_can/" + color.getName());
 				final Identifier baseGui = StreetArt.id("item/spray_can/gui/" + color.getName());
 				final Identifier baseHand = StreetArt.id("item/spray_can/hand/" + color.getName());
 				generateSprayCan(itemModelGenerators, item, baseGui, baseHand);
@@ -187,6 +194,9 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);
+			AllItems.ROLLERBLADES.forEach(item -> {
+				itemModelGenerators.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
+			});
 		}
 	}
 
@@ -199,7 +209,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		protected void addTags(final HolderLookup.Provider registries) {
 			final TagAppender<Item, Item> cans = this.valueLookupBuilder(AllTags.Items.SPRAY_CANS);
 			final TagAppender<Item, Item> ballons = this.valueLookupBuilder(AllTags.Items.PAINT_BALLOONS);
-			for (DyeColor value : DyeColor.values()) {
+			for (final DyeColor value : DyeColor.values()) {
 				cans.add(AllItems.SPRAY_CANS.get(value));
 				ballons.add(AllItems.PAINT_BALLOONS.get(value));
 			}

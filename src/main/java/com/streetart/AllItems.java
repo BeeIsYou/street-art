@@ -66,8 +66,7 @@ public class AllItems {
                     .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
     );
 
-    public static Item ROLLERBLADES1 = registerRollerblades("rollerblades");
-    public static Item ROLLERBLADES2 = registerRollerblades("rollerblades2");
+    public static Item RED_ROLLERBLADES = registerRollerblades("red_rollerblades");
 
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)
@@ -106,6 +105,7 @@ public class AllItems {
                     }
                 }
                 output.accept(PRESSURE_WASHER);
+                ROLLERBLADES.forEach(output::accept);
             }).build();
 
     public static void init() {
