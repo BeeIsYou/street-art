@@ -23,6 +23,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -189,7 +190,7 @@ public class GServerChunkManager {
         }
     }
 
-    public boolean handleChange(ServerPlayer player, final BiDirectionalGraffitiChange packet, final TileKey key, final TileChange change) {
+    public boolean handleChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final TileKey key, final TileChange change) {
         final GServerDataHolder tile = this.getOrConditionalCreateFace(
                 key.pos(),
                 key.dir(),
@@ -214,8 +215,7 @@ public class GServerChunkManager {
             }
         }
 
-        graffiti.get(key.pos())
-                .blame(player);
+        this.blame(player, key.pos());
 
         return true;
     }
@@ -267,6 +267,15 @@ public class GServerChunkManager {
         }
 
         return blockData.get(dir, depth);
+    }
+
+    public void blame(@Nullable final Entity entity, final BlockPos pos) {
+        if (entity instanceof ServerPlayer || entity == null) {
+            final GServerBlock gblock = this.graffiti.get(pos);
+            if (gblock != null) {
+                gblock.blame((ServerPlayer) entity);
+            }
+        }
     }
 
     public enum Type {

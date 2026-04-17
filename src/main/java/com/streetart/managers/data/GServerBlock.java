@@ -25,6 +25,7 @@ public class GServerBlock implements PublicFacingBlockData {
 
     private final BlockDataMapper blockData;
 
+    //TODO: maybe make this more robust, describing where the blame is coming from if not a player (IE dispenser / fill command from command block)
     @Nullable
     private UUID recentPlayerID;
 
@@ -82,8 +83,12 @@ public class GServerBlock implements PublicFacingBlockData {
         return Math.round(v * 16) / 16d;
     }
 
-    public void blame(final ServerPlayer player) {
-        this.recentPlayerID = player.getUUID();
+    public void blame(@Nullable final ServerPlayer player) {
+        if (player != null) {
+            this.recentPlayerID = player.getUUID();
+        } else {
+            this.recentPlayerID = null;
+        }
     }
 
     public record Snapshot(BlockDataMapper map, UUID recentPlayerID, BlockPos pos) {

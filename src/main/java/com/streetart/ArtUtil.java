@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -18,6 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +36,20 @@ public class ArtUtil {
         final BlockPos pos = hitResult.getBlockPos();
         final Vec3 clickPosition = hitResult.getLocation();
         final Vector3f relative = new Vector3f(
-                (float)(clickPosition.x - pos.getX()),
-                (float)(clickPosition.y - pos.getY()),
-                (float)(clickPosition.z - pos.getZ())
+                (float) (clickPosition.x - pos.getX()),
+                (float) (clickPosition.y - pos.getY()),
+                (float) (clickPosition.z - pos.getZ())
         );
         final Vec2 plane = switch (hitResult.getDirection()) {
-            case DOWN -> new Vec2(relative.x, 1-relative.z);
+            case DOWN -> new Vec2(relative.x, 1 - relative.z);
             case UP -> new Vec2(relative.x, relative.z);
-            case NORTH -> new Vec2(1-relative.x, 1-relative.y);
-            case SOUTH -> new Vec2(relative.x, 1-relative.y);
-            case WEST -> new Vec2(relative.z, 1-relative.y);
-            case EAST -> new Vec2(1-relative.z, 1-relative.y);
+            case NORTH -> new Vec2(1 - relative.x, 1 - relative.y);
+            case SOUTH -> new Vec2(relative.x, 1 - relative.y);
+            case WEST -> new Vec2(relative.z, 1 - relative.y);
+            case EAST -> new Vec2(1 - relative.z, 1 - relative.y);
         };
-        final int x = (int)(plane.x * 16);
-        final int y = (int)(plane.y * 16);
+        final int x = (int) (plane.x * 16);
+        final int y = (int) (plane.y * 16);
         return new Vector2i(x, y);
     }
 
@@ -67,12 +69,14 @@ public class ArtUtil {
 
     /**
      * Coats every exposed face of a block in paint
+     *
      * @return true if any paint was applied
      */
-    public static boolean latherInPaint(final ServerLevel serverLevel,
-                                     final List<ShapeFaces> shapeFaces,
-                                     final BlockPos pos,
-                                     final byte content
+    public static boolean latherInPaint(@Nullable final Entity entity,
+                                        final ServerLevel serverLevel,
+                                        final List<ShapeFaces> shapeFaces,
+                                        final BlockPos pos,
+                                        final byte content
     ) {
         final ChunkAccess chunk = serverLevel.getChunk(pos);
         final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
@@ -92,8 +96,10 @@ public class ArtUtil {
                 if (data != null) {
                     data.fillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2());
                     manager.markFullResend(data, pos, dir);
+                    manager.blame(entity, key.pos());
                     return true;
                 }
+
                 return false;
             });
         }
@@ -104,7 +110,8 @@ public class ArtUtil {
         return changed;
     }
 
-    public static void latherDirectionInPaint(final ServerLevel serverLevel,
+    public static void latherDirectionInPaint(@Nullable Entity entity,
+                                              final ServerLevel serverLevel,
                                               final List<ShapeFaces> shapeFaces,
                                               final BlockPos pos,
                                               final Direction thisDir,
@@ -122,12 +129,13 @@ public class ArtUtil {
 
         boolean changed = false;
         for (final ShapeFaces faces : shapeFaces) {
-             changed |= faces.doWith(thisDir, face -> {
+            changed |= faces.doWith(thisDir, face -> {
                 final TileKey key = new TileKey(pos, thisDir, face.depth());
                 final GServerDataHolder data = manager.getOrConditionalCreateFace(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
                     data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
                     manager.markFullResend(data, pos, thisDir);
+                    manager.blame(entity, key.pos());
                     return true;
                 }
                 return false;

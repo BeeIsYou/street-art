@@ -40,7 +40,7 @@ public class FillCommand {
         int count = 0;
         for (final BlockPos blockPos : BlockPos.betweenClosed(a, b)) {
             final List<ArtUtil.ShapeFaces> faces = ArtUtil.gatherShapeFaces(level.getBlockState(blockPos).getCollisionShape(level, blockPos));
-            if (ArtUtil.latherInPaint(level, faces, blockPos.immutable(), color.id)) {
+            if (ArtUtil.latherInPaint(context.getSource().getEntity(), level, faces, blockPos.immutable(), color.id)) {
                 count++;
             }
         }
