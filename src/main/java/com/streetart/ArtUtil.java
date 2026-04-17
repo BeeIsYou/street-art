@@ -88,7 +88,7 @@ public class ArtUtil {
                 }
 
                 final TileKey key = new TileKey(pos, dir, face.depth());
-                final GServerDataHolder data = manager.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                final GServerDataHolder data = manager.getOrConditionalCreateFace(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
                     data.fillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2());
                     manager.markFullResend(data, pos, dir);
@@ -124,7 +124,7 @@ public class ArtUtil {
         for (final ShapeFaces faces : shapeFaces) {
              changed |= faces.doWith(thisDir, face -> {
                 final TileKey key = new TileKey(pos, thisDir, face.depth());
-                final GServerDataHolder data = manager.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                final GServerDataHolder data = manager.getOrConditionalCreateFace(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
                     data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
                     manager.markFullResend(data, pos, thisDir);

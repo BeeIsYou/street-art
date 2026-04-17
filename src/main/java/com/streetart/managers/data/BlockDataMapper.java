@@ -122,4 +122,11 @@ public class BlockDataMapper {
     public boolean isCompletelyEmpty() {
         return this.blockData.isEmpty();
     }
+
+    /**
+     * Pwetty pwease do not modify the entries inside
+     */
+    public Iterator<Map.Entry<Direction, List<GServerDataHolder>>> getImmutableIterator() {
+        return Collections.unmodifiableCollection(this.blockData.entrySet()).iterator();
+    }
 }

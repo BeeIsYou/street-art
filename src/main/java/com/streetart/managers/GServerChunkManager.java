@@ -24,6 +24,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -189,7 +190,7 @@ public class GServerChunkManager {
     }
 
     public boolean handleChange(final BiDirectionalGraffitiChange packet, final TileKey key, final TileChange change) {
-        final GServerDataHolder tile = this.getOrConditionalCreate(
+        final GServerDataHolder tile = this.getOrConditionalCreateFace(
                 key.pos(),
                 key.dir(),
                 key.depth(),
@@ -238,19 +239,37 @@ public class GServerChunkManager {
         return false;
     }
 
-    public @Nullable GServerDataHolder getOrConditionalCreate(final BlockPos pos, final Direction dir, final double depth, final boolean clear) {
+    public @Nullable GServerBlock getOrConditionalCreateBlock(final BlockPos pos, final boolean clear) {
         if (clear) {
-            return this.get(pos, dir, depth);
+            return this.getBlock(pos);
         } else {
-            return this.getOrCreate(pos, dir, depth);
+            return this.getOrCreateBlock(pos);
         }
     }
 
-    public GServerDataHolder getOrCreate(final BlockPos pos, final Direction dir, final double depth) {
+    public GServerBlock getOrCreateBlock(final BlockPos pos) {
+        return this.graffiti.computeIfAbsent(pos, _ -> new GServerBlock(pos));
+    }
+
+    @Contract(pure = true)
+    public @Nullable GServerBlock getBlock(final BlockPos pos) {
+        return this.graffiti.get(pos);
+    }
+
+    public @Nullable GServerDataHolder getOrConditionalCreateFace(final BlockPos pos, final Direction dir, final double depth, final boolean clear) {
+        if (clear) {
+            return this.getFace(pos, dir, depth);
+        } else {
+            return this.getOrCreateFace(pos, dir, depth);
+        }
+    }
+
+    public GServerDataHolder getOrCreateFace(final BlockPos pos, final Direction dir, final double depth) {
         return this.graffiti.computeIfAbsent(pos, _ -> new GServerBlock(pos)).getOrCreate(dir, depth);
     }
 
-    public @Nullable GServerDataHolder get(final BlockPos pos, final Direction dir, final double depth) {
+    @Contract(pure = true)
+    public @Nullable GServerDataHolder getFace(final BlockPos pos, final Direction dir, final double depth) {
         final GServerBlock blockData = this.graffiti.get(pos);
         if (blockData == null) {
             return null;

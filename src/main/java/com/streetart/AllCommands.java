@@ -4,11 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.streetart.commands.ClearCommand;
 import com.streetart.commands.ColorComponentArgument;
+import com.streetart.commands.CountCommand;
 import com.streetart.commands.FillCommand;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.HeightmapTypeArgument;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 
 public class AllCommands {
     public static void init() {
@@ -17,6 +20,11 @@ public class AllCommands {
                 ColorComponentArgument.class,
                 new ColorComponentArgument.Info()
         );
+        ArgumentTypeRegistry.registerArgumentType(
+                StreetArt.id("count_type"),
+                CountCommand.CountTypeArgument.class,
+                SingletonArgumentInfo.contextFree(CountCommand.CountTypeArgument::new)
+        );
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext, Commands.CommandSelection selection) {
@@ -24,6 +32,7 @@ public class AllCommands {
 
         ClearCommand.register(root);
         FillCommand.register(root);
+        CountCommand.register(root);
 
         dispatcher.register(root);
     }

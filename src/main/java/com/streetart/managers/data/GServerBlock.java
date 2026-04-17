@@ -7,7 +7,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class GServerBlock implements PublicFacingBlockData {
 
@@ -56,6 +58,13 @@ public class GServerBlock implements PublicFacingBlockData {
 
     public BlockPos getBlockPos() {
         return this.blockPos;
+    }
+
+    /**
+     * Pwetty pwease do not modify the entries inside
+     */
+    public Iterator<Map.Entry<Direction, List<GServerDataHolder>>> getImmutableIterator() {
+        return this.blockData.getImmutableIterator();
     }
 
     public boolean isEmpty() {

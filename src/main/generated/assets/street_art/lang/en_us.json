@@ -1,5 +1,7 @@
 {
   "commands.street_art.clear.success": "Explodiated paint off of %s blocks",
+  "commands.street_art.count.any_success": "Counted %s %s",
+  "commands.street_art.count.color_success": "Counted %s %s with color %s",
   "commands.street_art.fill.success": "It's all over %s blocks",
   "item.street_art.black_paint_balloon": "Black Paint Balloon",
   "item.street_art.black_spray_can": "Black Spray Can",
