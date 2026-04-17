@@ -3,6 +3,7 @@ package com.streetart;
 import com.streetart.arealib.AreaLib;
 import com.streetart.component.ChargeComponent;
 import com.streetart.component.ColorComponent;
+import com.streetart.component.RollerbladeComponent;
 import com.streetart.item.*;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
@@ -12,7 +13,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.Unit;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -22,12 +22,25 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.block.DispenserBlock;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 public class AllItems {
+    public static final List<Item> ROLLERBLADES = new ArrayList<>();
     private static final UseEffects NONE = new UseEffects(true, false, 1);
+    private static final ItemAttributeModifiers TRIP_MODIFIER =
+            ItemAttributeModifiers.builder().add(
+                    Attributes.STEP_HEIGHT,
+                    new AttributeModifier(
+                            StreetArt.id("tripping"),
+                            -0.75,
+                            AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                    ),
+                    EquipmentSlotGroup.FEET
+            ).build();
 
     public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
             BuiltInRegistries.CREATIVE_MODE_TAB.key(), StreetArt.id("creative_tab")
@@ -53,22 +66,8 @@ public class AllItems {
                     .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
     );
 
-    public static Item ROLLER_BLADES = register("roller_blades", Item::new,
-            new Item.Properties().stacksTo(1)
-                    .equippable(EquipmentSlot.FEET)
-                    .component(AllDataComponents.ROLLER_BLADES, Unit.INSTANCE)
-                    .component(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.builder()
-                            .add(
-                                    Attributes.STEP_HEIGHT,
-                                    new AttributeModifier(
-                                            StreetArt.id("tripping"),
-                                            -0.75,
-                                            AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
-                                    ),
-                                    EquipmentSlotGroup.FEET
-                            )
-                            .build())
-    );
+    public static Item ROLLERBLADES1 = registerRollerblades("rollerblades");
+    public static Item ROLLERBLADES2 = registerRollerblades("rollerblades2");
 
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)
@@ -140,6 +139,17 @@ public class AllItems {
 
         Registry.register(BuiltInRegistries.ITEM, key, item);
 
+        return item;
+    }
+
+    private static Item registerRollerblades(final String name) {
+        final Item item = register(name, Item::new,
+                new Item.Properties().stacksTo(1)
+                        .equippable(EquipmentSlot.FEET)
+                        .component(AllDataComponents.ROLLER_BLADES, RollerbladeComponent.streetArt(name))
+                        .component(DataComponents.ATTRIBUTE_MODIFIERS, TRIP_MODIFIER)
+        );
+        ROLLERBLADES.add(item);
         return item;
     }
 }
