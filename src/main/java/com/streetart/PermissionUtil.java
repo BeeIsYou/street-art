@@ -17,7 +17,11 @@ public class PermissionUtil {
     public static boolean modificationAllowed(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player) {
         final boolean adventurePermitted = getAdventurePermitted(pos, level, stack, player);
 
-        final boolean opped = player != null && Commands.LEVEL_ADMINS.check(player.permissions());
+        final boolean opped =
+                player != null &&
+                player.gameMode() != null &&
+                player.gameMode().isCreative() &&
+                Commands.LEVEL_ADMINS.check(player.permissions());
 
         if (StreetArt.AREA_LIB.isInRegion(level, pos, AreaLib.Type.PROTECTED)) {
             if (!adventurePermitted || !opped) {
