@@ -54,7 +54,7 @@ public abstract class AbstractClientPlayerMixin extends Player implements IHasRo
                                                final Operation<Double> operation, @Local(ordinal = 2) LocalFloatRef walkingSpeed) {
         double movementSpeed = operation.call(instance, attribute);
         if (this.getController().isActive()) {
-            return this.getController().getFovScalar(walkingSpeed.get(), movementSpeed) * movementSpeed;
+            return this.getController().getFovScalar(walkingSpeed.get(), movementSpeed) * walkingSpeed.get();
         }
         return movementSpeed;
     }

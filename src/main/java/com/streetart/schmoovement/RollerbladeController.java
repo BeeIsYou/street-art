@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.Equippable;
 import org.joml.Vector2d;
+import org.joml.Vector2dc;
 import org.joml.Vector4f;
 
 public class RollerbladeController {
@@ -19,7 +20,7 @@ public class RollerbladeController {
     private int airTicks = 0;
     private int stride = 0;
     private final double accelSpeed = 0.1;
-    private final double accelCapStart = 0.3;
+    private final double accelCapStart = 0.15;
     private final double accelCapEnd = 0.45;
 
     public RollerbladeController(final LivingEntity owner) {
@@ -119,19 +120,32 @@ public class RollerbladeController {
                 this.owner.getDeltaMovement().z
         );
 
-        final boolean performCrouchBoost = this.crouchingTicks > 0 && this.airTicks < 4;
+        final boolean performCrouchBoost = this.crouchingTicks > 0 && this.airTicks < 5;
 
         // perform a crouch boost
         if (performCrouchBoost) {
-            final double boost = Math.min(this.crouchingTicks * 1d, 10);
-            final Vector2d fromZero = new Vector2d(impulse).mul(boost);
-            final Vector2d fromVel = new Vector2d(impulse).mul(boost).add(vel);
-            if (fromZero.length() > fromVel.length()) {
-                impulse.set(fromZero).sub(vel);
-            } else {
-                impulse.set(fromVel).sub(vel);
+            // https://www.desmos.com/calculator/faz4mdmkwz
+            // basically. boost towards vel adds. boost away from vel resets
+            final double boostFrac = Math.min(this.crouchingTicks / 10f, 1);
+            this.crouchingTicks = -99999;
+            if (impulse.length() == 0) {
+                return vel.mul(-boostFrac);
             }
-            this.crouchingTicks = 0;
+
+            final Vector2d boost = impulse.normalize(boostFrac * 0.2);
+            final Vector2d add = vel.add(boost, new Vector2d());
+            double dot = boost.dot(add);
+            dot = Math.clamp(2 * dot, 0, boost.length() * add.length());
+            final double projDot = Math.max(0, dot / boost.lengthSquared());
+            boost.mul(projDot, add);
+            if (add.length() > this.accelCapEnd) {
+                add.normalize(this.accelCapEnd);
+            }
+            if (add.length() > boost.length()) {
+                return add.sub(vel);
+            } else {
+                return boost.sub(vel);
+            }
         }
 
         // no zero div :p
@@ -152,24 +166,13 @@ public class RollerbladeController {
             double mul = stride;
             mul = 1 - (1 - mul) * dot;
             impulse.mul(mul);
-            impulse.mul(0.25);
         }
 
         if (vel.length() < this.accelCapStart) {
             return impulse;
         }
 
-        final Vector2d capped = new Vector2d(impulse);
-
-        if (dot > 0) {
-            // d = v * a / (|v|^2)
-            // cap = a - v * d
-            final double scalar = dot * impulse.length() / vel.length();
-            // trying to move forwards limits to perpendicular vector
-            final Vector2d temp = new Vector2d(vel);
-            temp.mul(scalar);
-            capped.sub(temp);
-        }
+        final Vector2d capped = scaleBackToPerpendicular(impulse, vel, new Vector2d(), 1);
 
         this.debugCappedAccel = new Vector2d(capped);
 
@@ -177,7 +180,8 @@ public class RollerbladeController {
             return capped;
         }
 
-        final double capRatio = this.getCapScalar(vel.length());
+        double capRatio = this.getCapScalar(vel.length());
+        capRatio = Math.sqrt(capRatio);
         this.debugCapRatio = capRatio;
 
         impulse.mul(1 - capRatio);
@@ -187,15 +191,26 @@ public class RollerbladeController {
         return capped;
     }
 
-    private void rotateInputToLook(final Vector2d input) {
-        // transform input to be relative to forwards look
-        final double realYRot = -this.owner.getYRot() * (Math.PI / 180);
-        final double sin = Math.sin(realYRot);
-        final double cos = Math.cos(realYRot);
-        input.set(
-                input.x * cos + input.y * sin,
-                -input.x * sin + input.y * cos
-        );
+    public static Vector2d scaleBackToPerpendicular(final Vector2dc vec, final Vector2dc dir, final Vector2d dest, final double scaleBack) {
+        if (scaleBack <= 0) {
+            dest.set(vec);
+            return dest;
+        }
+        final double len = dir.length();
+        final double dot = -vec.dot(dir) / (len * len);
+        if (dot >= 0) {
+            dest.set(vec);
+            return dest;
+        }
+
+        dest.set(dir).mul(dot).add(vec);
+
+        if (scaleBack >= 1) {
+            return dest;
+        }
+
+        dest.lerp(vec, scaleBack);
+        return dest;
     }
 
     /**
@@ -211,7 +226,7 @@ public class RollerbladeController {
             final double cap = Math.min(1, this.getCapScalar(speed));
             scalar += cap / 4;
         }
-        scalar *= 1 - (Math.min(this.crouchingTicks, 10) / 40d);
+        scalar *= 1 - (Math.clamp(this.crouchingTicks, 0, 10) / 40d);
         return scalar;
     }
 
