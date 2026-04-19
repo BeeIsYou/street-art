@@ -39,7 +39,7 @@ public class ChargingMovement extends Movement {
 
         final double boostFrac = Math.min(this.controller.crouchTicks / 10f, 1);
         if (input.length() == 0) {
-            return vel.mul(-boostFrac);
+            return vel.mul(1 - boostFrac);
         }
 
         final Vector2d boost = input.normalize(boostFrac * 0.2);
