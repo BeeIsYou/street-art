@@ -31,13 +31,13 @@ public abstract class LivingEntityMixin extends Entity implements IHasRollerblad
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void checkRolling(final CallbackInfo ci) {
-        this.controller.tickActive();
+        this.controller.alwaysTick();
     }
 
     @ModifyVariable(method = "travelInAir", at = @At(value = "STORE", ordinal = 0))
     private float streetArt$rollerBladeBlockFriction(final float original) {
         if (this.controller.isActive()) {
-            return (float) this.controller.getBlockFriction(original);
+            return (float) this.controller.modifyBlockFriction(original);
         }
         return original;
     }

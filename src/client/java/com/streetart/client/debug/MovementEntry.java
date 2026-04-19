@@ -21,20 +21,14 @@ public class MovementEntry implements DebugScreenEntry {
             RollerbladeController controller = ((IHasRollerbladeController)player).getController();
             displayer.addToGroup(AllDebugEntries.SCHMOOVEMENT,
                 List.of(
-                    ChatFormatting.UNDERLINE + "Schmoovement",
+                    ChatFormatting.UNDERLINE + "Schmoovement: " + controller.currentMovement.toString(),
                     String.format("Vel %.2f %.2f %.2f",
                         player.getDeltaMovement().x,
                         player.getDeltaMovement().y,
                         player.getDeltaMovement().z
                     ),
                     String.format("Speed %.2f", player.getDeltaMovement().horizontalDistance()),
-                    String.format("Input %.2f %.2f", player.xxa, player.zza),
-                    String.format("Org Accel: %.5f %.5f", controller.debugOriginalAccel.x, controller.debugOriginalAccel.y),
-                    String.format("Cap Accel: %.5f %.5f", controller.debugCappedAccel.x, controller.debugCappedAccel.y),
-                    String.format("Fin Accel: %.5f %.5f", controller.debugFinalAccel.x, controller.debugFinalAccel.y),
-                    String.format("Cap ratio: %.2f", controller.debugCapRatio),
-                    String.format("Crouch: %d", controller.debugCrouchingTicks),
-                    String.format("Stride: %.2f", controller.debugStride)
+                    String.format("Input %.2f %.2f", player.xxa, player.zza)
                 )
             );
         }

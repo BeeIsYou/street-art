@@ -22,12 +22,10 @@ public class EntityMixin {
         final Vec3 accel = operation.call(input, speed, yRot);
         if (this instanceof final IHasRollerbladeController controller && !((Object)this instanceof ServerPlayer)) {
             if (controller.getController().isActive()) {
-                final Vector2d transformed = controller.getController().transformVelocity(
+                final Vector2d transformed = controller.getController().transformAcceleration(
                         new Vector2d(input.x, input.z),
-                        new Vector2d(accel.x, accel.z),
-                        speed
+                        new Vector2d(accel.x, accel.z)
                 );
-                controller.getController().debugFinalAccel = new Vector2d(transformed);
                 return new Vec3(
                         transformed.x, accel.y, transformed.y
                 );
