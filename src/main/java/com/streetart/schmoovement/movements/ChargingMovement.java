@@ -16,7 +16,7 @@ public class ChargingMovement extends Movement {
 
     @Override
     public void start() {
-        this.controller.crouchTicks = 0;
+//        this.controller.crouchTicks = 0;
     }
 
     @Override

@@ -22,6 +22,7 @@ public class RollerbladeController {
 
     private boolean active = false;
 
+    private int uncrouchTicks = 0;
     public int crouchTicks = 0;
     public int airTicks = 0;
     public int stride = 0;
@@ -66,6 +67,12 @@ public class RollerbladeController {
     public void postMove() {
         if (this.owner.isCrouching()) {
             this.crouchTicks++;
+            this.uncrouchTicks = 0;
+        } else {
+            this.uncrouchTicks++;
+        }
+        if (this.uncrouchTicks > 5) {
+            this.crouchTicks = 0;
         }
 
         if (this.owner.onGround()) {
