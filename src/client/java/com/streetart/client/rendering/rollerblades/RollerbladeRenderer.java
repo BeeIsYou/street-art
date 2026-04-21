@@ -55,12 +55,25 @@ public class RollerbladeRenderer implements ArmorRenderer {
         final CubeDeformation noop = new CubeDeformation(0.0F);
 
         final CubeListBuilder cubes = CubeListBuilder.create()
-                .texOffs(0, 0).addBox(-2.5F, 8.0F, -2.5F, 5.0F, 5.0F, 5.0F, noop)
-                .texOffs(0, 10).addBox(-2.5F, 10.0F, -4.5F, 5.0F, 3.0F, 2.0F, noop)
-                .texOffs(0, 15).addBox(-1.0F, 13.0F, -5.0F, 2.0F, 2.0F, 8.0F, noop);
+                .texOffs(16, 5).addBox(-2.0F, 9.0F, 2.25F, 4.0F, 2.0F, 0.0F, noop)
+                .texOffs(8, 2).addBox(-1.25F, 12.5F, -4.5F, 0.0F, 2.0F, 7.0F, noop)
+                .texOffs(8, 2).addBox(1.25F, 12.5F, -4.5F, 0.0F, 2.0F, 7.0F, noop)
+                .texOffs(0, 14).addBox(-1.0F, 13.0F, -5.0F, 2.0F, 2.0F, 8.0F, noop)
+                .texOffs(0, 9).addBox(-1.5F, 10.0F, -4.0F, 3.0F, 3.0F, 2.0F, noop)
+                .texOffs(0, 0).addBox(-2.0F, 8.0F, -2.0F, 4.0F, 5.0F, 4.0F, new CubeDeformation(0.3F));
 
-        root.addOrReplaceChild("right_leg", cubes, PartPose.ZERO);
-        root.addOrReplaceChild("left_leg", cubes, PartPose.ZERO);
+        final CubeListBuilder tongue = CubeListBuilder.create()
+                .texOffs(4, 6).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 3.0F, 0.0F, noop);
+        final PartPose tonguePose = PartPose.offsetAndRotation(
+                0.0F, 10.0F, -1.25F,
+                0.0873F, 0.0F, 0.0F
+        );
+
+        final PartDefinition right = root.addOrReplaceChild("right_leg", cubes, PartPose.ZERO);
+        right.addOrReplaceChild("right_tongue", tongue, tonguePose);
+
+        final PartDefinition left = root.addOrReplaceChild("left_leg", cubes, PartPose.ZERO);
+        left.addOrReplaceChild("left_tongue", tongue, tonguePose);
 
         return mesh;
     }
