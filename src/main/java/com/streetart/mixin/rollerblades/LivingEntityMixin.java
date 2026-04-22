@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements IHasRollerbladeController {
@@ -102,6 +103,13 @@ public abstract class LivingEntityMixin extends Entity implements IHasRollerblad
             return false;
         }
         return operation.call(instance);
+    }
+
+    @Inject(method = "canGlide", at = @At(value = "RETURN"), cancellable = true)
+    private void streetArt$rollerbladePreventElytra(final CallbackInfoReturnable<Boolean> cir) {
+        if (this.controller.isActive() && !this.controller.currentMovement.mayFly() && cir.getReturnValue()) {
+            cir.setReturnValue(false);
+        }
     }
 
     @Override

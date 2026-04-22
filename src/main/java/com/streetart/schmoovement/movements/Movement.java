@@ -26,10 +26,6 @@ public abstract class Movement {
      */
     public abstract Vector2d transformAcceleration(final Vector2d input, final Vector2d impulse);
 
-    public double modifyBlockFriction(final float original) {
-        return 1;
-    }
-
     @Override
     public abstract String toString();
 
@@ -42,6 +38,10 @@ public abstract class Movement {
         );
     }
 
+    public double modifyBlockFriction(final float original) {
+        return 1;
+    }
+
     public boolean canJump(final boolean onGround) {
         return onGround;
     }
@@ -52,5 +52,9 @@ public abstract class Movement {
 
     public double modifyGravity(final double original) {
         return original;
+    }
+
+    public boolean mayFly() {
+        return true;
     }
 }

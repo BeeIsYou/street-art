@@ -15,11 +15,11 @@ public class WallCollideStatus {
         this.preWallCollide = movement;
         this.type = Type.fromBeforeAndAfter(movement, modifiedMovement);
         if (this.type != Type.NONE) {
-            this.cachedType = this.type;
+            this.cachedType = this.type.tryMerge(this.cachedType);
         }
     }
 
-    public void testCache(Entity entity) {
+    public void testCache(final Entity entity) {
         if (!this.cachedType.canContinue(entity)) {
             this.cachedType = this.type;
         }
@@ -62,8 +62,16 @@ public class WallCollideStatus {
             return this != NONE;
         }
 
-        public boolean canSlide() {
+        public boolean isOrthogonal() {
             return this == NORTH || this == SOUTH || this == EAST || this == WEST;
+        }
+
+        public boolean isDiagonal() {
+            return this == NORTH_EAST || this == NORTH_WEST || this == SOUTH_EAST || this == SOUTH_WEST;
+        }
+
+        public boolean isSimilarDirection(final Type other) {
+            return this.normal.dot(other.normal) > 0;
         }
 
         public static Type fromBeforeAndAfter(final Vec3 beforePos, final Vec3 afterPos) {
@@ -94,6 +102,61 @@ public class WallCollideStatus {
                     return NORTH_EAST;
                 }
             }
+        }
+
+        /**
+         * @return NONE if can not merge, otherwise the combined direction
+         */
+        public Type tryMerge(final Type other) {
+            if (this == other) {
+                return this;
+            }
+            if (this.isDiagonal() && this.isSimilarDirection(other)) {
+                return this;
+            }
+            if (other.isDiagonal() && other.isSimilarDirection(this)) {
+                return other;
+            }
+
+            return switch (this) {
+                case NORTH -> {
+                    if (other == EAST) {
+                        yield NORTH_EAST;
+                    }
+                    if (other == WEST) {
+                        yield NORTH_WEST;
+                    }
+                    yield NONE;
+                }
+                case EAST -> {
+                    if (other == NORTH) {
+                        yield NORTH_EAST;
+                    }
+                    if (other == SOUTH) {
+                        yield SOUTH_EAST;
+                    }
+                    yield NONE;
+                }
+                case SOUTH -> {
+                    if (other == EAST) {
+                        yield SOUTH_EAST;
+                    }
+                    if (other == WEST) {
+                        yield SOUTH_WEST;
+                    }
+                    yield NONE;
+                }
+                case WEST -> {
+                    if (other == NORTH) {
+                        yield NORTH_WEST;
+                    }
+                    if (other == SOUTH) {
+                        yield SOUTH_WEST;
+                    }
+                    yield NONE;
+                }
+                default -> NONE;
+            };
         }
 
         public boolean canContinue(final Entity entity) {

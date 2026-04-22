@@ -16,7 +16,8 @@
     "rollerblades.AbstractClientPlayerMixin",
     "rollerblades.CameraMixin",
     "rollerblades.HumanoidModelMixin",
-    "rollerblades.LivingEntityRendererMixin"
+    "rollerblades.LivingEntityRendererMixin",
+    "rollerblades.LocalPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

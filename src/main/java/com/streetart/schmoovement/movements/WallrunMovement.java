@@ -1,5 +1,6 @@
 package com.streetart.schmoovement.movements;
 
+import com.streetart.mixin.LivingEntityInvoker;
 import com.streetart.schmoovement.RollerbladeController;
 import com.streetart.schmoovement.WallCollideStatus;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,11 +22,22 @@ public class WallrunMovement extends Movement {
 
     @Override
     public void start() {
-        this.owner.setDeltaMovement(
-                this.owner.getDeltaMovement().x,
-                0,
-                this.owner.getDeltaMovement().z
-        );
+        if (this.owner.getDeltaMovement().y < 0) {
+            this.owner.setDeltaMovement(
+                    this.owner.getDeltaMovement().x,
+                    this.owner.getDeltaMovement().y * 0.25,
+                    this.owner.getDeltaMovement().z
+            );
+        } else {
+            final double maxJumpSpeed = ((LivingEntityInvoker)this.owner).invokeGetJumpPower() * 0.4;
+            if (this.owner.getDeltaMovement().y > maxJumpSpeed) {
+                this.owner.setDeltaMovement(
+                        this.owner.getDeltaMovement().x,
+                        maxJumpSpeed,
+                        this.owner.getDeltaMovement().z
+                );
+            }
+        }
     }
 
     @Override
@@ -58,5 +70,10 @@ public class WallrunMovement extends Movement {
         final double speed = Math.sqrt(newVelocity.dot(newVelocity.x, 0, newVelocity.z));
         newVelocity.fma(speed * 0.25 + 0.25, this.status.getCachedType().normal);
         return newVelocity;
+    }
+
+    @Override
+    public boolean mayFly() {
+        return false;
     }
 }

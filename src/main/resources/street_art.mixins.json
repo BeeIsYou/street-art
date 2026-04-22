@@ -6,6 +6,7 @@
     "ChunkMapInvoker",
     "GameRulesMixin",
     "LevelMixin",
+    "LivingEntityInvoker",
     "PlayerMixin",
     "ServerLevelMixin",
     "rollerblades.EntityMixin",
@@ -18,5 +19,5 @@
   },
   "overwrites": {
     "requireAnnotations": true
-	}
+  }
 }
