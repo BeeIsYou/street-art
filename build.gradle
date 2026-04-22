@@ -103,7 +103,7 @@ publishing {
 
 import com.modrinth.minotaur.dependencies.ModDependency
 modrinth {
-	token = "${streetArtPushTokenModrinth}"
+	token = project.hasProperty("streetArtPushTokenModrinth") ? "${streetArtPushTokenModrinth}" : "noop"
 	projectId = 'n0uMUjJI'
 	versionNumber = "${mod_version}"
 	// versionName = 'My swagalicious release'
