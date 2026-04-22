@@ -14,11 +14,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlotGroup;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.block.DispenserBlock;
 
@@ -31,16 +27,6 @@ import java.util.function.Function;
 public class AllItems {
     public static final List<Item> ROLLERBLADES = new ArrayList<>();
     private static final UseEffects NONE = new UseEffects(true, false, 1);
-    private static final ItemAttributeModifiers TRIP_MODIFIER =
-            ItemAttributeModifiers.builder().add(
-                    Attributes.STEP_HEIGHT,
-                    new AttributeModifier(
-                            StreetArt.id("tripping"),
-                            -0.75,
-                            AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
-                    ),
-                    EquipmentSlotGroup.FEET
-            ).build();
 
     public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
             BuiltInRegistries.CREATIVE_MODE_TAB.key(), StreetArt.id("creative_tab")
@@ -147,7 +133,6 @@ public class AllItems {
                 new Item.Properties().stacksTo(1)
                         .equippable(EquipmentSlot.FEET)
                         .component(AllDataComponents.ROLLER_BLADES, RollerbladeComponent.streetArt(name))
-                        .component(DataComponents.ATTRIBUTE_MODIFIERS, TRIP_MODIFIER)
         );
         ROLLERBLADES.add(item);
         return item;

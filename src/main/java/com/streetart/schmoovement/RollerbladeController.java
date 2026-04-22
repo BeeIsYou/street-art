@@ -1,13 +1,18 @@
 package com.streetart.schmoovement;
 
 import com.streetart.AllDataComponents;
+import com.streetart.StreetArt;
 import com.streetart.schmoovement.movements.AirborneMovement;
 import com.streetart.schmoovement.movements.ChargingMovement;
 import com.streetart.schmoovement.movements.GroundedMovement;
 import com.streetart.schmoovement.movements.Movement;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.Equippable;
@@ -28,10 +33,16 @@ public class RollerbladeController {
     public int stride = 0;
 
     public final double accelCapStart = 0.15;
+    public final double stepBonus = 0.35;
     public final double accelCapEnd = 0.45;
 
     private final List<Movement> movements;
     public Movement currentMovement;
+
+    private static final Identifier STEP_MODIFIER_ZOOMING_ID = StreetArt.id("step_height_zooming");
+    private static final AttributeModifier STEP_MODIFIER_ZOOMING = new AttributeModifier(
+            STEP_MODIFIER_ZOOMING_ID, 0.5F, AttributeModifier.Operation.ADD_VALUE
+    );
 
     public RollerbladeController(final LivingEntity owner) {
         this.owner = owner;
@@ -59,8 +70,14 @@ public class RollerbladeController {
                     this.currentMovement = movement;
                     this.currentMovement.start();
                 }
-                return;
+                break;
             }
+        }
+
+        final AttributeInstance step = this.owner.getAttribute(Attributes.STEP_HEIGHT);
+        step.removeModifier(STEP_MODIFIER_ZOOMING.id());
+        if (this.owner.getDeltaMovement().horizontalDistanceSqr() > this.stepBonus * this.stepBonus) {
+            step.addTransientModifier(STEP_MODIFIER_ZOOMING);
         }
     }
 
