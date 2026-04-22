@@ -9,6 +9,8 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public class EntityMixin {
@@ -30,9 +32,25 @@ public class EntityMixin {
         return accel;
     }
 
+    @Inject(method = "collide", at = @At(value = "RETURN"))
+    private void streetArt$markWallCollide(final Vec3 movement, final CallbackInfoReturnable<Vec3> ci) {
+        if (this instanceof final IHasRollerbladeController controller) {
+            controller.getController().getWallCollideStatus().markCollision(movement, ci.getReturnValue());
+        }
+    }
+
     @WrapOperation(method = "collide", at = @At(value = "INVOKE", target = "onGround"))
     private boolean streetArt$rollerbladeAirStepUp(final Entity instance, final Operation<Boolean> operation) {
         return operation.call(instance) ||
                 (this instanceof final IHasRollerbladeController controller && controller.getController().isZooming());
+    }
+
+    @WrapOperation(method = "getGravity", at = @At(value = "INVOKE", target = "getDefaultGravity"))
+    private double streetArt$rollerbladeModifyGravity(final Entity instance, final Operation<Double> operation) {
+        final double original = operation.call(instance);
+        if (this instanceof final IHasRollerbladeController controller && controller.getController().isActive()) {
+            return controller.getController().currentMovement.modifyGravity(original);
+        }
+        return original;
     }
 }

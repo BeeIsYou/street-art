@@ -2,10 +2,7 @@ package com.streetart.schmoovement;
 
 import com.streetart.AllDataComponents;
 import com.streetart.StreetArt;
-import com.streetart.schmoovement.movements.AirborneMovement;
-import com.streetart.schmoovement.movements.ChargingMovement;
-import com.streetart.schmoovement.movements.GroundedMovement;
-import com.streetart.schmoovement.movements.Movement;
+import com.streetart.schmoovement.movements.*;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -32,6 +29,8 @@ public class RollerbladeController {
     public int airTicks = 0;
     public int stride = 0;
 
+    private final WallCollideStatus wallCollideStatus = new WallCollideStatus();
+
     public final double accelCapStart = 0.15;
     public final double stepBonus = 0.30;
     public final double accelCapEnd = 0.45;
@@ -49,6 +48,7 @@ public class RollerbladeController {
         this.movements = List.of(
                 new ChargingMovement(this, this.owner),
                 new GroundedMovement(this, this.owner),
+                new WallrunMovement(this, this.owner),
                 new AirborneMovement(this, this.owner)
         );
         this.currentMovement = this.movements.getLast();
@@ -56,6 +56,10 @@ public class RollerbladeController {
 
     public boolean coyoteTime() {
         return this.airTicks < 4;
+    }
+
+    public WallCollideStatus getWallCollideStatus() {
+        return this.wallCollideStatus;
     }
 
     public void alwaysTick() {
@@ -70,6 +74,11 @@ public class RollerbladeController {
     }
 
     public void preMove() {
+        if (!this.isActive()) {
+            this.currentMovement.end();
+            this.currentMovement =  this.movements.getLast();
+            this.currentMovement.start();
+        }
         for (final Movement movement : this.movements) {
             if (movement.canContinue()) {
                 if (movement != this.currentMovement) {
@@ -110,6 +119,8 @@ public class RollerbladeController {
         } else {
             this.stride = 0;
         }
+
+        this.wallCollideStatus.testCache(this.owner);
     }
 
     public Vector2d transformAcceleration(final Vector2d input, final Vector2d impulse) {

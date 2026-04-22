@@ -3,8 +3,8 @@ package com.streetart.schmoovement.movements;
 import com.streetart.schmoovement.RollerbladeController;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import org.apache.commons.lang3.NotImplementedException;
 import org.joml.Vector2d;
+import org.joml.Vector3d;
 
 public abstract class Movement {
     protected final RollerbladeController controller;
@@ -31,9 +31,7 @@ public abstract class Movement {
     }
 
     @Override
-    public String toString() {
-        throw new NotImplementedException();
-    }
+    public abstract String toString();
 
     protected final Vector2d getXZInput() {
         final float sin = Mth.sin(this.owner.getYRot() * (float) (Math.PI / 180.0));
@@ -44,4 +42,15 @@ public abstract class Movement {
         );
     }
 
+    public boolean canJump(final boolean onGround) {
+        return onGround;
+    }
+
+    public Vector3d modifyJump(final Vector3d newVelocity) {
+        return newVelocity;
+    }
+
+    public double modifyGravity(final double original) {
+        return original;
+    }
 }

@@ -10,6 +10,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.WalkAnimationState;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements IHasRollerbladeController {
     @Unique
-    private RollerbladeController controller = new RollerbladeController((LivingEntity)(Object)this);
+    private final RollerbladeController controller = new RollerbladeController((LivingEntity)(Object)this);
 
     public RollerbladeController getController() {
         return this.controller;
@@ -72,6 +74,25 @@ public abstract class LivingEntityMixin extends Entity implements IHasRollerblad
         } else {
             operation.call(instance, speed, factor, positionScale);
             ((OverwrittenWalkAnimationState)instance).setLegSweep(1);
+        }
+    }
+
+    @WrapOperation(method = "aiStep", at = @At(value = "INVOKE", target = "onGround"))
+    private boolean streetArt$rollerbladeJumpOverride(final LivingEntity instance, final Operation<Boolean> operation) {
+        if (this.controller.isActive()) {
+            return this.controller.currentMovement.canJump(operation.call(instance));
+        }
+        return operation.call(instance);
+    }
+
+    @WrapOperation(method = "jumpFromGround", at = @At(value = "INVOKE", target = "setDeltaMovement"))
+    private void streetArt$modifyJump(final LivingEntity instance, final double x, final double y, final double z, final Operation<Vec3> operation) {
+        if (this.controller.isActive()) {
+            Vector3d velocity = new Vector3d(x, y, z);
+            velocity = this.controller.currentMovement.modifyJump(velocity);
+            operation.call(instance, velocity.x, velocity.y, velocity.z);
+        } else {
+            operation.call(instance, x, y, z);
         }
     }
 
