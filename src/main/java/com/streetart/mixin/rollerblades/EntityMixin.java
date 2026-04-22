@@ -5,17 +5,13 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.streetart.mixinterface.IHasRollerbladeController;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Entity.class)
 public class EntityMixin {
-    @Shadow
-    private Level level;
     @WrapOperation(method = "moveRelative", at = @At(value = "INVOKE", target = "getInputVector"))
     private Vec3 streetArt$transformAcceleration(final Vec3 input, final float speed,
                                                  final float yRot, final Operation<Vec3> operation) {
@@ -32,5 +28,11 @@ public class EntityMixin {
             }
         }
         return accel;
+    }
+
+    @WrapOperation(method = "collide", at = @At(value = "INVOKE", target = "onGround"))
+    private boolean streetArt$rollerbladeAirStepUp(final Entity instance, final Operation<Boolean> operation) {
+        return operation.call(instance) ||
+                (this instanceof final IHasRollerbladeController controller && controller.getController().isZooming());
     }
 }

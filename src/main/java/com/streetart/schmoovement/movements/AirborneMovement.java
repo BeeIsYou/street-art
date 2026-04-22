@@ -15,8 +15,20 @@ public class AirborneMovement extends GroundedMovement {
     }
 
     @Override
-    public Vector2d transformAcceleration(final Vector2d input, final Vector2d impulse) {
-        return super.transformAcceleration(input, impulse).mul(0.1);
+    public Vector2d transformAcceleration(final Vector2d input, Vector2d impulse) {
+        impulse = super.transformAcceleration(input, impulse);
+
+        final Vector2d vel = new Vector2d(this.owner.getDeltaMovement().x, this.owner.getDeltaMovement().z);
+        final double angle = vel.angle(vel);
+        final double cos = Math.cos(angle) * 0.1; // should limit forwards/backwards acceleration
+        final double sin = Math.sin(angle); // but leave strafing untouched
+
+        impulse.set(
+                impulse.x * cos + impulse.y * sin,
+                impulse.y * cos - impulse.x * sin
+        );
+
+        return impulse;
     }
 
     @Override

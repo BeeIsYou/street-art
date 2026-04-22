@@ -33,7 +33,7 @@ public class RollerbladeController {
     public int stride = 0;
 
     public final double accelCapStart = 0.15;
-    public final double stepBonus = 0.35;
+    public final double stepBonus = 0.30;
     public final double accelCapEnd = 0.45;
 
     private final List<Movement> movements;
@@ -62,6 +62,13 @@ public class RollerbladeController {
         this.active = this.canRoll();
     }
 
+    /**
+     * Moving fast enough for "zooming" tricks. e.g. bonus step height
+     */
+    public boolean isZooming() {
+        return this.isActive() && this.owner.getDeltaMovement().horizontalDistanceSqr() > this.stepBonus * this.stepBonus;
+    }
+
     public void preMove() {
         for (final Movement movement : this.movements) {
             if (movement.canContinue()) {
@@ -76,7 +83,7 @@ public class RollerbladeController {
 
         final AttributeInstance step = this.owner.getAttribute(Attributes.STEP_HEIGHT);
         step.removeModifier(STEP_MODIFIER_ZOOMING.id());
-        if (this.owner.getDeltaMovement().horizontalDistanceSqr() > this.stepBonus * this.stepBonus) {
+        if (this.isZooming()) {
             step.addTransientModifier(STEP_MODIFIER_ZOOMING);
         }
     }
