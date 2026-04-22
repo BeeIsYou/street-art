@@ -1,6 +1,7 @@
 plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
+	id 'com.modrinth.minotaur' version '2.+'
 }
 
 version = project.mod_version
@@ -98,4 +99,19 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
+}
+
+import com.modrinth.minotaur.dependencies.ModDependency
+modrinth {
+	token = "${streetArtPushTokenModrinth}"
+	projectId = 'n0uMUjJI'
+	versionNumber = "${mod_version}"
+	// versionName = 'My swagalicious release'
+	uploadFile = jar
+	gameVersions = ['26.1.1']
+	loaders = ['fabric']
+	dependencies = [
+			new ModDependency('P7dR8mSH', 'required'), // fabric api
+			new ModDependency('IBuXDbma', 'optional')  // area lib
+	]
 }
