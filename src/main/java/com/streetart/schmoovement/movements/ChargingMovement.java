@@ -3,6 +3,7 @@ package com.streetart.schmoovement.movements;
 import com.streetart.schmoovement.RollerbladeController;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Vector2d;
+import org.joml.Vector3d;
 
 public class ChargingMovement extends Movement {
     public ChargingMovement(final RollerbladeController controller, final LivingEntity owner) {
@@ -23,9 +24,23 @@ public class ChargingMovement extends Movement {
     public void end() {
         if (!this.owner.isCrouching()) {
             final Vector2d vel = this.getVelocityOverwrite();
+            final Vector2d delta = new Vector2d(
+                    this.owner.getDeltaMovement().x - vel.x,
+                    this.owner.getDeltaMovement().z - vel.y
+            );
+            this.spawnBoostParticles(delta);
             this.owner.setDeltaMovement(vel.x, this.owner.getDeltaMovement().y, vel.y);
             this.controller.crouchTicks = 0;
         }
+    }
+
+    private void spawnBoostParticles(final Vector2d deltaVel) {
+        this.spawnBlockParticles(
+                new Vector3d(deltaVel.x * 5, 0, deltaVel.y * 5),
+                new Vector3d(this.owner.position().x, this.owner.position().y + 0.1, this.owner.position().z),
+                this.owner.getOnPosLegacy(),
+                10
+        );
     }
 
     private Vector2d getVelocityOverwrite() {

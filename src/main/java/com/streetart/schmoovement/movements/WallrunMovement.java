@@ -3,16 +3,19 @@ package com.streetart.schmoovement.movements;
 import com.streetart.mixin.LivingEntityInvoker;
 import com.streetart.schmoovement.RollerbladeController;
 import com.streetart.schmoovement.WallCollideStatus;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 
 public class WallrunMovement extends Movement {
     private final WallCollideStatus status;
+    private final WindstateMovement windstate;
 
-    public WallrunMovement(final RollerbladeController controller, final LivingEntity owner) {
+    public WallrunMovement(final RollerbladeController controller, final LivingEntity owner, final WindstateMovement windstate) {
         super(controller, owner);
         this.status = controller.getWallCollideStatus();
+        this.windstate = windstate;
     }
 
     @Override
@@ -45,8 +48,30 @@ public class WallrunMovement extends Movement {
 
     }
 
+    private void spawnWallrunParticles(int amount) {
+        this.spawnBlockParticles(
+                new Vector3d(this.status.getCachedType().normal).mul(0.1).add(
+                        -this.owner.getDeltaMovement().x,
+                        1.5,
+                        -this.owner.getDeltaMovement().z
+                ),
+                new Vector3d(this.status.getCachedType().normal).mul(0.1).add(
+                        this.owner.position().x,
+                        this.owner.position().y,
+                        this.owner.position().z
+                ),
+                BlockPos.containing(
+                        this.owner.position().x - this.status.getCachedType().normal.x() * (0.1 + this.owner.getBbWidth()),
+                        this.owner.position().y - this.status.getCachedType().normal.y() * 0.1,
+                        this.owner.position().z - this.status.getCachedType().normal.z() * (0.1 + this.owner.getBbWidth())
+                ),
+                amount
+        );
+    }
+
     @Override
     public Vector2d transformAcceleration(final Vector2d input, final Vector2d impulse) {
+        this.spawnWallrunParticles(1);
         return impulse.zero();
     }
 
@@ -69,7 +94,8 @@ public class WallrunMovement extends Movement {
     public Vector3d modifyJump(final Vector3d newVelocity) {
         final double speed = Math.sqrt(newVelocity.dot(newVelocity.x, 0, newVelocity.z));
         newVelocity.fma(speed * 0.25 + 0.25, this.status.getCachedType().normal);
-        this.controller.transitionTo(this.controller.windstate);
+        this.spawnWallrunParticles(10);
+        this.controller.transitionTo(this.windstate);
         return newVelocity;
     }
 

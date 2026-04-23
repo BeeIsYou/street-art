@@ -9,6 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.WalkAnimationState;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
@@ -22,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements IHasRollerbladeController {
     @Unique
-    private final RollerbladeController controller = new RollerbladeController((LivingEntity)(Object)this);
+    private RollerbladeController controller;
 
     public RollerbladeController getController() {
         return this.controller;
@@ -30,6 +31,15 @@ public abstract class LivingEntityMixin extends Entity implements IHasRollerblad
 
     protected LivingEntityMixin(final EntityType<? extends LivingEntity> type, final Level level) {
         super(type, level);
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void streetArt$initController(CallbackInfo ci) {
+        if ((Object)this instanceof Player) {
+            this.controller = RollerbladeController.advanced((LivingEntity)(Object) this);
+        } else {
+            this.controller = RollerbladeController.simple((LivingEntity)(Object) this);
+        }
     }
 
     @Inject(method = "tick", at = @At("HEAD"))

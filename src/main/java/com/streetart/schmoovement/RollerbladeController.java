@@ -18,6 +18,7 @@ import org.joml.Vector2dc;
 import org.joml.Vector4f;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class RollerbladeController {
     private final LivingEntity owner;
@@ -35,7 +36,6 @@ public class RollerbladeController {
     public final double stepBonus = 0.30;
     public final double accelCapEnd = 0.45;
 
-    public final WindstateMovement windstate;
     private final List<Movement> movements;
     public Movement currentMovement;
 
@@ -44,17 +44,28 @@ public class RollerbladeController {
             STEP_MODIFIER_ZOOMING_ID, 0.5F, AttributeModifier.Operation.ADD_VALUE
     );
 
+    public static RollerbladeController simple(final LivingEntity owner) {
+        return new RollerbladeController(owner, c -> List.of(
+                new GroundedMovement(c, owner)
+        ));
+    }
 
-    public RollerbladeController(final LivingEntity owner) {
+    public static RollerbladeController advanced(final LivingEntity owner) {
+        return new RollerbladeController(owner, c -> {
+            final WindstateMovement windstate = new WindstateMovement(c, owner);
+            return List.of(
+                    new ChargingMovement(c, owner),
+                    new GroundedMovement(c, owner),
+                    new WallrunMovement(c, owner, windstate),
+                    windstate,
+                    new AirborneMovement(c, owner)
+            );
+        });
+    }
+
+    public RollerbladeController(final LivingEntity owner, Function<RollerbladeController, List<Movement>> movements) {
         this.owner = owner;
-        this.windstate = new WindstateMovement(this, this.owner);
-        this.movements = List.of(
-                new ChargingMovement(this, this.owner),
-                new GroundedMovement(this, this.owner),
-                new WallrunMovement(this, this.owner),
-                this.windstate,
-                new AirborneMovement(this, this.owner)
-        );
+        this.movements = movements.apply(this);
         this.currentMovement = this.movements.getLast();
     }
 
@@ -68,6 +79,10 @@ public class RollerbladeController {
 
     public void alwaysTick() {
         this.active = this.canRoll();
+    }
+
+    public boolean isActive() {
+        return this.active && !this.owner.onClimbable() && !this.owner.isSwimming();
     }
 
     /**
@@ -154,10 +169,6 @@ public class RollerbladeController {
         return 1;
     }
 
-    public boolean isActive() {
-        return this.active;
-    }
-
     public static boolean canRollUsing(final ItemStack itemStack, final EquipmentSlot slot) {
         if (!itemStack.has(AllDataComponents.ROLLER_BLADES)) {
             return false;
@@ -223,6 +234,6 @@ public class RollerbladeController {
     }
 
     public Vector4f getAnimationModifiers() {
-        return new Vector4f(1, 1, 1, 1);
+        return new Vector4f(1f, 0.25f, 0.25f, 2.5f);
     }
 }
