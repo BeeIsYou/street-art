@@ -134,10 +134,19 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 			translationBuilder.add(AllItems.CREATIVE_TAB_KEY, "Street Art");
 
+			translationBuilder.add(AllTags.Items.SPRAY_CANS, "Spray Cans");
+			translationBuilder.add(AllTags.Items.PAINT_BALLOONS, "Paint Balloons");
+			translationBuilder.add(AllTags.Items.PAINT_CREATORS, "Paint Creators");
+
 			translationBuilder.add("commands.street_art.clear.success", "Explodiated paint off of %s blocks");
 			translationBuilder.add("commands.street_art.fill.success", "It's all over %s blocks");
 			translationBuilder.add("commands.street_art.count.any_success", "Counted %s %s");
 			translationBuilder.add("commands.street_art.count.color_success", "Counted %s %s with color %s");
+
+			translationBuilder.add("gamerule.category.street_art.game_rules", "Street Art");
+			translationBuilder.add("gamerule.street_art.adventure_painting", "Allow Adventure Players to Paint");
+			translationBuilder.add("gamerule.street_art.non_players_adventure", "Non-Player Painting counts as Adventure");
+			translationBuilder.add("gamerule.street_art.random_decay_speed", "Random Paint Decay Speed");
 		}
 	}
 

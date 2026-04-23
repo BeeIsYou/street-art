@@ -3,6 +3,10 @@
   "commands.street_art.count.any_success": "Counted %s %s",
   "commands.street_art.count.color_success": "Counted %s %s with color %s",
   "commands.street_art.fill.success": "It's all over %s blocks",
+  "gamerule.category.street_art.game_rules": "Street Art",
+  "gamerule.street_art.adventure_painting": "Allow Adventure Players to Paint",
+  "gamerule.street_art.non_players_adventure": "Non-Player Painting counts as Adventure",
+  "gamerule.street_art.random_decay_speed": "Random Paint Decay Speed",
   "item.street_art.black_paint_balloon": "Black Paint Balloon",
   "item.street_art.black_spray_can": "Black Spray Can",
   "item.street_art.blue_paint_balloon": "Blue Paint Balloon",
@@ -81,5 +85,8 @@
   "lore.street_art.sealant": "Preserves your art for generations to come (Operator only)\nHold R-Click and drag to define a region\nL-Click on a region to remove\nSpray paint within will not degrade over time",
   "lore.street_art.water_balloon": "Throw to wash away a small area of paint",
   "lore.street_art.white_spray_can": "The perfect tool for freeform expression\nHold right click to spray in a large cone\nHold left click to spray in a small cone",
-  "lore.street_art.yellow_spray_can": "The perfect tool for freeform expression\nHold right click to spray in a large cone\nHold left click to spray in a small cone"
+  "lore.street_art.yellow_spray_can": "The perfect tool for freeform expression\nHold right click to spray in a large cone\nHold left click to spray in a small cone",
+  "tag.item.street_art.paint_balloons": "Paint Balloons",
+  "tag.item.street_art.paint_creators": "Paint Creators",
+  "tag.item.street_art.spray_cans": "Spray Cans"
 }
