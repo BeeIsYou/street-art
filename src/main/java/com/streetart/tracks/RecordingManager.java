@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class RecordingManager {
     private TrackRecording currentRecording = null;
 
-    public void itemUse(final Player player) {
+    public void itemUseEmptyTrack(final Player player) {
         if (this.currentRecording == null) {
             this.start(player);
         } else {
@@ -26,20 +26,25 @@ public class RecordingManager {
         return this.currentRecording;
     }
 
-    public TrackRecording findHighestPriorityRecording(final Player player) {
+    public TrackRecording findRecording(final Player player) {
         if (this.currentRecording != null) {
             return this.currentRecording;
         }
         for (final ItemStack itemStack : player.getInventory()) {
-            if (itemStack.has(AllDataComponents.TRACK_RECORDING)) {
-                return itemStack.get(AllDataComponents.TRACK_RECORDING);
+            final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+            if (contents != null) {
+                final ItemStack contained = contents.getContained();
+                final TrackRecording recording = contained.get(AllDataComponents.TRACK_RECORDING);
+                if (recording != null) {
+                    return recording;
+                }
             }
         }
         return null;
     }
 
     public void start(final Player player) {
-        if (TapeRecorderItem.hasRecorder(player)) {
+        if (TapeRecorderItem.hasRecorderWithBlankTrack(player)) {
             this.currentRecording = new TrackRecording(new ArrayList<>(TrackRecording.MAX_POINTS));
             player.sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.start"));
         }
@@ -47,7 +52,7 @@ public class RecordingManager {
 
     public void tick(final Player player, final Level level) {
         if (this.currentRecording != null) {
-            if (player == null || level == null || !TapeRecorderItem.hasRecorder(player)) {
+            if (player == null || level == null || !TapeRecorderItem.hasRecorderWithBlankTrack(player)) {
                 this.cancel(player);
             } else {
                 this.currentRecording.tickRecording(player);

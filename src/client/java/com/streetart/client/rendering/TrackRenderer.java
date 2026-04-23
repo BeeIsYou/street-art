@@ -16,7 +16,7 @@ import java.awt.*;
 
 public class TrackRenderer {
     public static void render(final LevelTerrainRenderContext context) {
-        final TrackRecording recording = StreetArt.recordingManager.findHighestPriorityRecording(Minecraft.getInstance().player);
+        final TrackRecording recording = StreetArt.recordingManager.findRecording(Minecraft.getInstance().player);
         if (recording == null) {
             return;
         }

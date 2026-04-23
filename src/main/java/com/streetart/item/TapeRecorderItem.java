@@ -1,12 +1,17 @@
 package com.streetart.item;
 
+import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
 import com.streetart.StreetArt;
+import com.streetart.tracks.TapeRecorderContents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -17,10 +22,28 @@ public class TapeRecorderItem extends Item {
         super(properties);
     }
 
+    public static boolean hasRecorderWithBlankTrack(final Player player) {
+        for (final ItemStack itemStack : player.getInventory()) {
+            final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+            if (contents != null) {
+                final ItemStack contained = contents.getContained();
+                if (contained.is(AllItems.EMPTY_TRACK)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
         if (level.isClientSide()) {
-            StreetArt.recordingManager.itemUse(player);
+            final TapeRecorderContents contents = player.getItemInHand(hand).get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+            if (contents != null) {
+                if (contents.getContained().is(AllItems.EMPTY_TRACK)) {
+                    StreetArt.recordingManager.itemUseEmptyTrack(player);
+                }
+            }
         }
         return InteractionResult.PASS;
     }
@@ -30,7 +53,34 @@ public class TapeRecorderItem extends Item {
         return super.canDestroyBlock(itemStack, state, level, pos, user);
     }
 
-    public static boolean hasRecorder(final Player player) {
-        return player.getInventory().contains(stack -> stack.is(AllItems.TAPE_RECORDER));
+    @Override
+    public boolean overrideOtherStackedOnMe(final ItemStack self, final ItemStack other, final Slot slot, final ClickAction clickAction, final Player player, final SlotAccess carriedItem) {
+        if (clickAction != ClickAction.SECONDARY) {
+            return false;
+        }
+
+        if (!slot.allowModification(player)) {
+            return false;
+        }
+
+        final TapeRecorderContents contents = self.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+
+        if (contents == null || contents.getContained().isEmpty()) {
+            if (TapeRecorderContents.accepts(other)) {
+                // putting tape into recorder
+                self.set(AllDataComponents.TAPE_RECORDER_CONTENTS, new TapeRecorderContents(other));
+                other.setCount(0);
+                return true;
+            }
+        } else {
+            if (other.isEmpty()) {
+                // taking tape out of recorder
+                carriedItem.set(contents.getContained());
+                self.remove(AllDataComponents.TAPE_RECORDER_CONTENTS);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

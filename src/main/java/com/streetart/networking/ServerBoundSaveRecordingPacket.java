@@ -3,7 +3,7 @@ package com.streetart.networking;
 import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
 import com.streetart.StreetArt;
-import com.streetart.item.TapeRecorderItem;
+import com.streetart.tracks.TapeRecorderContents;
 import com.streetart.tracks.TrackRecording;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -26,15 +26,19 @@ public record ServerBoundSaveRecordingPacket(TrackRecording recording) implement
     }
 
     public static void handle(final ServerBoundSaveRecordingPacket packet, final ServerPlayNetworking.Context context) {
-        if (TapeRecorderItem.hasRecorder(context.player())) {
-            final ItemStack track = new ItemStack(AllItems.TRACK);
-            track.set(AllDataComponents.TRACK_RECORDING, packet.recording);
-            if (!context.player().addItem(track)) {
-                context.player().drop(track, false);
+        for (final ItemStack itemStack : context.player().getInventory()) {
+            final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+            if (contents != null) {
+                final ItemStack contained = contents.getContained();
+                if (contained.is(AllItems.EMPTY_TRACK)) {
+                    final ItemStack track = contained.transmuteCopy(AllItems.TRACK);
+                    track.set(AllDataComponents.TRACK_RECORDING, packet.recording);
+                    itemStack.set(AllDataComponents.TAPE_RECORDER_CONTENTS, new TapeRecorderContents(track));
+                    context.player().sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.success"));
+                    return;
+                }
             }
-            context.player().sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.success"));
-        } else {
-            context.player().sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.failure"));
         }
+        context.player().sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.failure"));
     }
 }
