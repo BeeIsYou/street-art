@@ -44,15 +44,21 @@ public class AllItems {
     );
 
     public static PaintBalloonItem WATER_BALLOON = register("water_balloon", PaintBalloonItem::new,
-            new Item.Properties().stacksTo(16).useCooldown(0.5f)
+            new Item.Properties().stacksTo(16).useCooldown(0.25f)
     );
 
     public static Map<DyeColor, PaintBalloonItem> PAINT_BALLOONS = registerDyed("paint_balloon", PaintBalloonItem::new,
-            dye -> new Item.Properties().stacksTo(16).useCooldown(0.5f)
+            dye -> new Item.Properties().stacksTo(16).useCooldown(0.25f)
                     .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
     );
 
     public static Item RED_ROLLERBLADES = registerRollerblades("red_rollerblades");
+
+    public static Item TAPE_RECORDER = register("tape_recorder", TapeRecorderItem::new,
+            new Item.Properties().stacksTo(1).useCooldown(0.25f));
+
+    public static Item TRACK = register("track", Item::new,
+            new Item.Properties().stacksTo(1));
 
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)

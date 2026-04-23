@@ -1,10 +1,12 @@
 package com.streetart.client;
 
 import com.streetart.AllEntityTypes;
+import com.streetart.StreetArt;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.rendering.GraffitiRenderer;
 import com.streetart.client.rendering.TileAtlasManager;
+import com.streetart.client.rendering.TrackRenderer;
 import com.streetart.client.rendering.rollerblades.RollerbladeRenderer;
 import com.streetart.graffiti_data.TileChange;
 import com.streetart.graffiti_data.TileKey;
@@ -31,9 +33,13 @@ public class StreetArtClient implements ClientModInitializer {
 
     public static TileAtlasManager tileAtlasManager;
 
+
     @Override
     public void onInitializeClient() {
-        LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register(GraffitiRenderer::render);
+        LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register(context -> {
+            GraffitiRenderer.render(context);
+            TrackRenderer.render(context);
+        });
 
         ClientLifecycleEvents.CLIENT_STARTED.register(
                 _ -> {
@@ -73,6 +79,7 @@ public class StreetArtClient implements ClientModInitializer {
                     return true;
                 });
             }
+            StreetArt.recordingManager.tick(l.player, l.level);
         });
 
         ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((l, ll) -> {

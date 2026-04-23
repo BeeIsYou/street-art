@@ -1,0 +1,79 @@
+package com.streetart.tracks;
+
+import com.streetart.AllDataComponents;
+import com.streetart.item.TapeRecorderItem;
+import com.streetart.networking.ServerBoundSaveRecordingPacket;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
+
+public class RecordingManager {
+    private TrackRecording currentRecording = null;
+
+    public void itemUse(final Player player) {
+        if (this.currentRecording == null) {
+            this.start(player);
+        } else {
+            this.stop();
+        }
+    }
+
+    public TrackRecording getCurrentRecording() {
+        return this.currentRecording;
+    }
+
+    public TrackRecording findHighestPriorityRecording(final Player player) {
+        if (this.currentRecording != null) {
+            return this.currentRecording;
+        }
+        for (final ItemStack itemStack : player.getInventory()) {
+            if (itemStack.has(AllDataComponents.TRACK_RECORDING)) {
+                return itemStack.get(AllDataComponents.TRACK_RECORDING);
+            }
+        }
+        return null;
+    }
+
+    public void start(final Player player) {
+        if (TapeRecorderItem.hasRecorder(player)) {
+            this.currentRecording = new TrackRecording(new ArrayList<>(TrackRecording.MAX_POINTS));
+            player.sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.start"));
+        }
+    }
+
+    public void tick(final Player player, final Level level) {
+        if (this.currentRecording != null) {
+            if (player == null || level == null || !TapeRecorderItem.hasRecorder(player)) {
+                this.cancel(player);
+            } else {
+                this.currentRecording.tickRecording(player);
+                if (this.currentRecording.needsToStop()) {
+                    this.stop();
+                }
+            }
+        }
+    }
+
+    public void cancel(final Player player) {
+        this.currentRecording = null;
+        if (player != null) {
+            player.sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.cancel"));
+        }
+    }
+
+    public void stop() {
+        ClientPlayNetworking.send(new ServerBoundSaveRecordingPacket(this.currentRecording));
+        this.currentRecording = null;
+        // message sent when server gives item with recording
+    }
+
+    public void markSignificant() {
+        if (this.currentRecording != null) {
+            this.currentRecording.markSignificant();
+        }
+    }
+}

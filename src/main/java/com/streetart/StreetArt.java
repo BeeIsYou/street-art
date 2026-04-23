@@ -4,6 +4,7 @@ import com.streetart.arealib.AreaLib;
 import com.streetart.arealib.AreaLibPresent;
 import com.streetart.managers.GraffitiGlobalManager;
 import com.streetart.networking.*;
+import com.streetart.tracks.RecordingManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -20,6 +21,8 @@ public class StreetArt implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static AreaLib AREA_LIB;
+
+    public static RecordingManager recordingManager = new RecordingManager();
 
     public static Identifier id(final String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
@@ -41,10 +44,11 @@ public class StreetArt implements ModInitializer {
 
         PayloadTypeRegistry.serverboundPlay().register(ServerBoundRequestDataPacket.TYPE, ServerBoundRequestDataPacket.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(BiDirectionalGraffitiChange.TYPE, BiDirectionalGraffitiChange.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ServerBoundSaveRecordingPacket.TYPE, ServerBoundSaveRecordingPacket.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(ServerBoundRequestDataPacket.TYPE, GraffitiGlobalManager::handleRequestPacket);
-
         ServerPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, GraffitiGlobalManager::handleChange);
+        ServerPlayNetworking.registerGlobalReceiver(ServerBoundSaveRecordingPacket.TYPE, ServerBoundSaveRecordingPacket::handle);
 
         ServerPlayerEvents.JOIN.register(ClientBoundGameRuleSync::onJoin);
 

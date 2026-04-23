@@ -2,6 +2,8 @@ package com.streetart.client.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.streetart.AllItems;
+import com.streetart.StreetArt;
 import com.streetart.item.SprayPaintInteractor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -12,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Minecraft.class)
@@ -23,17 +26,28 @@ public class MinecraftMixin {
     @Shadow
     Options options;
 
+    @Unique
+    private boolean wasDown;
+
     @WrapOperation(method = "handleKeybinds",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;continueAttack(Z)V")
     )
     private void streetArt$dontSwingCan(final Minecraft instance, final boolean value, final Operation<Void> operation) {
         final ItemStack mainhand = this.player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (mainhand.getItem() instanceof SprayPaintInteractor && value) {
-            mainhand.use(this.level, this.player, InteractionHand.MAIN_HAND);
-            operation.call(instance, false);
-        } else {
-            operation.call(instance, value);
+        if (value) {
+            if (mainhand.getItem() instanceof SprayPaintInteractor) {
+                mainhand.use(this.level, this.player, InteractionHand.MAIN_HAND);
+                operation.call(instance, false);
+                this.wasDown = true;
+                return;
+            } else if (mainhand.is(AllItems.TAPE_RECORDER) && !this.wasDown) {
+                StreetArt.recordingManager.markSignificant();
+                this.wasDown = true;
+                return;
+            }
         }
+        this.wasDown = value;
+        operation.call(instance, value);
     }
 
     @WrapOperation(method = "handleKeybinds",

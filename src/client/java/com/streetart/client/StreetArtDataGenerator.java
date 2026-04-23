@@ -220,6 +220,8 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 					StreetArt.id("item/pressure_washer/creative_hand"),
 					PRESSURE_WASHER_HAND);
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.TAPE_RECORDER, ModelTemplates.FLAT_ITEM); // todo
+			itemModelGenerators.generateFlatItem(AllItems.TRACK, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);
