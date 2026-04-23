@@ -25,6 +25,11 @@ public class WallCollideStatus {
         }
     }
 
+    public void resetToNone() {
+        this.type = Type.NONE;
+        this.cachedType = Type.NONE;
+    }
+
     public Type getType() {
         return this.type;
     }

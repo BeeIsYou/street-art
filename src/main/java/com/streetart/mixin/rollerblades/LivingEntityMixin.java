@@ -35,6 +35,9 @@ public abstract class LivingEntityMixin extends Entity implements IHasRollerblad
     @Inject(method = "tick", at = @At("HEAD"))
     private void checkRolling(final CallbackInfo ci) {
         this.controller.alwaysTick();
+        if (this.controller.isActive()) {
+            this.resetFallDistance(); // boring to delete fall damage but idc ill put in something more sophisticated later
+        }
     }
 
     @ModifyVariable(method = "travelInAir", at = @At(value = "STORE", ordinal = 0))

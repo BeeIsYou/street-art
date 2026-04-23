@@ -69,6 +69,7 @@ public class WallrunMovement extends Movement {
     public Vector3d modifyJump(final Vector3d newVelocity) {
         final double speed = Math.sqrt(newVelocity.dot(newVelocity.x, 0, newVelocity.z));
         newVelocity.fma(speed * 0.25 + 0.25, this.status.getCachedType().normal);
+        this.controller.transitionTo(this.controller.windstate);
         return newVelocity;
     }
 

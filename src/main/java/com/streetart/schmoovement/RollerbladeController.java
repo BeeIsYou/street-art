@@ -35,6 +35,7 @@ public class RollerbladeController {
     public final double stepBonus = 0.30;
     public final double accelCapEnd = 0.45;
 
+    public final WindstateMovement windstate;
     private final List<Movement> movements;
     public Movement currentMovement;
 
@@ -43,12 +44,15 @@ public class RollerbladeController {
             STEP_MODIFIER_ZOOMING_ID, 0.5F, AttributeModifier.Operation.ADD_VALUE
     );
 
+
     public RollerbladeController(final LivingEntity owner) {
         this.owner = owner;
+        this.windstate = new WindstateMovement(this, this.owner);
         this.movements = List.of(
                 new ChargingMovement(this, this.owner),
                 new GroundedMovement(this, this.owner),
                 new WallrunMovement(this, this.owner),
+                this.windstate,
                 new AirborneMovement(this, this.owner)
         );
         this.currentMovement = this.movements.getLast();
@@ -73,6 +77,12 @@ public class RollerbladeController {
         return this.isActive() && this.owner.getDeltaMovement().horizontalDistanceSqr() > this.stepBonus * this.stepBonus;
     }
 
+    public void transitionTo(final Movement movement) {
+        this.currentMovement.end();
+        this.currentMovement = movement;
+        this.currentMovement.start();
+    }
+
     public void preMove() {
         if (!this.isActive()) {
             this.currentMovement.end();
@@ -82,9 +92,7 @@ public class RollerbladeController {
         for (final Movement movement : this.movements) {
             if (movement.canContinue()) {
                 if (movement != this.currentMovement) {
-                    this.currentMovement.end();
-                    this.currentMovement = movement;
-                    this.currentMovement.start();
+                    this.transitionTo(movement);
                 }
                 break;
             }
