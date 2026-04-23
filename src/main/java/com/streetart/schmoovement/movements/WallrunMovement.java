@@ -9,18 +9,29 @@ import org.joml.Vector2d;
 import org.joml.Vector3d;
 
 public class WallrunMovement extends Movement {
+    private int uses = 3;
     private final WallCollideStatus status;
-    private final WindstateMovement windstate;
+    /**
+     * Enters windstate after a wallrun
+     */
+    private WindstateMovement windstate;
 
-    public WallrunMovement(final RollerbladeController controller, final LivingEntity owner, final WindstateMovement windstate) {
+    public WallrunMovement(final RollerbladeController controller, final LivingEntity owner) {
         super(controller, owner);
         this.status = controller.getWallCollideStatus();
+    }
+
+    public void linkWindstate(final WindstateMovement windstate) {
         this.windstate = windstate;
+    }
+
+    public void resetUses() {
+        this.uses = 3;
     }
 
     @Override
     public boolean canContinue() {
-        return this.status.getCachedType().isColliding();
+        return this.status.getCachedType().isColliding() && this.uses > 0;
     }
 
     @Override
@@ -82,7 +93,7 @@ public class WallrunMovement extends Movement {
 
     @Override
     public double modifyGravity(final double original) {
-        return original * 0.25;
+        return this.uses > 0 ? original * 0.25 : original;
     }
 
     @Override
@@ -92,10 +103,13 @@ public class WallrunMovement extends Movement {
 
     @Override
     public Vector3d modifyJump(final Vector3d newVelocity) {
-        final double speed = Math.sqrt(newVelocity.dot(newVelocity.x, 0, newVelocity.z));
-        newVelocity.fma(speed * 0.25 + 0.25, this.status.getCachedType().normal);
+        final double speed = Math.sqrt(newVelocity.dot(newVelocity.x, 0, newVelocity.z)) * 0.25 + 0.25;
+        newVelocity.fma(speed, this.status.getCachedType().normal);
+        this.uses--;
         this.spawnWallrunParticles(10);
-        this.controller.transitionTo(this.windstate);
+        if (this.windstate != null) {
+            this.controller.transitionTo(this.windstate);
+        }
         return newVelocity;
     }
 

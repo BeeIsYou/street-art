@@ -52,14 +52,17 @@ public class RollerbladeController {
 
     public static RollerbladeController advanced(final LivingEntity owner) {
         return new RollerbladeController(owner, c -> {
+            final ChargingMovement charging = new ChargingMovement(c, owner);
+            final GroundedMovement grounded = new GroundedMovement(c, owner);
+            final WallrunMovement wallrun = new WallrunMovement(c, owner);
             final WindstateMovement windstate = new WindstateMovement(c, owner);
-            return List.of(
-                    new ChargingMovement(c, owner),
-                    new GroundedMovement(c, owner),
-                    new WallrunMovement(c, owner, windstate),
-                    windstate,
-                    new AirborneMovement(c, owner)
-            );
+            final AirborneMovement airborne = new AirborneMovement(c, owner);
+
+            charging.linkWallrun(wallrun);
+            grounded.linkWallrun(wallrun);
+            wallrun.linkWindstate(windstate);
+
+            return List.of(charging, grounded, wallrun, windstate, airborne);
         });
     }
 

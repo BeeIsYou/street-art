@@ -5,8 +5,17 @@ import net.minecraft.world.entity.LivingEntity;
 import org.joml.Vector2d;
 
 public class GroundedMovement extends Movement {
+    /**
+     * Resets efficacy of wallrunning
+     */
+    private WallrunMovement wallrun;
+
     public GroundedMovement(final RollerbladeController controller, final LivingEntity owner) {
         super(controller, owner);
+    }
+
+    public void linkWallrun(final WallrunMovement wallrun) {
+        this.wallrun = wallrun;
     }
 
     @Override
@@ -16,7 +25,9 @@ public class GroundedMovement extends Movement {
 
     @Override
     public void start() {
-
+        if (this.wallrun != null) {
+            this.wallrun.resetUses();
+        }
     }
 
     @Override

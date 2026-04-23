@@ -6,8 +6,17 @@ import org.joml.Vector2d;
 import org.joml.Vector3d;
 
 public class ChargingMovement extends Movement {
+    /**
+     * Resets efficacy of wallrunning
+     */
+    private WallrunMovement wallrun;
+
     public ChargingMovement(final RollerbladeController controller, final LivingEntity owner) {
         super(controller, owner);
+    }
+
+    public void linkWallrun(final WallrunMovement wallrun) {
+        this.wallrun = wallrun;
     }
 
     @Override
@@ -17,7 +26,9 @@ public class ChargingMovement extends Movement {
 
     @Override
     public void start() {
-//        this.controller.crouchTicks = 0;
+        if (this.wallrun != null) {
+            this.wallrun.resetUses();
+        }
     }
 
     @Override
