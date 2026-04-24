@@ -1,0 +1,5 @@
+{
+  "type": "street_art:crafting_special_tape_dye",
+  "dye": "#minecraft:dyes",
+  "target": "street_art:track"
+}

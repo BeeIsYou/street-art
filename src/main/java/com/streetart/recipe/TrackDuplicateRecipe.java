@@ -12,26 +12,26 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
-public class TapeDuplicateRecipe extends CustomRecipe {
-    public static final MapCodec<TapeDuplicateRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+public class TrackDuplicateRecipe extends CustomRecipe {
+    public static final MapCodec<TrackDuplicateRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Ingredient.CODEC.fieldOf("copy_from").forGetter(r -> r.copyFrom),
             Ingredient.CODEC.fieldOf("copy_onto").forGetter(r -> r.copyOnto)
-    ).apply(instance, TapeDuplicateRecipe::new));
+    ).apply(instance, TrackDuplicateRecipe::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, TapeDuplicateRecipe> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, TrackDuplicateRecipe> STREAM_CODEC = StreamCodec.composite(
             Ingredient.CONTENTS_STREAM_CODEC,
             r -> r.copyFrom,
             Ingredient.CONTENTS_STREAM_CODEC,
             r -> r.copyOnto,
-            TapeDuplicateRecipe::new
+            TrackDuplicateRecipe::new
     );
 
-    public static final RecipeSerializer<TapeDuplicateRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+    public static final RecipeSerializer<TrackDuplicateRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
     private final Ingredient copyFrom;
     private final Ingredient copyOnto;
 
-    public TapeDuplicateRecipe(final Ingredient copyFrom, final Ingredient copyOnto) {
+    public TrackDuplicateRecipe(final Ingredient copyFrom, final Ingredient copyOnto) {
         this.copyFrom = copyFrom;
         this.copyOnto = copyOnto;
     }

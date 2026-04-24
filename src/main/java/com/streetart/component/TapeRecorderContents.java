@@ -3,7 +3,7 @@ package com.streetart.component;
 import com.mojang.serialization.Codec;
 import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
-import com.streetart.tracks.TrackRecording;
+import com.streetart.tracks.RecordedTrack;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -52,7 +52,7 @@ public class TapeRecorderContents implements TooltipProvider {
 
     @Override
     public void addToTooltip(final Item.TooltipContext context, final Consumer<Component> consumer, final TooltipFlag flag, final DataComponentGetter components) {
-        final TrackRecording recording = this.getContained().get(AllDataComponents.TRACK_RECORDING);
+        final RecordedTrack recording = this.getContained().get(AllDataComponents.TRACK_RECORDING);
         if (recording != null) {
             recording.addToTooltip(context, consumer, flag, components);
         }

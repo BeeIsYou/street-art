@@ -4,7 +4,8 @@ import com.streetart.AllItems;
 import com.streetart.AllTags;
 import com.streetart.StreetArt;
 import com.streetart.component.TapeRecorderContents;
-import com.streetart.recipe.TapeDuplicateRecipe;
+import com.streetart.recipe.TrackDuplicateRecipe;
+import com.streetart.recipe.TrackDyeRecipe;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
@@ -359,6 +360,8 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 					trackDuplicate(this.output, Ingredient.of(AllItems.TRACK), Ingredient.of(AllItems.BLANK_TRACK),
 							"street_art:copy_track_onto_blank_track");
+					trackDye(this.output, Ingredient.of(AllItems.TRACK), this.tag(ItemTags.DYES),
+							"street_art:dye_track");
 
 					this.shaped(RecipeCategory.MISC, AllItems.TAPE_RECORDER)
 							.define('I', ConventionalItemTags.IRON_INGOTS)
@@ -395,7 +398,12 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		}
 
 		public static void trackDuplicate(RecipeOutput output, final Ingredient copyFrom, final Ingredient copyOnto, final String name) {
-			SpecialRecipeBuilder.special(() -> new TapeDuplicateRecipe(copyFrom, copyOnto))
+			SpecialRecipeBuilder.special(() -> new TrackDuplicateRecipe(copyFrom, copyOnto))
+					.save(output, name);
+		}
+
+		public static void trackDye(RecipeOutput output, final Ingredient target, final Ingredient dye, final String name) {
+			SpecialRecipeBuilder.special(() -> new TrackDyeRecipe(target, dye))
 					.save(output, name);
 		}
 

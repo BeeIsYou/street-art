@@ -4,20 +4,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.streetart.StreetArt;
 import com.streetart.client.mixin.LevelRendererAccessor;
-import com.streetart.tracks.TrackRecording;
+import com.streetart.tracks.RecordedTrack;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
-import java.awt.*;
+import java.util.List;
 
 public class TrackRenderer {
     public static void render(final LevelTerrainRenderContext context) {
-        final TrackRecording currentRecording = StreetArt.recordingManager.getCurrentRecording();
-        final TrackRecording heldRecording = StreetArt.recordingManager.findInventoryRecording(Minecraft.getInstance().player);
+        final List<RecordedTrack.Point> currentRecording = StreetArt.recordingManager.getPoints();
+        final RecordedTrack heldRecording = StreetArt.recordingManager.findInventoryRecording(Minecraft.getInstance().player);
 
         final SubmitNodeStorage storage = ((LevelRendererAccessor)context.levelRenderer()).getSubmitNodeStorage();
 
@@ -30,27 +31,29 @@ public class TrackRenderer {
         storage.submitCustomGeometry(poseStack, renderType, (pose, buffer) -> {
             if (currentRecording != null) {
                 renderTrack(pose, buffer, camPos, currentRecording,
-                        Color.WHITE.getRGB(), Color.LIGHT_GRAY.getRGB(),
+                        DyeColor.WHITE.getTextureDiffuseColor(),
+                        DyeColor.GRAY.getTextureDiffuseColor(),
                         offset, 0.05
                 );
             }
             if (heldRecording != null) {
-                renderTrack(pose, buffer, camPos, heldRecording,
-                        Color.YELLOW.getRGB(), Color.RED.getRGB(),
+                renderTrack(pose, buffer, camPos, heldRecording.getPoints(),
+                        heldRecording.colorA.getTextureDiffuseColor(),
+                        heldRecording.colorB.getTextureDiffuseColor(),
                         offset, 0.05
                 );
             }
         });
     }
 
-    private static void renderTrack(final PoseStack.Pose pose, final VertexConsumer buffer, final Vec3 camPos, final TrackRecording recording,
+    private static void renderTrack(final PoseStack.Pose pose, final VertexConsumer buffer, final Vec3 camPos, final List<RecordedTrack.Point> points,
                                     final int startColor, final int endColor, final double progressOffset, final double speed) {
         final float width = Minecraft.getInstance().gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth * 2;
-        for (int i = 0; i < recording.getPoints().size() - 1; i++) {
+        for (int i = 0; i < points.size() - 1; i++) {
             for (int j = 0; j < 2; j++) {
                 final float progress = (float)(((progressOffset - (i + j) * speed) % 1) + 1) % 1;
                 final int color = mixColors(progress, startColor, endColor);
-                final TrackRecording.Point point = recording.getPoints().get(i+j);
+                final RecordedTrack.Point point = points.get(i+j);
                 buffer.addVertex(
                                 (float) (point.x() - camPos.x),
                                 (float) (point.y() - camPos.y),

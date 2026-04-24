@@ -4,19 +4,23 @@ import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
 import com.streetart.StreetArt;
 import com.streetart.component.TapeRecorderContents;
-import com.streetart.tracks.TrackRecording;
+import com.streetart.tracks.RecordedTrack;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 
-public record ServerBoundSaveRecordingPacket(TrackRecording recording) implements CustomPacketPayload {
+import java.util.List;
+
+public record ServerBoundSaveRecordingPacket(List<RecordedTrack.Point> points) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<ServerBoundSaveRecordingPacket> TYPE  = new Type<>(StreetArt.id("save_recording"));
     public static final StreamCodec<ByteBuf, ServerBoundSaveRecordingPacket> CODEC = StreamCodec.composite(
-            TrackRecording.STREAM_CODEC,
-            ServerBoundSaveRecordingPacket::recording,
+            RecordedTrack.Point.STREAM_CODEC.apply(ByteBufCodecs.list(RecordedTrack.MAX_POINTS)),
+            ServerBoundSaveRecordingPacket::points,
             ServerBoundSaveRecordingPacket::new
     );
 
@@ -33,7 +37,12 @@ public record ServerBoundSaveRecordingPacket(TrackRecording recording) implement
                 if (contained.is(AllItems.BLANK_TRACK)) {
                     final ItemStack track = contained.transmuteCopy(AllItems.TRACK);
                     track.set(AllDataComponents.TRACK_RECORDING,
-                            new TrackRecording(context.player().getPlainTextName(), packet.recording.getPoints())
+                            new RecordedTrack(
+                                    context.player().getPlainTextName(),
+                                    packet.points,
+                                    DyeColor.values()[context.player().getRandom().nextInt(DyeColor.values().length)],
+                                    DyeColor.values()[context.player().getRandom().nextInt(DyeColor.values().length)]
+                            )
                     );
                     itemStack.set(AllDataComponents.TAPE_RECORDER_CONTENTS, new TapeRecorderContents(track));
                     context.player().sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.success"));

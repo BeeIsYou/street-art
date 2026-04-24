@@ -12,7 +12,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipProvider;
@@ -21,57 +21,56 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class TrackRecording implements TooltipProvider {
+public class RecordedTrack implements TooltipProvider {
     public static final int MAX_POINTS = 20*60*2;
 
-    public static final Codec<TrackRecording> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<RecordedTrack> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("author").forGetter(r -> r.author),
-            Point.CODEC.sizeLimitedListOf(MAX_POINTS).fieldOf("points").forGetter(r -> r.recordedTrack)
-    ).apply(instance, TrackRecording::new));
+            Point.CODEC.sizeLimitedListOf(MAX_POINTS).fieldOf("points").forGetter(r -> r.track),
+            DyeColor.CODEC.fieldOf("color_a").forGetter(r -> r.colorA),
+            DyeColor.CODEC.fieldOf("color_b").forGetter(r -> r.colorB)
+    ).apply(instance, RecordedTrack::new));
 
-    public static final StreamCodec<ByteBuf, TrackRecording> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, RecordedTrack> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8,
             r -> r.author,
             ByteBufCodecs.collection(ArrayList::new, Point.STREAM_CODEC, MAX_POINTS),
-            r -> r.recordedTrack,
-            TrackRecording::new
+            r -> r.track,
+            DyeColor.STREAM_CODEC,
+            r -> r.colorA,
+            DyeColor.STREAM_CODEC,
+            r -> r.colorB,
+            RecordedTrack::new
     );
 
     private final String author;
-    private final List<Point> recordedTrack;
-    private boolean nextSignificant = false;
+    private final List<Point> track;
+    public final DyeColor colorA;
+    public final DyeColor colorB;
 
-    public TrackRecording(final String author, final List<Point> recording) {
+    public RecordedTrack(final String author, final List<Point> recording, DyeColor colorA, DyeColor colorB) {
         this.author = author;
-        this.recordedTrack = recording;
+        this.track = recording;
+        this.colorA = colorA;
+        this.colorB = colorB;
+    }
+
+    public RecordedTrack redye(DyeColor colorA, DyeColor colorB) {
+        return new RecordedTrack(
+                this.author,
+                this.track,
+                colorA,
+                colorB
+        );
     }
 
     public List<Point> getPoints() {
-        return this.recordedTrack;
+        return this.track;
     }
 
-    public void tickRecording(final Entity recorder) {
-        if (this.recordedTrack.size() < MAX_POINTS) {
-            this.recordedTrack.add(new Point(
-                    recorder.position().x,
-                    recorder.position().y + 0.1,
-                    recorder.position().z,
-                    this.nextSignificant
-            ));
-            this.nextSignificant = false;
-        }
-    }
 
     public float getDuration() {
-        return this.recordedTrack.size() / 20f;
-    }
-
-    public void markSignificant() {
-        this.nextSignificant = true;
-    }
-
-    public boolean needsToStop() {
-        return this.recordedTrack.size() == MAX_POINTS;
+        return this.track.size() / 20f;
     }
 
     @Override
@@ -90,11 +89,11 @@ public class TrackRecording implements TooltipProvider {
         }
         consumer.accept(component.withStyle(ChatFormatting.GOLD));
 
-        if (!this.recordedTrack.isEmpty()) {
+        if (!this.track.isEmpty()) {
             final BlockPos origin = BlockPos.containing(
-                    this.recordedTrack.getFirst().x,
-                    this.recordedTrack.getFirst().y,
-                    this.recordedTrack.getFirst().z
+                    this.track.getFirst().x,
+                    this.track.getFirst().y,
+                    this.track.getFirst().z
             );
             consumer.accept(Component.translatable("street_art.track.start_position", origin.getX(), origin.getY(), origin.getZ()).withStyle(ChatFormatting.GRAY));
         }
