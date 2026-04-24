@@ -45,7 +45,7 @@ public class TapeRecorderItem extends Item {
                 }
             }
         }
-        return InteractionResult.PASS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

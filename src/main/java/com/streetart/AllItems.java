@@ -35,6 +35,7 @@ public class AllItems {
     public static Map<DyeColor, SprayCanItem> SPRAY_CANS = registerDyed("spray_can", SprayCanItem::new,
             dye -> new Item.Properties().stacksTo(1)
                     .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
+                    .component(AllDataComponents.BUNDLE_STACK_SIZE_OVERRIDE, 16)
                     .component(DataComponents.USE_EFFECTS, NONE)
     );
 
@@ -55,7 +56,7 @@ public class AllItems {
     public static Item RED_ROLLERBLADES = registerRollerblades("red_rollerblades");
 
     public static Item TAPE_RECORDER = register("tape_recorder", TapeRecorderItem::new,
-            new Item.Properties().stacksTo(1).useCooldown(0.25f));
+            new Item.Properties().stacksTo(1).useCooldown(1f));
 
     public static Item BLANK_TRACK = register("blank_track", Item::new,
             new Item.Properties());
