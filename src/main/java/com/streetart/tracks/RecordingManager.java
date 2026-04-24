@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class RecordingManager {
@@ -30,18 +31,19 @@ public class RecordingManager {
         return this.points;
     }
 
-    public RecordedTrack findInventoryRecording(final Player player) {
+    public Collection<RecordedTrack> findInventoryRecordings(final Player player) {
+        final List<RecordedTrack> recordings = new ArrayList<>();
         for (final ItemStack itemStack : player.getInventory()) {
             final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
             if (contents != null) {
                 final ItemStack contained = contents.getContained();
                 final RecordedTrack recording = contained.get(AllDataComponents.TRACK_RECORDING);
                 if (recording != null) {
-                    return recording;
+                    recordings.add(recording);
                 }
             }
         }
-        return null;
+        return recordings;
     }
 
     public void start(final Player player) {

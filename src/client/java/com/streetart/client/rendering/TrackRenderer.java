@@ -13,12 +13,13 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Collection;
 import java.util.List;
 
 public class TrackRenderer {
     public static void render(final LevelTerrainRenderContext context) {
         final List<RecordedTrack.Point> currentRecording = StreetArt.recordingManager.getPoints();
-        final RecordedTrack heldRecording = StreetArt.recordingManager.findInventoryRecording(Minecraft.getInstance().player);
+        final Collection<RecordedTrack> heldRecordings = StreetArt.recordingManager.findInventoryRecordings(Minecraft.getInstance().player);
 
         final SubmitNodeStorage storage = ((LevelRendererAccessor)context.levelRenderer()).getSubmitNodeStorage();
 
@@ -27,42 +28,58 @@ public class TrackRenderer {
 
         final RenderType renderType = RenderTypes.lines();
         final double partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
-        final double offset = (partialTick + context.levelState().gameTime % 20) * 0.05;
+        final double offset = 1 - (partialTick + context.levelState().gameTime % 20) / 20f;
         storage.submitCustomGeometry(poseStack, renderType, (pose, buffer) -> {
             if (currentRecording != null) {
                 renderTrack(pose, buffer, camPos, currentRecording,
-                        DyeColor.WHITE.getTextureDiffuseColor(),
-                        DyeColor.GRAY.getTextureDiffuseColor(),
-                        offset, 0.05
+                        DyeColor.WHITE.getTextColor(),
+                        DyeColor.GRAY.getTextColor(),
+                        offset, 0.05f
                 );
             }
-            if (heldRecording != null) {
-                renderTrack(pose, buffer, camPos, heldRecording.getPoints(),
-                        heldRecording.colorA.getTextureDiffuseColor(),
-                        heldRecording.colorB.getTextureDiffuseColor(),
-                        offset, 0.05
+            for (final RecordedTrack recording : heldRecordings) {
+                renderTrack(pose, buffer, camPos, recording.getPoints(),
+                        recording.colorA.getTextColor(),
+                        recording.colorB.getTextColor(),
+                        offset, 0.05f
                 );
             }
         });
     }
 
     private static void renderTrack(final PoseStack.Pose pose, final VertexConsumer buffer, final Vec3 camPos, final List<RecordedTrack.Point> points,
-                                    final int startColor, final int endColor, final double progressOffset, final double speed) {
-        final float width = Minecraft.getInstance().gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth * 2;
-        for (int i = 0; i < points.size() - 1; i++) {
-            for (int j = 0; j < 2; j++) {
-                final float progress = (float)(((progressOffset - (i + j) * speed) % 1) + 1) % 1;
-                final int color = mixColors(progress, startColor, endColor);
-                final RecordedTrack.Point point = points.get(i+j);
-                buffer.addVertex(
-                                (float) (point.x() - camPos.x),
-                                (float) (point.y() - camPos.y),
-                                (float) (point.z() - camPos.z))
-                        .setColor(color)
-                        .setLineWidth(width)
-                        .setNormal(0, 1, 0);
-            }
+                                    final int startColor, final int endColor, final double progressOffset, final float frequency) {
+        final float width = Minecraft.getInstance().gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth;
+        float progress = (float)(progressOffset % 1);
+        int color = mixColors(progress, startColor, endColor);
+        for (int i = 1; i < points.size(); i++) {
+            final float nextProgress = (progress + frequency) % 1;
+            final int nextColor = mixColors(nextProgress, startColor, endColor);
+            renderLine(pose, buffer, camPos,
+                    points.get(i - 1), points.get(i),
+                    color, nextColor, width);
+            progress = nextProgress;
+            color = nextColor;
         }
+    }
+
+    private static void renderLine(final PoseStack.Pose pose, final VertexConsumer buffer, final Vec3 camPos,
+                                   final RecordedTrack.Point a, final RecordedTrack.Point b,
+                                   final int colorA, final int colorB, final float baseWidth) {
+        buffer.addVertex(
+                        (float) (a.x() - camPos.x),
+                        (float) (a.y() - camPos.y),
+                        (float) (a.z() - camPos.z))
+                .setColor(colorA)
+                .setLineWidth(baseWidth)
+                .setNormal((float) (b.x() - a.x()), (float) (b.y() - a.y()), (float) (b.z() - a.z()));
+        buffer.addVertex(
+                        (float) (b.x() - camPos.x),
+                        (float) (b.y() - camPos.y),
+                        (float) (b.z() - camPos.z))
+                .setColor(colorB)
+                .setLineWidth(baseWidth)
+                .setNormal((float) (b.x() - a.x()), (float) (b.y() - a.y()), (float) (b.z() - a.z()));
     }
 
     public static int mixColors(final float mix, final int from, final int to) {
