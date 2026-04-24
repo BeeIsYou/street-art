@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "street_art:item/empty_track"
+    "layer0": "street_art:item/tape_recorder_blank"
   }
 }

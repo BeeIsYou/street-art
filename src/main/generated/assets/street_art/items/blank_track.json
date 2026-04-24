@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "street_art:item/empty_track"
+    "model": "street_art:item/blank_track"
   }
 }

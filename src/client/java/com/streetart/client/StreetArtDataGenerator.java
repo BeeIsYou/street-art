@@ -98,6 +98,27 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 							Why called rollerblade if no sword"""
 			); // todo ran out of funny juice :(
 
+			translationBuilder.add(AllItems.TAPE_RECORDER, "Tape Recorder");
+			translationBuilder.add("lore.street_art.tape_recorder",
+					"""
+							Insert a blank tape and right click to record your path
+							Right click again to finish recording
+							Share your routes and slick tricks"""
+			);
+
+			translationBuilder.add(AllItems.BLANK_TRACK, "Blank Track");
+			translationBuilder.add("lore.street_art.blank_track",
+					"""
+							Insert into a tape recorder to record a path"""
+			);
+
+			translationBuilder.add(AllItems.TRACK, "Track");
+			translationBuilder.add("lore.street_art.track",
+					"""
+							A recorded path
+							Insert into a tape recorder to view it"""
+			);
+
 			translationBuilder.add(AllItems.CREATIVE_PRESSURE_WASHER, "Creative Pressure Washer");
 			translationBuilder.add("lore.street_art.creative_pressure_washer",
 					"""
@@ -139,6 +160,15 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllTags.Items.SPRAY_CANS, "Spray Cans");
 			translationBuilder.add(AllTags.Items.PAINT_BALLOONS, "Paint Balloons");
 			translationBuilder.add(AllTags.Items.PAINT_CREATORS, "Paint Creators");
+
+			translationBuilder.add("street_art.tape_recorder.message.start", "Track Recording Started");
+			translationBuilder.add("street_art.tape_recorder.message.cancel", "Track Recording Cancelled");
+			translationBuilder.add("street_art.tape_recorder.message.success", "Track Successfully Recorded");
+			translationBuilder.add("street_art.tape_recorder.message.failure", "Track Recording Failed :(");
+
+			translationBuilder.add("street_art.track.author", "Recorded by: %s");
+			translationBuilder.add("street_art.track.duration.seconds", "Duration: %ss");
+			translationBuilder.add("street_art.track.duration.minutes_seconds", "Duration: %s:%s");
 
 			translationBuilder.add("commands.street_art.clear.success", "Explodiated paint off of %s blocks");
 			translationBuilder.add("commands.street_art.fill.success", "It's all over %s blocks");
@@ -200,13 +230,13 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		}
 
 		public static void generateTapeRecorder(final ItemModelGenerators itemModelGenerators, final Item item,
-                                                final Identifier emptyName, final Identifier blankName, final Identifier recordedName) {
+                                                final Identifier emptyName, final Identifier blankName, final Identifier trackName) {
 			final Identifier emptyModel = ModelTemplates.FLAT_ITEM.create(emptyName, TextureMapping.layer0(new Material(emptyName, false)), itemModelGenerators.modelOutput);
 			final Identifier blankModel = ModelTemplates.FLAT_ITEM.create(blankName, TextureMapping.layer0(new Material(blankName, false)), itemModelGenerators.modelOutput);
-			final Identifier recordedModel = ModelTemplates.FLAT_ITEM.create(recordedName, TextureMapping.layer0(new Material(recordedName, false)), itemModelGenerators.modelOutput);
+			final Identifier trackModel = ModelTemplates.FLAT_ITEM.create(trackName, TextureMapping.layer0(new Material(trackName, false)), itemModelGenerators.modelOutput);
 			final ItemModel.Unbaked empty = ItemModelUtils.plainModel(emptyModel);
 			final ItemModel.Unbaked blank = ItemModelUtils.plainModel(blankModel);
-			final ItemModel.Unbaked recorded = ItemModelUtils.plainModel(recordedModel);
+			final ItemModel.Unbaked recorded = ItemModelUtils.plainModel(trackModel);
 			final ItemModel.Unbaked cases = ItemModelUtils.select(
 					new TapeRecorderContentsPropery(TapeRecorderContents.State.EMPTY),
 					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.EMPTY), empty),
@@ -239,10 +269,10 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 					StreetArt.id("item/pressure_washer/creative_hand"),
 					PRESSURE_WASHER_HAND);
 			generateTapeRecorder(itemModelGenerators, AllItems.TAPE_RECORDER,
-					StreetArt.id("item/tape_recorder"),
-					StreetArt.id("item/tape_recorder_closed_blank"),
-					StreetArt.id("item/tape_recorder_closed"));
-			itemModelGenerators.generateFlatItem(AllItems.EMPTY_TRACK, ModelTemplates.FLAT_ITEM);
+					StreetArt.id("item/tape_recorder_empty"),
+					StreetArt.id("item/tape_recorder_blank"),
+					StreetArt.id("item/tape_recorder_track"));
+			itemModelGenerators.generateFlatItem(AllItems.BLANK_TRACK, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.TRACK, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);

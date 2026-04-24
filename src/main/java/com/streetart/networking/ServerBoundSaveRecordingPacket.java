@@ -30,9 +30,11 @@ public record ServerBoundSaveRecordingPacket(TrackRecording recording) implement
             final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
             if (contents != null) {
                 final ItemStack contained = contents.getContained();
-                if (contained.is(AllItems.EMPTY_TRACK)) {
+                if (contained.is(AllItems.BLANK_TRACK)) {
                     final ItemStack track = contained.transmuteCopy(AllItems.TRACK);
-                    track.set(AllDataComponents.TRACK_RECORDING, packet.recording);
+                    track.set(AllDataComponents.TRACK_RECORDING,
+                            new TrackRecording(context.player().getPlainTextName(), packet.recording.getPoints())
+                    );
                     itemStack.set(AllDataComponents.TAPE_RECORDER_CONTENTS, new TapeRecorderContents(track));
                     context.player().sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.success"));
                     return;

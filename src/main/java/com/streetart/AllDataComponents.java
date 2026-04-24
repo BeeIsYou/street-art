@@ -2,6 +2,7 @@ package com.streetart;
 
 import com.streetart.component.*;
 import com.streetart.tracks.TrackRecording;
+import net.fabricmc.fabric.api.item.v1.ItemComponentTooltipProviderRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,7 +34,10 @@ public class AllDataComponents {
             .networkSynchronized(AreaSelectComponent.BYTE_CODEC)
     );
 
-    public static void init() {}
+    public static void init() {
+        ItemComponentTooltipProviderRegistry.addLast(TRACK_RECORDING);
+        ItemComponentTooltipProviderRegistry.addLast(TAPE_RECORDER_CONTENTS);
+    }
 
     private static <T> DataComponentType<T> register(final String id, final UnaryOperator<DataComponentType.Builder<T>> builder) {
         return Registry.register(

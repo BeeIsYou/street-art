@@ -57,7 +57,7 @@ public class AllItems {
     public static Item TAPE_RECORDER = register("tape_recorder", TapeRecorderItem::new,
             new Item.Properties().stacksTo(1).useCooldown(0.25f));
 
-    public static Item EMPTY_TRACK = register("empty_track", Item::new,
+    public static Item BLANK_TRACK = register("blank_track", Item::new,
             new Item.Properties().stacksTo(1));
 
     public static Item TRACK = register("track", Item::new,

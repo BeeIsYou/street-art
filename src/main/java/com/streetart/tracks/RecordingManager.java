@@ -46,7 +46,7 @@ public class RecordingManager {
 
     public void start(final Player player) {
         if (TapeRecorderItem.hasRecorderWithBlankTrack(player)) {
-            this.currentRecording = new TrackRecording(new ArrayList<>(TrackRecording.MAX_POINTS));
+            this.currentRecording = new TrackRecording(player.getPlainTextName(), new ArrayList<>(TrackRecording.MAX_POINTS));
             player.sendOverlayMessage(Component.translatable("street_art.tape_recorder.message.start"));
         }
     }

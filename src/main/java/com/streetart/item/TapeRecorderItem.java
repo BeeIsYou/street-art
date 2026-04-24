@@ -27,7 +27,7 @@ public class TapeRecorderItem extends Item {
             final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
             if (contents != null) {
                 final ItemStack contained = contents.getContained();
-                if (contained.is(AllItems.EMPTY_TRACK)) {
+                if (contained.is(AllItems.BLANK_TRACK)) {
                     return true;
                 }
             }
@@ -40,7 +40,7 @@ public class TapeRecorderItem extends Item {
         if (level.isClientSide()) {
             final TapeRecorderContents contents = player.getItemInHand(hand).get(AllDataComponents.TAPE_RECORDER_CONTENTS);
             if (contents != null) {
-                if (contents.getContained().is(AllItems.EMPTY_TRACK)) {
+                if (contents.getContained().is(AllItems.BLANK_TRACK)) {
                     StreetArt.recordingManager.itemUseEmptyTrack(player);
                 }
             }
