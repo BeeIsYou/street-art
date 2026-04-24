@@ -3,7 +3,7 @@ package com.streetart.item;
 import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
 import com.streetart.StreetArt;
-import com.streetart.tracks.TapeRecorderContents;
+import com.streetart.component.TapeRecorderContents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -68,8 +68,8 @@ public class TapeRecorderItem extends Item {
         if (contents == null || contents.getContained().isEmpty()) {
             if (TapeRecorderContents.accepts(other)) {
                 // putting tape into recorder
-                self.set(AllDataComponents.TAPE_RECORDER_CONTENTS, new TapeRecorderContents(other));
-                other.setCount(0);
+                self.set(AllDataComponents.TAPE_RECORDER_CONTENTS, new TapeRecorderContents(other.copyWithCount(1)));
+                other.shrink(1);
                 return true;
             }
         } else {
@@ -77,6 +77,12 @@ public class TapeRecorderItem extends Item {
                 // taking tape out of recorder
                 carriedItem.set(contents.getContained());
                 self.remove(AllDataComponents.TAPE_RECORDER_CONTENTS);
+                return true;
+            } else if (TapeRecorderContents.accepts(other) && other.getCount() == 1) {
+                // swapping tapes
+                final TapeRecorderContents newContents = new TapeRecorderContents(other);
+                carriedItem.set(contents.getContained());
+                self.set(AllDataComponents.TAPE_RECORDER_CONTENTS, newContents);
                 return true;
             }
         }

@@ -1,6 +1,7 @@
 package com.streetart.tracks;
 
 import com.streetart.AllDataComponents;
+import com.streetart.component.TapeRecorderContents;
 import com.streetart.item.TapeRecorderItem;
 import com.streetart.networking.ServerBoundSaveRecordingPacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;

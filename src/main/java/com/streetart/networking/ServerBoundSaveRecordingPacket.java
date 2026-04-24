@@ -3,7 +3,7 @@ package com.streetart.networking;
 import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
 import com.streetart.StreetArt;
-import com.streetart.tracks.TapeRecorderContents;
+import com.streetart.component.TapeRecorderContents;
 import com.streetart.tracks.TrackRecording;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;

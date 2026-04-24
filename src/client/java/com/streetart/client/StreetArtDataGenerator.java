@@ -3,6 +3,7 @@ package com.streetart.client;
 import com.streetart.AllItems;
 import com.streetart.AllTags;
 import com.streetart.StreetArt;
+import com.streetart.component.TapeRecorderContents;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
@@ -15,6 +16,7 @@ import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.*;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.SelectItemModel;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -197,6 +199,23 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			));
 		}
 
+		public static void generateTapeRecorder(final ItemModelGenerators itemModelGenerators, final Item item,
+                                                final Identifier emptyName, final Identifier blankName, final Identifier recordedName) {
+			final Identifier emptyModel = ModelTemplates.FLAT_ITEM.create(emptyName, TextureMapping.layer0(new Material(emptyName, false)), itemModelGenerators.modelOutput);
+			final Identifier blankModel = ModelTemplates.FLAT_ITEM.create(blankName, TextureMapping.layer0(new Material(blankName, false)), itemModelGenerators.modelOutput);
+			final Identifier recordedModel = ModelTemplates.FLAT_ITEM.create(recordedName, TextureMapping.layer0(new Material(recordedName, false)), itemModelGenerators.modelOutput);
+			final ItemModel.Unbaked empty = ItemModelUtils.plainModel(emptyModel);
+			final ItemModel.Unbaked blank = ItemModelUtils.plainModel(blankModel);
+			final ItemModel.Unbaked recorded = ItemModelUtils.plainModel(recordedModel);
+			final ItemModel.Unbaked cases = ItemModelUtils.select(
+					new TapeRecorderContentsPropery(TapeRecorderContents.State.EMPTY),
+					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.EMPTY), empty),
+					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.BLANK), blank),
+					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.RECORDED), recorded)
+			);
+			itemModelGenerators.itemModelOutput.accept(item, cases);
+		}
+
 		@Override
 		public void generateItemModels(final ItemModelGenerators itemModelGenerators) {
 			AllItems.SPRAY_CANS.forEach((color, item) -> {
@@ -219,10 +238,13 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 					StreetArt.id("item/pressure_washer/creative_item"),
 					StreetArt.id("item/pressure_washer/creative_hand"),
 					PRESSURE_WASHER_HAND);
-			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
-			itemModelGenerators.generateFlatItem(AllItems.TAPE_RECORDER, ModelTemplates.FLAT_ITEM); // todo
+			generateTapeRecorder(itemModelGenerators, AllItems.TAPE_RECORDER,
+					StreetArt.id("item/tape_recorder"),
+					StreetArt.id("item/tape_recorder_closed_blank"),
+					StreetArt.id("item/tape_recorder_closed"));
 			itemModelGenerators.generateFlatItem(AllItems.EMPTY_TRACK, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.TRACK, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);

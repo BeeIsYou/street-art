@@ -1,10 +1,6 @@
 package com.streetart;
 
-import com.streetart.component.AreaSelectComponent;
-import com.streetart.component.ChargeComponent;
-import com.streetart.component.ColorComponent;
-import com.streetart.component.RollerbladeComponent;
-import com.streetart.tracks.TapeRecorderContents;
+import com.streetart.component.*;
 import com.streetart.tracks.TrackRecording;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -27,6 +23,8 @@ public class AllDataComponents {
 
     public static final DataComponentType<TapeRecorderContents> TAPE_RECORDER_CONTENTS = register("tape_recorder_contents", builder -> builder
             .persistent(TapeRecorderContents.CODEC).networkSynchronized(TapeRecorderContents.STREAM_CODEC));
+
+
 
     public static final DataComponentType<TrackRecording> TRACK_RECORDING = register("track_recording", builder -> builder
             .persistent(TrackRecording.CODEC).networkSynchronized(TrackRecording.STREAM_CODEC));
