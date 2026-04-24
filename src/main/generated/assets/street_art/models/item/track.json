@@ -1,6 +1,8 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "street_art:item/track"
+    "layer0": "street_art:item/track/base",
+    "layer1": "street_art:item/track/color_a",
+    "layer2": "street_art:item/track/color_b"
   }
 }

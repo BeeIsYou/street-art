@@ -1,6 +1,22 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "street_art:item/track"
+    "model": "street_art:item/track",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      },
+      {
+        "type": "street_art:track_color",
+        "default": -5231066,
+        "first": true
+      },
+      {
+        "type": "street_art:track_color",
+        "default": -425955,
+        "first": false
+      }
+    ]
   }
 }

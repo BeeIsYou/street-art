@@ -105,6 +105,7 @@ public class StreetArtClient implements ClientModInitializer {
 
         new RollerbladeRenderer().init();
         AllDataComponentProperties.init();
+        AllTintSources.init();
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
             ClientAreaLibStuff.init();

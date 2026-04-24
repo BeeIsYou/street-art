@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.*;
@@ -231,19 +232,35 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			));
 		}
 
+		public static void generateTrack(final ItemModelGenerators itemModelGenerators, final Item item,
+										 final Identifier target, final Identifier base, final Identifier colorA, final Identifier colorB) {
+			itemModelGenerators.generateLayeredItem(target, new Material(base), new Material(colorA), new Material(colorB));
+			final ItemModel.Unbaked model = ItemModelUtils.tintedModel(
+					target,
+					new Constant(-1),
+					new TrackTintSource(DyeColor.RED.getTextureDiffuseColor(), true),
+					new TrackTintSource(DyeColor.ORANGE.getTextureDiffuseColor(), false));
+
+			itemModelGenerators.itemModelOutput.accept(item, model);
+		}
+
 		public static void generateTapeRecorder(final ItemModelGenerators itemModelGenerators, final Item item,
-                                                final Identifier emptyName, final Identifier blankName, final Identifier trackName) {
+                                                final Identifier emptyName, final Identifier blankName, final Identifier trackName, final Identifier colorA, final Identifier colorB) {
 			final Identifier emptyModel = ModelTemplates.FLAT_ITEM.create(emptyName, TextureMapping.layer0(new Material(emptyName, false)), itemModelGenerators.modelOutput);
 			final Identifier blankModel = ModelTemplates.FLAT_ITEM.create(blankName, TextureMapping.layer0(new Material(blankName, false)), itemModelGenerators.modelOutput);
-			final Identifier trackModel = ModelTemplates.FLAT_ITEM.create(trackName, TextureMapping.layer0(new Material(trackName, false)), itemModelGenerators.modelOutput);
+			itemModelGenerators.generateLayeredItem(trackName, new Material(trackName), new Material(colorA), new Material(colorB));
 			final ItemModel.Unbaked empty = ItemModelUtils.plainModel(emptyModel);
 			final ItemModel.Unbaked blank = ItemModelUtils.plainModel(blankModel);
-			final ItemModel.Unbaked recorded = ItemModelUtils.plainModel(trackModel);
+			final ItemModel.Unbaked track = ItemModelUtils.tintedModel(
+					trackName,
+					new Constant(-1),
+					new TrackTintSource(DyeColor.RED.getTextureDiffuseColor(), true),
+					new TrackTintSource(DyeColor.ORANGE.getTextureDiffuseColor(), false));
 			final ItemModel.Unbaked cases = ItemModelUtils.select(
 					new TapeRecorderContentsPropery(TapeRecorderContents.State.EMPTY),
 					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.EMPTY), empty),
 					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.BLANK), blank),
-					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.RECORDED), recorded)
+					new SelectItemModel.SwitchCase<>(List.of(TapeRecorderContents.State.RECORDED), track)
 			);
 			itemModelGenerators.itemModelOutput.accept(item, cases);
 		}
@@ -271,11 +288,16 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 					StreetArt.id("item/pressure_washer/creative_hand"),
 					PRESSURE_WASHER_HAND);
 			generateTapeRecorder(itemModelGenerators, AllItems.TAPE_RECORDER,
-					StreetArt.id("item/tape_recorder_empty"),
-					StreetArt.id("item/tape_recorder_blank"),
-					StreetArt.id("item/tape_recorder_track"));
+					StreetArt.id("item/tape_recorder/empty"),
+					StreetArt.id("item/tape_recorder/blank"),
+					StreetArt.id("item/tape_recorder/base"),
+					StreetArt.id("item/tape_recorder/color_a"),
+					StreetArt.id("item/tape_recorder/color_b"));
 			itemModelGenerators.generateFlatItem(AllItems.BLANK_TRACK, ModelTemplates.FLAT_ITEM);
-			itemModelGenerators.generateFlatItem(AllItems.TRACK, ModelTemplates.FLAT_ITEM);
+			generateTrack(itemModelGenerators, AllItems.TRACK, StreetArt.id("item/track"),
+					StreetArt.id("item/track/base"),
+					StreetArt.id("item/track/color_a"),
+					StreetArt.id("item/track/color_b"));
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
@@ -397,12 +419,12 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 					.requires(dye);
 		}
 
-		public static void trackDuplicate(RecipeOutput output, final Ingredient copyFrom, final Ingredient copyOnto, final String name) {
+		public static void trackDuplicate(final RecipeOutput output, final Ingredient copyFrom, final Ingredient copyOnto, final String name) {
 			SpecialRecipeBuilder.special(() -> new TrackDuplicateRecipe(copyFrom, copyOnto))
 					.save(output, name);
 		}
 
-		public static void trackDye(RecipeOutput output, final Ingredient target, final Ingredient dye, final String name) {
+		public static void trackDye(final RecipeOutput output, final Ingredient target, final Ingredient dye, final String name) {
 			SpecialRecipeBuilder.special(() -> new TrackDyeRecipe(target, dye))
 					.save(output, name);
 		}

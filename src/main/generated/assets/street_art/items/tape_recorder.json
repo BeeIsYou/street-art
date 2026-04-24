@@ -5,21 +5,37 @@
       {
         "model": {
           "type": "minecraft:model",
-          "model": "street_art:item/tape_recorder_empty"
+          "model": "street_art:item/tape_recorder/empty"
         },
         "when": "empty"
       },
       {
         "model": {
           "type": "minecraft:model",
-          "model": "street_art:item/tape_recorder_blank"
+          "model": "street_art:item/tape_recorder/blank"
         },
         "when": "blank"
       },
       {
         "model": {
           "type": "minecraft:model",
-          "model": "street_art:item/tape_recorder_track"
+          "model": "street_art:item/tape_recorder/base",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "street_art:track_color",
+              "default": -5231066,
+              "first": true
+            },
+            {
+              "type": "street_art:track_color",
+              "default": -425955,
+              "first": false
+            }
+          ]
         },
         "when": "recorded"
       }
