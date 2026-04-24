@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 
@@ -36,12 +37,18 @@ public record ServerBoundSaveRecordingPacket(List<RecordedTrack.Point> points) i
                 final ItemStack contained = contents.getContained();
                 if (contained.is(AllItems.BLANK_TRACK)) {
                     final ItemStack track = contained.transmuteCopy(AllItems.TRACK);
+                    final RandomSource random = context.player().getRandom();
+                    final int dyeIndex1 = random.nextInt(DyeColor.values().length);
+                    int dyeIndex2 = random.nextInt(DyeColor.values().length - 1);
+                    if (dyeIndex2 >= dyeIndex1) {
+                        dyeIndex2++;
+                    }
                     track.set(AllDataComponents.TRACK_RECORDING,
                             new RecordedTrack(
                                     context.player().getPlainTextName(),
                                     packet.points,
-                                    DyeColor.values()[context.player().getRandom().nextInt(DyeColor.values().length)],
-                                    DyeColor.values()[context.player().getRandom().nextInt(DyeColor.values().length)]
+                                    DyeColor.values()[dyeIndex1],
+                                    DyeColor.values()[dyeIndex2]
                             )
                     );
                     itemStack.set(AllDataComponents.TAPE_RECORDER_CONTENTS, new TapeRecorderContents(track));

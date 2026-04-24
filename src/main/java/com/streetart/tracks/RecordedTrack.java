@@ -48,14 +48,14 @@ public class RecordedTrack implements TooltipProvider {
     public final DyeColor colorA;
     public final DyeColor colorB;
 
-    public RecordedTrack(final String author, final List<Point> recording, DyeColor colorA, DyeColor colorB) {
+    public RecordedTrack(final String author, final List<Point> recording, final DyeColor colorA, final DyeColor colorB) {
         this.author = author;
         this.track = recording;
         this.colorA = colorA;
         this.colorB = colorB;
     }
 
-    public RecordedTrack redye(DyeColor colorA, DyeColor colorB) {
+    public RecordedTrack redye(final DyeColor colorA, final DyeColor colorB) {
         return new RecordedTrack(
                 this.author,
                 this.track,
@@ -73,10 +73,22 @@ public class RecordedTrack implements TooltipProvider {
         return this.track.size() / 20f;
     }
 
+    public int getTextColorA() {
+        return transformColorForText(this.colorA);
+    }
+
+    public int getTextColorB() {
+        return transformColorForText(this.colorB);
+    }
+
+    private static int transformColorForText(final DyeColor color) {
+        return color.getTextureDiffuseColor();
+    }
+
     @Override
     public void addToTooltip(final Item.TooltipContext context, final Consumer<Component> consumer, final TooltipFlag flag, final DataComponentGetter components) {
         if (!StringUtil.isBlank(this.author)) {
-            consumer.accept(Component.translatable("street_art.track.author", this.author).withStyle(ChatFormatting.RED));
+            consumer.accept(Component.translatable("street_art.track.author", this.author).withColor(this.getTextColorA()));
         }
         final int seconds = Mth.ceil(this.getDuration());
         final int min = seconds / 60;
@@ -87,7 +99,7 @@ public class RecordedTrack implements TooltipProvider {
         } else {
             component = Component.translatable("street_art.track.duration.minutes_seconds", min, String.format("%02d", sec));
         }
-        consumer.accept(component.withStyle(ChatFormatting.GOLD));
+        consumer.accept(component.withColor(this.getTextColorB()));
 
         if (!this.track.isEmpty()) {
             final BlockPos origin = BlockPos.containing(
