@@ -53,7 +53,7 @@ public class TrackRecording implements TooltipProvider {
         if (this.recordedTrack.size() < MAX_POINTS) {
             this.recordedTrack.add(new Point(
                     recorder.position().x,
-                    recorder.position().y,
+                    recorder.position().y + 0.1,
                     recorder.position().z,
                     this.nextSignificant
             ));

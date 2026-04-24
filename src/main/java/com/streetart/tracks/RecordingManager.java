@@ -27,10 +27,7 @@ public class RecordingManager {
         return this.currentRecording;
     }
 
-    public TrackRecording findRecording(final Player player) {
-        if (this.currentRecording != null) {
-            return this.currentRecording;
-        }
+    public TrackRecording findInventoryRecording(final Player player) {
         for (final ItemStack itemStack : player.getInventory()) {
             final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
             if (contents != null) {
