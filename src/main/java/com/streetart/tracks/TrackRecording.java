@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -87,8 +88,17 @@ public class TrackRecording implements TooltipProvider {
         } else {
             component = Component.translatable("street_art.track.duration.minutes_seconds", min, String.format("%02d", sec));
         }
-
         consumer.accept(component.withStyle(ChatFormatting.GOLD));
+
+        if (!this.recordedTrack.isEmpty()) {
+            final BlockPos origin = BlockPos.containing(
+                    this.recordedTrack.getFirst().x,
+                    this.recordedTrack.getFirst().y,
+                    this.recordedTrack.getFirst().z
+            );
+            consumer.accept(Component.translatable("street_art.track.start_position", origin.getX(), origin.getY(), origin.getZ()).withStyle(ChatFormatting.GRAY));
+        }
+
     }
 
     public record Point(double x, double y, double z, boolean significant) {

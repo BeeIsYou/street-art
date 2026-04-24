@@ -58,10 +58,10 @@ public class AllItems {
             new Item.Properties().stacksTo(1).useCooldown(0.25f));
 
     public static Item BLANK_TRACK = register("blank_track", Item::new,
-            new Item.Properties().stacksTo(1));
+            new Item.Properties());
 
     public static Item TRACK = register("track", Item::new,
-            new Item.Properties().stacksTo(1));
+            new Item.Properties());
 
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)
@@ -101,6 +101,8 @@ public class AllItems {
                 }
                 output.accept(PRESSURE_WASHER);
                 ROLLERBLADES.forEach(output::accept);
+                output.accept(AllItems.TAPE_RECORDER);
+                output.accept(AllItems.BLANK_TRACK);
             }).build();
 
     public static void init() {

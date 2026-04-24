@@ -4,6 +4,7 @@ import com.streetart.AllItems;
 import com.streetart.AllTags;
 import com.streetart.StreetArt;
 import com.streetart.component.TapeRecorderContents;
+import com.streetart.recipe.TapeDuplicateRecipe;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
@@ -19,15 +20,14 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.SelectItemModel;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.*;
 import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -169,6 +169,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add("street_art.track.author", "Recorded by: %s");
 			translationBuilder.add("street_art.track.duration.seconds", "Duration: %ss");
 			translationBuilder.add("street_art.track.duration.minutes_seconds", "Duration: %s:%s");
+			translationBuilder.add("street_art.track.start_position", "Starts at: %s %s %s");
 
 			translationBuilder.add("commands.street_art.clear.success", "Explodiated paint off of %s blocks");
 			translationBuilder.add("commands.street_art.fill.success", "It's all over %s blocks");
@@ -298,6 +299,11 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			this.valueLookupBuilder(AllTags.Items.PAINT_CREATORS)
 					.addTag(AllTags.Items.SPRAY_CANS)
 					.addTag(AllTags.Items.PAINT_BALLOONS);
+
+			final TagAppender<Item, Item> rollerblades = this.valueLookupBuilder(AllTags.Items.ROLLERBLADES);
+			for (final Item item : AllItems.ROLLERBLADES) {
+				rollerblades.add(item);
+			}
 		}
 	}
 
@@ -334,6 +340,35 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 							.pattern("PR ")
 							.unlockedBy("has_paint_creator", this.has(AllTags.Items.PAINT_CREATORS))
 							.save(this.output);
+
+					this.shaped(RecipeCategory.MISC, AllItems.BLANK_TRACK, 4)
+							.define('P', Items.PAPER)
+							.define('K', Items.DRIED_KELP)
+							.define('I', ConventionalItemTags.IRON_INGOTS)
+							.define('D', ConventionalItemTags.REDSTONE_DUSTS)
+							.pattern(" P ")
+							.pattern("KIK")
+							.pattern(" D ")
+							.unlockedBy("has_rollerblades", this.has(AllTags.Items.ROLLERBLADES))
+							.save(this.output);
+
+					this.shapeless(RecipeCategory.MISC, AllItems.BLANK_TRACK)
+							.requires(AllItems.TRACK)
+							.unlockedBy("has_track", this.has(AllItems.TRACK))
+							.save(this.output, "street_art:track_clearing");
+
+					trackDuplicate(this.output, Ingredient.of(AllItems.TRACK), Ingredient.of(AllItems.BLANK_TRACK),
+							"street_art:copy_track_onto_blank_track");
+
+					this.shaped(RecipeCategory.MISC, AllItems.TAPE_RECORDER)
+							.define('I', ConventionalItemTags.IRON_INGOTS)
+							.define('G', ConventionalItemTags.GLASS_PANES)
+							.define('B', ItemTags.STONE_BUTTONS)
+							.pattern(" I ")
+							.pattern("IGI")
+							.pattern("BIB")
+							.unlockedBy("has_blank_track", this.has(AllItems.BLANK_TRACK))
+							.save(this.output);
 				}
 			};
 		}
@@ -357,6 +392,11 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 					.requires(Items.DRIED_KELP)
 					.requires(Items.PAPER)
 					.requires(dye);
+		}
+
+		public static void trackDuplicate(RecipeOutput output, final Ingredient copyFrom, final Ingredient copyOnto, final String name) {
+			SpecialRecipeBuilder.special(() -> new TapeDuplicateRecipe(copyFrom, copyOnto))
+					.save(output, name);
 		}
 
 		@Override

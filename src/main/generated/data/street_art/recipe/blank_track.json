@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": "#c:dusts/redstone",
+    "I": "#c:ingots/iron",
+    "K": "minecraft:dried_kelp",
+    "P": "minecraft:paper"
+  },
+  "pattern": [
+    " P ",
+    "KIK",
+    " D "
+  ],
+  "result": {
+    "count": 4,
+    "id": "street_art:blank_track"
+  }
+}

@@ -99,6 +99,7 @@
   "street_art.track.author": "Recorded by: %s",
   "street_art.track.duration.minutes_seconds": "Duration: %s:%s",
   "street_art.track.duration.seconds": "Duration: %ss",
+  "street_art.track.start_position": "Starts at: %s %s %s",
   "tag.item.street_art.paint_balloons": "Paint Balloons",
   "tag.item.street_art.paint_creators": "Paint Creators",
   "tag.item.street_art.spray_cans": "Spray Cans"

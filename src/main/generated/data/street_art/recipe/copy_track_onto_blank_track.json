@@ -1,0 +1,5 @@
+{
+  "type": "street_art:crafting_special_tape_duplicate",
+  "copy_from": "street_art:track",
+  "copy_onto": "street_art:blank_track"
+}

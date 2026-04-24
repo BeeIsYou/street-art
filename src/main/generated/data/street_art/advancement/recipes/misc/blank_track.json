@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_rollerblades": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#street_art:rollerblades"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "street_art:blank_track"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_rollerblades"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "street_art:blank_track"
+    ]
+  }
+}

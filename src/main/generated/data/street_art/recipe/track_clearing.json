@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "street_art:track"
+  ],
+  "result": {
+    "id": "street_art:blank_track"
+  }
+}

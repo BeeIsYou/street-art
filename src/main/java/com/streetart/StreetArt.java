@@ -36,6 +36,7 @@ public class StreetArt implements ModInitializer {
         AllGameRules.init();
         AttachmentTypes.init();
         AllCommands.init();
+        AllRecipes.init();
 
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundGraffitiSet.TYPE, ClientBoundGraffitiSet.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ClientBoundInvalidateBlock.TYPE, ClientBoundInvalidateBlock.CODEC);

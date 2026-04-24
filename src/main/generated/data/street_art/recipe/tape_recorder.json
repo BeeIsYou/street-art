@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "#minecraft:stone_buttons",
+    "G": "#c:glass_panes",
+    "I": "#c:ingots/iron"
+  },
+  "pattern": [
+    " I ",
+    "IGI",
+    "BIB"
+  ],
+  "result": {
+    "id": "street_art:tape_recorder"
+  }
+}

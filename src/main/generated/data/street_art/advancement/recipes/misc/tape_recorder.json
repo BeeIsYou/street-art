@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_blank_track": {
+      "conditions": {
+        "items": [
+          {
+            "items": "street_art:blank_track"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "street_art:tape_recorder"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_blank_track"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "street_art:tape_recorder"
+    ]
+  }
+}
