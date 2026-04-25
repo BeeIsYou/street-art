@@ -27,12 +27,7 @@ public class GraffitiRenderer {
                 .withTexture(
                         "Sampler0",
                         StreetArtClient.tileAtlasManager.atlasLocation,
-                        () -> /*RenderSystem.getSamplerCache().getSampler(
-                                AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
-                                FilterMode.LINEAR, FilterMode.NEAREST,
-                                true
-                        )*/
-                        RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST, true)
+                        () -> RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST, true)
                 )
                 .sortOnUpload()
                 .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET);

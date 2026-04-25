@@ -28,6 +28,7 @@ public class TileAtlasManager {
     public Identifier atlasLocation;
     private DynamicMippedTexture atlasTexture;
     private final int mipCount;
+    private final IntArraySet toReMip = new IntArraySet();
 
     private boolean dirty;
 
@@ -112,7 +113,64 @@ public class TileAtlasManager {
     public void checkDirty() {
         if (this.dirty) {
             this.dirty = false;
+            for (final int id : this.toReMip) {
+                this.reMip(id);
+            }
+            this.toReMip.clear();
             this.atlasTexture.upload();
+        }
+    }
+
+    private void reMip(final int id) {
+        final NativeImage[] images = this.atlasTexture.getPixels();
+        NativeImage base = images[0];
+        int idx = (id % this.entriesX) * 8;
+        int idy = (id / this.entriesX) * 8;
+        int l = 8;
+        final int[] colors = new int[4];
+        for (int i = 1; i < images.length; i++) {
+            final NativeImage target = images[i];
+            for (int y = idy; y < idy + l; y++) {
+                for (int x = idx; x < idx + l; x++) {
+                    colors[0] = base.getPixel(x * 2    , y * 2    );
+                    colors[1] = base.getPixel(x * 2 + 1, y * 2    );
+                    colors[2] = base.getPixel(x * 2 + 1, y * 2 + 1);
+                    colors[3] = base.getPixel(x * 2    , y * 2 + 1);
+
+                    int nonTransparent = 0;
+                    int a = 0;
+                    int r = 0;
+                    int g = 0;
+                    int b = 0;
+                    for (final int color : colors) {
+                        final int ca = (color & 0xFF000000) >>> 24;
+                        if (ca != 0) {
+                            nonTransparent++;
+                            a += ca;
+                            r += (color & 0x00FF0000) >> 16;
+                            g += (color & 0x0000FF00) >> 8;
+                            b += (color & 0x000000FF);
+                        }
+                    }
+
+                    int color = 0;
+                    if (nonTransparent > 0) {
+                        // alpha respecting mix that doesn't darken at the edges
+                        a /= colors.length;
+                        r /= nonTransparent;
+                        g /= nonTransparent;
+                        b /= nonTransparent;
+                        color = a << 24 | r << 16 | g << 8 | b;
+                    }
+
+                    target.setPixel(x, y, color);
+                }
+            }
+
+            base = target;
+            l = l >> 1;
+            idx = idx >> 1;
+            idy = idy >> 1;
         }
     }
 
@@ -149,6 +207,8 @@ public class TileAtlasManager {
         if (color != 0) {
             color = color ^ (COLOR_MASK & this.nextRandom());
         }
+
+        this.toReMip.add(id);
 
         for (int i = 0; i < this.atlasTexture.getPixels().length; i++) {
             this.atlasTexture.getPixels()[i].setPixel(x >> i, y >> i, color);
