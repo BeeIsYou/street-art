@@ -2,7 +2,7 @@ package com.streetart.client.rendering;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.streetart.StreetArt;
-import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
@@ -22,13 +22,13 @@ public class TileAtlasManager {
 
     private int nextIndex = 0;
     private int useCount = 0;
-    private final IntSet freeIDs = new IntArraySet(this.idCount);
+    private final IntSet freeIDs = new IntOpenHashSet(this.idCount);
+    private final IntSet toReMip = new IntOpenHashSet(this.idCount);
 
     private final TextureManager textureManager;
     public Identifier atlasLocation;
     private DynamicMippedTexture atlasTexture;
     private final int mipCount;
-    private final IntArraySet toReMip = new IntArraySet();
 
     private boolean dirty;
 
