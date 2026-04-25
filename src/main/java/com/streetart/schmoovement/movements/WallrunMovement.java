@@ -10,6 +10,7 @@ import org.joml.Vector3d;
 
 public class WallrunMovement extends Movement {
     private int uses = 3;
+    private boolean lastKicked = false;
     private final WallCollideStatus status;
     /**
      * Enters windstate after a wallrun
@@ -27,11 +28,12 @@ public class WallrunMovement extends Movement {
 
     public void resetUses() {
         this.uses = 3;
+        this.lastKicked = false;
     }
 
     @Override
     public boolean canContinue() {
-        return this.status.getCachedType().isColliding() && this.uses > 0;
+        return this.status.getCachedType().isColliding() && this.uses > -1;
     }
 
     @Override
@@ -93,7 +95,7 @@ public class WallrunMovement extends Movement {
 
     @Override
     public double modifyGravity(final double original) {
-        return this.uses > 0 ? original * 0.25 : original;
+        return (this.uses > 0 && !this.lastKicked) ? original * 0.25 : original;
     }
 
     @Override
@@ -103,13 +105,26 @@ public class WallrunMovement extends Movement {
 
     @Override
     public Vector3d modifyJump(final Vector3d newVelocity) {
-        final double speed = Math.sqrt(newVelocity.dot(newVelocity.x, 0, newVelocity.z)) * 0.25 + 0.25;
-        newVelocity.fma(speed, this.status.getCachedType().normal);
         this.uses--;
-        this.spawnWallrunParticles(10);
-        if (this.windstate != null) {
-            this.controller.transitionTo(this.windstate);
+        final double speed = Math.sqrt(newVelocity.dot(newVelocity.x, 0, newVelocity.z)) * 0.25 + 0.25;
+        if (this.uses < 0) {
+            newVelocity.mul(0.5, 1, 0.5);
+            if (this.windstate != null) {
+                this.controller.transitionTo(this.windstate);
+            }
+        } else if (this.owner.isCrouching() && !this.lastKicked) {
+            newVelocity.mul(0.75, 1, 0.75);
+            this.lastKicked = true;
+        } else {
+            newVelocity.fma(speed, this.status.getCachedType().normal);
+            if (this.windstate != null) {
+                this.controller.transitionTo(this.windstate);
+            }
+            this.lastKicked = false;
         }
+
+        this.spawnWallrunParticles(10);
+
         return newVelocity;
     }
 

@@ -66,7 +66,7 @@ public class RollerbladeController {
         });
     }
 
-    public RollerbladeController(final LivingEntity owner, Function<RollerbladeController, List<Movement>> movements) {
+    public RollerbladeController(final LivingEntity owner, final Function<RollerbladeController, List<Movement>> movements) {
         this.owner = owner;
         this.movements = movements.apply(this);
         this.currentMovement = this.movements.getLast();
@@ -104,7 +104,7 @@ public class RollerbladeController {
     public void preMove() {
         if (!this.isActive()) {
             this.currentMovement.end();
-            this.currentMovement =  this.movements.getLast();
+            this.currentMovement = this.movements.getLast();
             this.currentMovement.start();
         }
         for (final Movement movement : this.movements) {
