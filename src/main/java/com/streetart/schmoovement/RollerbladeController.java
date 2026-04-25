@@ -85,7 +85,7 @@ public class RollerbladeController {
     }
 
     public boolean isActive() {
-        return this.active && !this.owner.onClimbable() && !this.owner.isSwimming();
+        return this.active && (!this.owner.onClimbable() || this.owner.onGround()) && !this.owner.isInLiquid();
     }
 
     /**

@@ -38,18 +38,20 @@ public class GraffitiRenderer {
             final double dist = camPos.distanceToSqr(data.pos.getX(), data.pos.getY(), data.pos.getZ());
             final float offset;
             if (dist < 16*16) {
-                offset = (float) (data.getDepth() + 0.001);
-            } else if (dist > 32*32) {
-                offset = (float) (data.getDepth() + 0.01);
+                offset = 0.001f;
+            } else if (dist > 64*64) {
+                offset = 0.1f;
             } else {
-                offset = (float) (data.getDepth() + Mth.lerp((dist - 16*16) / (32*32 - 16*16), 0.001, 0.01));
+                offset = (float) Mth.lerp((dist - 16*16) / (64*64 - 16*16), 0.001, 0.1);
             }
+            final float depthOff = (float) (offset + data.getDepth());
 
             pose.translate(
-                    data.pos.getX() + data.dir.getStepX() * offset,
-                    data.pos.getY() + data.dir.getStepY() * offset,
-                    data.pos.getZ() + data.dir.getStepZ() * offset
+                    data.pos.getX() - offset * 0.5f + data.dir.getStepX() * depthOff,
+                    data.pos.getY() - offset * 0.5f + data.dir.getStepY() * depthOff,
+                    data.pos.getZ() - offset * 0.5f + data.dir.getStepZ() * depthOff
             );
+            pose.scale(1 + offset, 1 + offset, 1 + offset);
 
             pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
             tileAtlasManager.writeUVs(data.id, mutUV);
