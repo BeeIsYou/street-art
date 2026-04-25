@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.streetart.StreetArt;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector4f;
@@ -27,14 +26,19 @@ public class TileAtlasManager {
 
     private final TextureManager textureManager;
     public Identifier atlasLocation;
-    private DynamicTexture atlasTexture;
+    private DynamicMippedTexture atlasTexture;
+    private final int mipCount;
 
     private boolean dirty;
 
-    public TileAtlasManager(final TextureManager textureManager) {
+    // todo respect mipmap setting ?
+    public TileAtlasManager(final TextureManager textureManager, final int mipLevels) {
         this.textureManager = textureManager;
         this.atlasLocation = StreetArt.id("atlas");
-        this.atlasTexture = new DynamicTexture(() -> "street_art:atlas_" + this.entriesX, this.entriesX * 16, this.entriesY * 16, true);
+        this.mipCount = mipLevels + 1;
+        this.atlasTexture = new DynamicMippedTexture(() -> "street_art:atlas_" + this.entriesX,
+                this.entriesX * 16, this.entriesY * 16,
+                true, this.mipCount);
         this.textureManager.register(this.atlasLocation, this.atlasTexture);
     }
 
@@ -54,9 +58,12 @@ public class TileAtlasManager {
     }
 
     private void quadrupleSize() {
-        final DynamicTexture newTexture = new DynamicTexture(() -> "street_art:atlas_" + this.entriesX, this.entriesX * 32, this.entriesY * 32, true);
-        final NativeImage newPix = newTexture.getPixels();
-        final NativeImage oldPix = this.atlasTexture.getPixels();
+        final DynamicMippedTexture newTexture = new DynamicMippedTexture(
+                () -> "street_art:atlas_" + this.entriesX,
+                this.entriesX * 32, this.entriesY * 32,
+                true, this.mipCount);
+        final NativeImage newPix = newTexture.getBasePixels();
+        final NativeImage oldPix = this.atlasTexture.getBasePixels();
         // puts textures into the atlas in such a way that
         for (int y = 0; y < this.entriesY; y++) {
             if (y % 2 == 0) {
@@ -110,7 +117,7 @@ public class TileAtlasManager {
     }
 
     public void clear() {
-        this.atlasTexture.setPixels(new NativeImage(this.entriesX * 16, this.entriesY * 16, true));
+//        this.atlasTexture.setPixels(new NativeImage(this.entriesX * 16, this.entriesY * 16, true));
         this.freeIDs.clear();
         this.nextIndex = 0;
         this.useCount = 0;
@@ -143,17 +150,20 @@ public class TileAtlasManager {
             color = color ^ (COLOR_MASK & this.nextRandom());
         }
 
-        this.atlasTexture.getPixels().setPixel(x, y, color);
+        for (int i = 0; i < this.atlasTexture.getPixels().length; i++) {
+            this.atlasTexture.getPixels()[i].setPixel(x >> i, y >> i, color);
+        }
+        this.atlasTexture.getBasePixels().setPixel(x, y, color);
         this.dirty = true;
     }
 
-    public int getPixel(final int id, int x, int y) {
+    public int getBasePixel(final int id, int x, int y) {
         x += (id % this.entriesX) * 16;
         y += (id / this.entriesX) * 16;
-        return this.atlasTexture.getPixels().getPixel(x, y);
+        return this.atlasTexture.getBasePixels().getPixel(x, y);
     }
 
-    public byte[] copyPixelData(final int id) {
+    public byte[] copyBasePixelData(final int id) {
         final byte[] data = new byte[16*16*4];
         final ByteBuffer buffer = ByteBuffer.wrap(data);
 
@@ -161,7 +171,7 @@ public class TileAtlasManager {
         final int ty = (id / this.entriesX) * 16;
         for (int y = ty; y < ty + 16; y++) {
             for (int x = tx; x < tx + 16; x++) {
-                buffer.putInt(this.atlasTexture.getPixels().getPixel(x, y));
+                buffer.putInt(this.atlasTexture.getBasePixels().getPixel(x, y));
             }
         }
         return data;

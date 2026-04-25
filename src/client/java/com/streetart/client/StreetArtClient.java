@@ -44,7 +44,7 @@ public class StreetArtClient implements ClientModInitializer {
         ClientLifecycleEvents.CLIENT_STARTED.register(
                 _ -> {
                     textureManager = new HashMap<>();
-                    tileAtlasManager = new TileAtlasManager(Minecraft.getInstance().getTextureManager());
+                    tileAtlasManager = new TileAtlasManager(Minecraft.getInstance().getTextureManager(), 4);
 
                     ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, (l, ll) -> {
                         final GClientManager man = textureManager.computeIfAbsent(ChunkPos.containing(l.pos()), _ -> new GClientManager());

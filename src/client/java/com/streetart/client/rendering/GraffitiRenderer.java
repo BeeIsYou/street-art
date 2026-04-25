@@ -1,5 +1,7 @@
 package com.streetart.client.rendering;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.streetart.client.StreetArtClient;
@@ -7,15 +9,36 @@ import com.streetart.client.manager.GClientData;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.client.mixin.LevelRendererAccessor;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
 
 public class GraffitiRenderer {
+    private static final RenderType GRAFFITI_TYPE;
+    static {
+        final RenderSetup.RenderSetupBuilder setup = RenderSetup.builder(RenderPipelines.TRANSLUCENT_BLOCK)
+                .useLightmap()
+                .withTexture(
+                        "Sampler0",
+                        StreetArtClient.tileAtlasManager.atlasLocation,
+                        () -> /*RenderSystem.getSamplerCache().getSampler(
+                                AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
+                                FilterMode.LINEAR, FilterMode.NEAREST,
+                                true
+                        )*/
+                        RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST, true)
+                )
+                .sortOnUpload()
+                .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET);
+        GRAFFITI_TYPE = RenderType.create("street_art:graffiti", setup.createRenderSetup());
+    }
+
     public static void render(final LevelTerrainRenderContext context) {
         final SubmitNodeStorage storage = ((LevelRendererAccessor)context.levelRenderer()).getSubmitNodeStorage();
 
@@ -23,8 +46,7 @@ public class GraffitiRenderer {
         final Vec3 camPos = context.levelState().cameraRenderState.pos;
         pose.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
-        final RenderType graffitiAtlas = RenderTypes.entityCutout(StreetArtClient.tileAtlasManager.atlasLocation);
-        storage.submitCustomGeometry(pose, graffitiAtlas, (_pose, buffer) -> {
+        storage.submitCustomGeometry(pose, GRAFFITI_TYPE, (_pose, buffer) -> {
             final PoseStack.Pose original = _pose.copy();
             for (final GClientManager entry : StreetArtClient.textureManager.values()) {
                 entry.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, StreetArtClient.tileAtlasManager, data));

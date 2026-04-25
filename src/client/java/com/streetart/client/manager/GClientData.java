@@ -81,13 +81,13 @@ public class GClientData extends GData implements AutoCloseable {
      * @return true if pixel changed
      */
     public boolean setPixel(final int x, final int y, final int color) {
-        final boolean changed = StreetArtClient.tileAtlasManager.getPixel(this.id, x, y) != color;
+        final boolean changed = StreetArtClient.tileAtlasManager.getBasePixel(this.id, x, y) != color;
         StreetArtClient.tileAtlasManager.setPixel(this.id, x, y, color);
         return changed;
     }
 
     public int getPixel(final int x, final int y) {
-        return StreetArtClient.tileAtlasManager.getPixel(this.id, x, y);
+        return StreetArtClient.tileAtlasManager.getBasePixel(this.id, x, y);
     }
 
     @Override
