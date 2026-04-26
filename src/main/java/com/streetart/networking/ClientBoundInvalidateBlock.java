@@ -1,7 +1,7 @@
 package com.streetart.networking;
 
 import com.streetart.StreetArt;
-import com.streetart.managers.data.TempData;
+import com.streetart.managers.data.ExposedGraffitiData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,7 +19,7 @@ public record ClientBoundInvalidateBlock(BlockPos pos) implements CustomPacketPa
         return TYPE;
     }
 
-    public static CustomPacketPayload getPacket(final TempData tempData) {
-        return new ClientBoundInvalidateBlock(tempData.pos());
+    public static CustomPacketPayload getPacket(final ExposedGraffitiData exposedGraffitiData) {
+        return new ClientBoundInvalidateBlock(exposedGraffitiData.pos());
     }
 }

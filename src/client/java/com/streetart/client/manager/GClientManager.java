@@ -4,8 +4,8 @@ import com.streetart.ArtUtil;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.rendering.LightMath;
 import com.streetart.component.ColorComponent;
-import com.streetart.graffiti_data.TileChange;
-import com.streetart.graffiti_data.TileKey;
+import com.streetart.graffiti_data.GraffitiChangeData;
+import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -159,7 +159,7 @@ public class GClientManager implements AutoCloseable {
         }
     }
 
-    public void handleChange(final byte content, final TileKey key, final TileChange change, final ClientPlayNetworking.Context context) {
+    public void handleChange(final byte content, final GraffitiKey key, final GraffitiChangeData change, final ClientPlayNetworking.Context context) {
         final ColorComponent colorComponent = ArtUtil.generateComponentFromByte(content);
 
         int depth = Mth.clamp(key.depth(), 0, 15);

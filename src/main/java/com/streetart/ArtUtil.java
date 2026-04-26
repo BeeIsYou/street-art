@@ -1,11 +1,12 @@
 package com.streetart;
 
 import com.streetart.component.ColorComponent;
-import com.streetart.graffiti_data.TileKey;
+import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.managers.GServerChunkManager;
 import com.streetart.managers.data.GServerDataHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -83,6 +84,7 @@ public class ArtUtil {
 
         boolean changed = false;
 
+        final Identifier defaultLayer = AllGraffitiLayers.DEFAULT_LAYER.graffityLayerId();
         for (final ShapeFaces faces : shapeFaces) {
             changed |= faces.forEach((dir, face) -> {
                 final BlockPos offPos = pos.relative(dir);
@@ -91,11 +93,11 @@ public class ArtUtil {
                     return false;
                 }
 
-                final TileKey key = new TileKey(pos, dir, face.depth());
-                final GServerDataHolder data = manager.getOrConditionalCreateFace(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                final GraffitiKey key = new GraffitiKey(defaultLayer, pos, dir, face.depth());
+                final GServerDataHolder data = manager.getOrConditionalCreateFace(defaultLayer, key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
                     data.fillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2());
-                    manager.markFullResend(data, pos, dir);
+                    manager.markFullResend(defaultLayer, data, pos, dir);
                     manager.blame(entity, key.pos());
                     return true;
                 }
@@ -110,7 +112,7 @@ public class ArtUtil {
         return changed;
     }
 
-    public static void latherDirectionInPaint(@Nullable Entity entity,
+    public static void latherDirectionInPaint(@Nullable final Entity entity,
                                               final ServerLevel serverLevel,
                                               final List<ShapeFaces> shapeFaces,
                                               final BlockPos pos,
@@ -127,14 +129,16 @@ public class ArtUtil {
             return;
         }
 
+        final Identifier defaultLayer = AllGraffitiLayers.DEFAULT_LAYER.graffityLayerId();
+
         boolean changed = false;
         for (final ShapeFaces faces : shapeFaces) {
             changed |= faces.doWith(thisDir, face -> {
-                final TileKey key = new TileKey(pos, thisDir, face.depth());
-                final GServerDataHolder data = manager.getOrConditionalCreateFace(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                final GraffitiKey key = new GraffitiKey(defaultLayer, pos, thisDir, face.depth());
+                final GServerDataHolder data = manager.getOrConditionalCreateFace(defaultLayer, key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
                     data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
-                    manager.markFullResend(data, pos, thisDir);
+                    manager.markFullResend(defaultLayer, data, pos, thisDir);
                     manager.blame(entity, key.pos());
                     return true;
                 }

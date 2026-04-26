@@ -9,14 +9,14 @@ import net.minecraft.network.codec.StreamCodec;
  *
  * @param modifiedPixels a 1024 bit (32 byte) mask for where to apply
  */
-public record TileChange(byte[] modifiedPixels) {
-    public static final StreamCodec<ByteBuf, TileChange> CODEC = StreamCodec.composite(
-            ByteBufCodecs.BYTE_ARRAY, TileChange::modifiedPixels,
-            TileChange::new
+public record GraffitiChangeData(byte[] modifiedPixels) {
+    public static final StreamCodec<ByteBuf, GraffitiChangeData> CODEC = StreamCodec.composite(
+            ByteBufCodecs.BYTE_ARRAY, GraffitiChangeData::modifiedPixels,
+            GraffitiChangeData::new
     );
 
-    public static TileChange empty() {
-        return new TileChange(new byte[32]);
+    public static GraffitiChangeData empty() {
+        return new GraffitiChangeData(new byte[32]);
     }
 
     public void markChanged(int x, int y) {

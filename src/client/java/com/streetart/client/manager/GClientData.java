@@ -3,7 +3,7 @@ package com.streetart.client.manager;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.rendering.LightMath;
 import com.streetart.component.ColorComponent;
-import com.streetart.graffiti_data.TileChange;
+import com.streetart.graffiti_data.GraffitiChangeData;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -43,9 +43,9 @@ public class GClientData implements AutoCloseable {
         }
     }
 
-    public void handleChange(final int color, final TileChange tileChange) {
+    public void handleChange(final int color, final GraffitiChangeData graffitiChangeData) {
         for (int i = 0; i < 256 / 8; i++) {
-            final byte b = tileChange.modifiedPixels()[i];
+            final byte b = graffitiChangeData.modifiedPixels()[i];
 
             for (int j = 0; j < 8; j++) {
                 if (((b >>> j) & 1) == 1) {

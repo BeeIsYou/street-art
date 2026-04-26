@@ -8,8 +8,8 @@ import com.streetart.client.rendering.GraffitiRenderer;
 import com.streetart.client.rendering.TileAtlasManager;
 import com.streetart.client.rendering.TrackRenderer;
 import com.streetart.client.rendering.rollerblades.RollerbladeRenderer;
-import com.streetart.graffiti_data.TileChange;
-import com.streetart.graffiti_data.TileKey;
+import com.streetart.graffiti_data.GraffitiChangeData;
+import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.networking.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -57,7 +57,7 @@ public class StreetArtClient implements ClientModInitializer {
                     });
 
                     ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, (packet, context) -> {
-                        for (final Map.Entry<TileKey, TileChange> entries : packet.changes().entrySet()) {
+                        for (final Map.Entry<GraffitiKey, GraffitiChangeData> entries : packet.changes().entrySet()) {
                             final GClientManager manager = textureManager.computeIfAbsent(ChunkPos.containing(entries.getKey().pos()), _ -> new GClientManager());
                             manager.handleChange(packet.content(), entries.getKey(), entries.getValue(), context);
                         }

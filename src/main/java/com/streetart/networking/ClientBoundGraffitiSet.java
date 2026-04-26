@@ -1,7 +1,7 @@
 package com.streetart.networking;
 
 import com.streetart.StreetArt;
-import com.streetart.managers.data.TempData;
+import com.streetart.managers.data.ExposedGraffitiData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,20 +25,20 @@ public record ClientBoundGraffitiSet(BlockPos pos, Direction dir, int depth, byt
         return TYPE;
     }
 
-    public static CustomPacketPayload getSetPacket(final TempData tempData) {
+    public static CustomPacketPayload getSetPacket(final ExposedGraffitiData exposedGraffitiData) {
         return new ClientBoundGraffitiSet(
-                tempData.pos(),
-                tempData.dir(),
-                tempData.data().depth,
-                tempData.data().getGraffitiData().array()
+                exposedGraffitiData.pos(),
+                exposedGraffitiData.dir(),
+                exposedGraffitiData.data().depth,
+                exposedGraffitiData.data().getGraffitiData().array()
         );
     }
 
-    public static CustomPacketPayload getSmotheredPacket(final TempData tempData) {
+    public static CustomPacketPayload getSmotheredPacket(final ExposedGraffitiData exposedGraffitiData) {
         return new ClientBoundGraffitiSet(
-                tempData.pos(),
-                tempData.dir(),
-                tempData.data().depth,
+                exposedGraffitiData.pos(),
+                exposedGraffitiData.dir(),
+                exposedGraffitiData.data().depth,
                 new byte[0]
         );
     }

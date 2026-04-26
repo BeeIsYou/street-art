@@ -2,7 +2,6 @@ package com.streetart.managers.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
@@ -51,15 +50,13 @@ public class BlockDataMapper {
         this.blockData = map;
     }
 
-    public void smotheredFromDir(final List<TempData> gatherer, final BlockPos pos, final Direction dir) {
+    public GServerDataHolder smotheredFromDir(final Direction dir) {
         final GServerDataHolder[] data = this.blockData.get(dir);
-
         if (data != null) {
-            final GServerDataHolder holder = data[0];
-            if (holder != null) {
-                gatherer.add(new TempData(holder, pos, dir));
-            }
+            return data[0];
         }
+
+        return null;
     }
 
     public boolean randomDecay(final RandomSource source) {
@@ -133,16 +130,16 @@ public class BlockDataMapper {
         }
     }
 
-    public List<TempData> compileData(final BlockPos pos) {
-        final List<TempData> compiled = new ArrayList<>();
+    public List<GServerDataHolder> compileData() {
+        final List<GServerDataHolder> compiled = new ArrayList<>();
 
-        this.blockData.forEach((dir, holder) -> {
-            for (final GServerDataHolder gServerDataHolder : holder) {
-                if (gServerDataHolder != null) {
-                    compiled.add(new TempData(gServerDataHolder, pos, dir));
+        for (final GServerDataHolder[] value : this.blockData.values()) {
+            for (final GServerDataHolder holder : value) {
+                if (holder != null) {
+                    compiled.add(holder);
                 }
             }
-        });
+        }
 
         return compiled;
     }

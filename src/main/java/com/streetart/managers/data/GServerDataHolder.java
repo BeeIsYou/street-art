@@ -3,7 +3,7 @@ package com.streetart.managers.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.component.ColorComponent;
-import com.streetart.graffiti_data.TileChange;
+import com.streetart.graffiti_data.GraffitiChangeData;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
@@ -59,11 +59,11 @@ public class GServerDataHolder {
     /**
      * @return true if fully cleared
      */
-    public boolean handleChange(final byte content, final TileChange tileChange) {
+    public boolean handleChange(final byte content, final GraffitiChangeData graffitiChangeData) {
         final ByteBuffer buf = this.getGraffitiData();
         buf.position(0);
         for (int i = 0; i < 256 / 8; i++) {
-            final byte b = tileChange.modifiedPixels()[i];
+            final byte b = graffitiChangeData.modifiedPixels()[i];
 
             for (int j = 0; j < 8; j++) {
                 if (((b >>> j) & 1) == 1) {
