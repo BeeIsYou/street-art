@@ -55,7 +55,7 @@ public class BlockDataMapper {
         final GServerDataHolder[] data = this.blockData.get(dir);
 
         if (data != null) {
-            final GServerDataHolder holder = data[15];
+            final GServerDataHolder holder = data[0];
             if (holder != null) {
                 gatherer.add(new TempData(holder, pos, dir));
             }
