@@ -63,33 +63,37 @@ public class TileAtlasManager {
                 () -> "street_art:atlas_" + this.entriesX,
                 this.entriesX * 32, this.entriesY * 32,
                 true, this.mipCount);
-        final NativeImage newPix = newTexture.getBasePixels();
-        final NativeImage oldPix = this.atlasTexture.getBasePixels();
-        // puts textures into the atlas in such a way that
-        for (int y = 0; y < this.entriesY; y++) {
-            if (y % 2 == 0) {
-                final int ny = y / 2;
-                for (int py = 0; py < 16; py++) {
-                    for (int px = 0; px < this.entriesX * 16; px++) {
-                        newPix.setPixel(
-                                px,
-                                ny * 16 + py,
-                                oldPix.getPixel(px, y * 16 + py)
-                        );
+        final NativeImage[] newPix = newTexture.getPixels();
+        final NativeImage[] oldPix = this.atlasTexture.getPixels();
+        // puts textures into the atlas in such a way that an id for NxN will point to the same block of data in 2Nx2N
+        int res = 16;
+        for (int i = 0; i < newPix.length; i++) {
+            for (int y = 0; y < this.entriesY; y++) {
+                if (y % 2 == 0) {
+                    final int ny = y / 2;
+                    for (int py = 0; py < res; py++) {
+                        for (int px = 0; px < this.entriesX * res; px++) {
+                            newPix[i].setPixel(
+                                    px,
+                                    ny * res + py,
+                                    oldPix[i].getPixel(px, y * res + py)
+                            );
+                        }
                     }
-                }
-            } else {
-                final int ny = (y - 1) / 2;
-                for (int py = 0; py < 16; py++) {
-                    for (int px = 0; px < this.entriesX * 16; px++) {
-                        newPix.setPixel(
-                                px + this.entriesX * 16,
-                                ny * 16 + py,
-                                oldPix.getPixel(px, y * 16 + py)
-                        );
+                } else {
+                    final int ny = (y - 1) / 2;
+                    for (int py = 0; py < res; py++) {
+                        for (int px = 0; px < this.entriesX * res; px++) {
+                            newPix[i].setPixel(
+                                    px + this.entriesX * res,
+                                    ny * res + py,
+                                    oldPix[i].getPixel(px, y * res + py)
+                            );
+                        }
                     }
                 }
             }
+            res = res >> 1;
         }
 
         this.atlasTexture.close();
@@ -102,7 +106,7 @@ public class TileAtlasManager {
         this.uSize /= 2;
         this.vSize /= 2;
 
-        StreetArt.LOGGER.info("Resizing spray paint atlas to {}x{}", this.entriesX * 16, this.entriesY * 16);
+        StreetArt.LOGGER.info("Resizing spray paint atlas to {}x{} ({} entries)", this.entriesX * 16, this.entriesY * 16, this.entriesX * this.entriesY);
     }
 
     public void freeID(final int id) {
