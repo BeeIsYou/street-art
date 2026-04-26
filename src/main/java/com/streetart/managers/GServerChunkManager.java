@@ -106,7 +106,7 @@ public class GServerChunkManager {
             return true;
         });
 
-        shouldSaveData |= this.sendAllDirty(level, pos, Type.SMOTHERED);
+        shouldSaveData |= this.sendAllDirty(level, pos, Type.SMOTHERED, this::tryRemoveData);
         shouldSaveData |= this.sendAllDirty(level, pos, Type.REMOVED,
                 tempData -> this.graffiti.remove(tempData.pos())
         );
@@ -226,6 +226,10 @@ public class GServerChunkManager {
         }
 
         block.tryRemoveData(dir, depth);
+    }
+
+    public void tryRemoveData(final TempData pointer) {
+        this.tryRemoveData(pointer.pos(), pointer.dir(), pointer.data().getDepth());
     }
 
     /**
