@@ -8,7 +8,6 @@ import com.streetart.item.SprayPaintInteractor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -22,8 +21,6 @@ public class MinecraftMixin {
     @Shadow
     LocalPlayer player;
     @Shadow
-    ClientLevel level;
-    @Shadow
     Options options;
 
     @Unique
@@ -33,10 +30,10 @@ public class MinecraftMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;continueAttack(Z)V")
     )
     private void streetArt$dontSwingCan(final Minecraft instance, final boolean value, final Operation<Void> operation) {
-        final ItemStack mainhand = this.player.getItemInHand(InteractionHand.MAIN_HAND);
+        final ItemStack mainhand = instance.player.getItemInHand(InteractionHand.MAIN_HAND);
         if (value) {
             if (mainhand.getItem() instanceof SprayPaintInteractor) {
-                mainhand.use(this.level, this.player, InteractionHand.MAIN_HAND);
+                instance.gameMode.useItem(instance.player, InteractionHand.MAIN_HAND);
                 operation.call(instance, false);
                 this.wasDown = true;
                 return;
