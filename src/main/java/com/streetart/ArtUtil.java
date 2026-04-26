@@ -157,15 +157,15 @@ public class ArtUtil {
             final int iy2 = Mth.clamp(Mth.ceil(y2 * 16), 0, 16);
             final int iz2 = Mth.clamp(Mth.ceil(z2 * 16), 0, 16);
             faces.add(new ShapeFaces(
-                    new Face(Mth.clamp(15 - iy2, 0, 15),
+                    new Face(Mth.clamp(16 - iy2, 0, 15),
                             ix1, iz1, ix2, iz2),
                     new Face(Mth.clamp(iy1, 0, 15),
                             ix1, 16 - iz2, ix2, 16 - iz1),
                     new Face(Mth.clamp(iz1, 0, 15),
                             16 - ix2, 16 - iy2, 16 - ix1, 16 - iy1),
-                    new Face(Mth.clamp(15 - ix2, 0, 15),
+                    new Face(Mth.clamp(16 - ix2, 0, 15),
                             16 - iz2, 16 - iy2, 16 - iz1, 16 - iy1),
-                    new Face(Mth.clamp(15 - iz2, 0, 15),
+                    new Face(Mth.clamp(16 - iz2, 0, 15),
                             ix1, 16 - iy2, ix2, 16 - iy1),
                     new Face(Mth.clamp(ix1, 0, 15),
                             iz1, 16 - iy2, iz2, 16 - iy1)
