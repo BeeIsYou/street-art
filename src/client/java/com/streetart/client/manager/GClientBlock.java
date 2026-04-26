@@ -95,22 +95,24 @@ public class GClientBlock implements AutoCloseable {
             };
 
             for (final GClientData tile : value.getValue()) {
-                Vec3 tilePos;
-                if (dir.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
-                    tilePos = pos.add(dir.getUnitVec3().scale(tile.depth / 16d + 0.1));
-                } else {
-                    tilePos = pos.add(dir.getUnitVec3().scale(0.9 - tile.depth / 16d));
-                }
+                if (tile != null) {
+                    Vec3 tilePos;
+                    if (dir.getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
+                        tilePos = pos.add(dir.getUnitVec3().scale(tile.depth / 16d + 0.1));
+                    } else {
+                        tilePos = pos.add(dir.getUnitVec3().scale(1.1 - tile.depth / 16d));
+                    }
 
-                for (int i = 0; i < 15; i++) {
-                    int px = level.getRandom().nextInt(16);
-                    int py = level.getRandom().nextInt(16);
-                    int color = tile.getPixel(px, py);
-                    if (color != 0) {
-                        Vec3 particlePos = tilePos.add(dx.scale(px / 16f)).add(dy.scale(py / 16f));
-                        level.addParticle(new DustParticleOptions(color, 1),
-                                particlePos.x, particlePos.y, particlePos.z, 0, 0, 0
-                        );
+                    for (int i = 0; i < 15; i++) {
+                        int px = level.getRandom().nextInt(16);
+                        int py = level.getRandom().nextInt(16);
+                        int color = tile.getPixel(px, py);
+                        if (color != 0) {
+                            Vec3 particlePos = tilePos.add(dx.scale(px / 16f)).add(dy.scale(py / 16f));
+                            level.addParticle(new DustParticleOptions(color, 1),
+                                    particlePos.x, particlePos.y, particlePos.z, 0, 0, 0
+                            );
+                        }
                     }
                 }
             }
