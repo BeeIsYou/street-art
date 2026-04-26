@@ -1,5 +1,10 @@
 package com.streetart.client.rendering;
 
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -15,14 +20,25 @@ import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
 
 public class GraffitiRenderer {
-    private static final RenderType GRAFFITI_TYPE;
+    public static final DepthStencilState DEPTH_STENCIL = new DepthStencilState(
+            CompareOp.LESS_THAN_OR_EQUAL, true,
+            -1, -10
+    );
+    public static final RenderPipeline TRANSLUCENT_GRAFFITI = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.BLOCK_SNIPPET)
+                    .withLocation("pipeline/translucent_block")
+                    .withShaderDefine("ALPHA_CUTOUT", 0.01F)
+                    .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+                    .withDepthStencilState(DEPTH_STENCIL)
+                    .withCull(false)
+                    .build());
+    public static final RenderType GRAFFITI_TYPE;
     static {
-        final RenderSetup.RenderSetupBuilder setup = RenderSetup.builder(RenderPipelines.TRANSLUCENT_BLOCK)
+        final RenderSetup.RenderSetupBuilder setup = RenderSetup.builder(TRANSLUCENT_GRAFFITI)
                 .useLightmap()
                 .withTexture(
                         "Sampler0",
@@ -52,23 +68,13 @@ public class GraffitiRenderer {
     private static final Vector4f mutUV = new Vector4f();
     private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final TileAtlasManager tileAtlasManager, final GClientData data) {
         if (data.light0 != -1) {
-            final double dist = camPos.distanceToSqr(data.pos.getX(), data.pos.getY(), data.pos.getZ());
-            final float offset;
-            if (dist < 16*16) {
-                offset = 0.001f;
-            } else if (dist > 64*64) {
-                offset = 0.1f;
-            } else {
-                offset = (float) Mth.lerp((dist - 16*16) / (64*64 - 16*16), 0.001, 0.1);
-            }
-            final float depthOff = (float) (offset + data.getDepth());
+            final float depthOff = (float) (data.getDepth());
 
             pose.translate(
-                    data.pos.getX() - offset * 0.5f + data.dir.getStepX() * depthOff,
-                    data.pos.getY() - offset * 0.5f + data.dir.getStepY() * depthOff,
-                    data.pos.getZ() - offset * 0.5f + data.dir.getStepZ() * depthOff
+                    data.pos.getX() + data.dir.getStepX() * depthOff,
+                    data.pos.getY() + data.dir.getStepY() * depthOff,
+                    data.pos.getZ() + data.dir.getStepZ() * depthOff
             );
-            pose.scale(1 + offset, 1 + offset, 1 + offset);
 
             pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
             tileAtlasManager.writeUVs(data.id, mutUV);
