@@ -2,7 +2,6 @@ package com.streetart.managers.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.streetart.managers.public_facing_interfaces.PublicFacingBlockData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -12,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class GServerBlock implements PublicFacingBlockData {
+public class GServerBlock {
 
     public static final Codec<GServerBlock> CODEC = RecordCodecBuilder.create(i -> i.group(
                     BlockDataMapper.CODEC.fieldOf("data_map").forGetter(b -> b.blockData),
@@ -71,7 +70,7 @@ public class GServerBlock implements PublicFacingBlockData {
     /**
      * Pwetty pwease do not modify the entries inside
      */
-    public Iterable<Map.Entry<Direction, List<GServerDataHolder>>> getImmutableIterator() {
+    public Collection<Map.Entry<Direction, GServerDataHolder[]>> getImmutableIterator() {
         return this.blockData.getImmutableIterator();
     }
 

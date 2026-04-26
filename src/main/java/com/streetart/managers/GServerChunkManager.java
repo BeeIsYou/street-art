@@ -11,7 +11,6 @@ import com.streetart.graffiti_data.TileKey;
 import com.streetart.managers.data.GServerBlock;
 import com.streetart.managers.data.GServerDataHolder;
 import com.streetart.managers.data.TempData;
-import com.streetart.managers.public_facing_interfaces.PublicFacingBlockData;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
@@ -115,7 +114,7 @@ public class GServerChunkManager {
         return shouldSaveData;
     }
 
-    public <T extends GServerBlock & PublicFacingBlockData> Iterable<T> allGraffitiBlockData() {
+    public <T extends GServerBlock> Iterable<T> allGraffitiBlockData() {
         return (Iterable<T>) this.graffiti.values();
     }
 

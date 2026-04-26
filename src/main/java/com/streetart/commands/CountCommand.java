@@ -52,7 +52,7 @@ public class CountCommand {
         final BlockPos a = BlockPosArgument.getLoadedBlockPos(context, "from");
         final BlockPos b = BlockPosArgument.getLoadedBlockPos(context, "to");
         final CountType type = context.getArgument("type", CountType.class);
-        int c = countRegion(level, a, b, type, null);
+        final int c = countRegion(level, a, b, type, null);
         context.getSource().sendSuccess(() -> Component.translatable("commands.street_art.count.any_success", c, type.name), false);
         return c;
     }
@@ -63,7 +63,7 @@ public class CountCommand {
         final BlockPos b = BlockPosArgument.getLoadedBlockPos(context, "to");
         final CountType type = context.getArgument("type", CountType.class);
         final ColorComponent color = context.getArgument("color", ColorComponent.class);
-        int c = countRegion(level, a, b, type, color);
+        final int c = countRegion(level, a, b, type, color);
         context.getSource().sendSuccess(() -> Component.translatable("commands.street_art.count.color_success", c, type.name, color.name), false);
         return c;
     }
@@ -86,7 +86,7 @@ public class CountCommand {
     private static int countBlock(final GServerBlock block, final CountType type, final @Nullable ColorComponent color) {
         int c = 0;
 
-        for (Map.Entry<Direction, List<GServerDataHolder>> entries : block.getImmutableIterator()) {
+        for (final Map.Entry<Direction, GServerDataHolder[]> entries : block.getImmutableIterator()) {
             for (final GServerDataHolder face : entries.getValue()) {
                 final int dc = countFace(face, type, color);
 

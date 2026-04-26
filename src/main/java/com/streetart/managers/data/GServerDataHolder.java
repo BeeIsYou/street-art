@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.TileChange;
+import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import org.joml.Vector4f;
 
@@ -16,7 +17,8 @@ public class GServerDataHolder {
     public static final Codec<GServerDataHolder> CODEC = RecordCodecBuilder.create(i -> i.group(
                     Codec.BYTE_BUFFER.fieldOf("texture_data").forGetter(d -> d.graffitiData),
                     Codec.DOUBLE.fieldOf("depth").forGetter(GServerDataHolder::getDepth),
-                    Codec.INT.optionalFieldOf("grace", 0).forGetter(d -> d.graceTimer)
+                    Codec.INT.optionalFieldOf("grace", 0).forGetter(d -> d.graceTimer),
+                    Direction.CODEC.fieldOf("direction").forGetter(d -> d.dir)
             ).apply(i, GServerDataHolder::new));
 
     private final ByteBuffer graffitiData;
@@ -28,14 +30,17 @@ public class GServerDataHolder {
 
     private final double depth;
 
-    public GServerDataHolder(final double depth) {
-        this(ByteBuffer.allocate(PIXEL_BYTE_SIZE * 16 * 16), depth, 0);
+    public final Direction dir;
+
+    public GServerDataHolder(final double depth, Direction dir) {
+        this(ByteBuffer.allocate(PIXEL_BYTE_SIZE * 16 * 16), depth, 0, dir);
     }
 
-    public GServerDataHolder(final ByteBuffer buf, final double depth, final int graceTimer) {
+    public GServerDataHolder(final ByteBuffer buf, final double depth, final int graceTimer, Direction dir) {
         this. depth = depth;
         this.graffitiData = buf;
         this.graceTimer = graceTimer;
+        this.dir = dir;
     }
 
     /**

@@ -5,106 +5,133 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class BlockDataMapper {
 
     public static final Codec<BlockDataMapper> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.unboundedMap(Direction.CODEC, Codec.list(GServerDataHolder.CODEC)).fieldOf("data").forGetter(d -> d.blockData))
+                    Codec.list(GServerDataHolder.CODEC).fieldOf("data").forGetter(d -> {
+                        ArrayList<GServerDataHolder> holders = new ArrayList<>();
+                        for (Map.Entry<Direction, GServerDataHolder[]> eset : d.blockData.entrySet()) {
+                            for (GServerDataHolder holder : eset.getValue()) {
+                                if (holder != null) {
+                                    holders.add(holder);
+                                }
+                            }
+                        }
+
+                        return holders;
+                    }))
             .apply(i, BlockDataMapper::new)
     );
 
-    private final EnumMap<Direction, List<GServerDataHolder>> blockData;
-    
+    private final EnumMap<Direction, GServerDataHolder[]> blockData;
+    private static final int MAX_SIZE = 16;
+
     public BlockDataMapper() {
         this.blockData = new EnumMap<>(Direction.class);
     }
 
-    public BlockDataMapper(final Map<Direction, List<GServerDataHolder>> blockData) {
-        final EnumMap<Direction, List<GServerDataHolder>> map = new EnumMap<>(Direction.class);
+    public BlockDataMapper(final List<GServerDataHolder> holders) {
+        final EnumMap<Direction, GServerDataHolder[]> map = new EnumMap<>(Direction.class);
 
-        //grrr mc grrrrrr
-        //we need to iterate over all entries as we need to be able to mutate the inner lists here
-        for (final Map.Entry<Direction, List<GServerDataHolder>> entries : blockData.entrySet()) {
-            map.put(entries.getKey(), new ArrayList<>(entries.getValue()));
+        for (final GServerDataHolder holder : holders) {
+            map.computeIfAbsent(holder.dir, _ -> new GServerDataHolder[MAX_SIZE])
+                    [this.fromDepthToIndex(holder.getDepth())] = holder;
         }
 
         this.blockData = map;
     }
 
+    public BlockDataMapper(final EnumMap<Direction, GServerDataHolder[]> blockData) {
+        final EnumMap<Direction, GServerDataHolder[]> map = new EnumMap<>(Direction.class);
+        map.putAll(blockData);
+        this.blockData = map;
+    }
+
     public void smotheredFromDir(final List<TempData> gatherer, final BlockPos pos, final Direction dir) {
-        final List<GServerDataHolder> data = this.blockData.get(dir);
+        final GServerDataHolder[] data = this.blockData.get(dir);
+
         if (data != null) {
-            for (final GServerDataHolder holder : data) {
-                if (holder.getDepth() == 1) {
-                    gatherer.add(new TempData(holder, pos, dir));
-                }
+            final GServerDataHolder holder = data[15];
+            if (holder != null) {
+                gatherer.add(new TempData(holder, pos, dir));
             }
         }
     }
 
     public boolean randomDecay(final RandomSource source) {
         this.blockData.entrySet().removeIf(eSet -> {
-            eSet.getValue().removeIf(holder -> holder.randomDecay(source));
-            return eSet.getValue().isEmpty();
+            boolean passWithoutFullClear = false; //only true when a decay happens but doesn't remove all data
+            boolean dataAvailable = false; //only true when there is still data left inside array
+
+            final int beforeLength = eSet.getValue().length;
+            for (int i = 0; i < beforeLength; i++) {
+                final GServerDataHolder holder = eSet.getValue()[i];
+                if (holder != null) {
+                    dataAvailable = true;
+                } else {
+                    continue;
+                }
+
+                if (holder.randomDecay(source)) {
+                    if (!passWithoutFullClear) {
+                        dataAvailable = false;
+                    }
+
+                    eSet.getValue()[i] = null;
+                } else {
+                    passWithoutFullClear = true;
+                }
+            }
+
+            return !dataAvailable;
         });
 
         return this.isCompletelyEmpty();
     }
 
     public GServerDataHolder getOrCreate(final Direction dir, final double depth) {
-        final List<GServerDataHolder> dataList = this.blockData.computeIfAbsent(dir, _ -> new ArrayList<>(6));
+        final GServerDataHolder[] dataList = this.blockData.computeIfAbsent(dir, _ -> new GServerDataHolder[MAX_SIZE]);
+        final double snappedDepth = GServerBlock.snapToGrid(depth);
 
-        final double snapped = GServerBlock.snapToGrid(depth);
-        for (final GServerDataHolder holder : dataList) {
-            if (holder.getDepth() == snapped) {
-                return holder;
-            }
+        final int index = this.fromDepthToIndex(snappedDepth);
+        GServerDataHolder holder = dataList[index];
+        if (holder != null) {
+            return holder;
         }
 
-        final GServerDataHolder holder = new GServerDataHolder(snapped);
-        dataList.add(holder);
+        holder = new GServerDataHolder(snappedDepth, dir);
+        dataList[index] = holder;
         return holder;
     }
 
+    @Nullable
     public GServerDataHolder getFromDepth(final Direction dir, final double depth) {
-        final List<GServerDataHolder> holders = this.blockData.get(dir);
-        if (holders == null) {
-            return null;
-        }
-
-        final double snapped = GServerBlock.snapToGrid(depth);
-        for (final GServerDataHolder holder : holders) {
-            if (holder.getDepth() == snapped) {
-                return holder;
-            }
+        final GServerDataHolder[] holders = this.blockData.get(dir);
+        if (holders != null) {
+            return holders[this.fromDepthToIndex(GServerBlock.snapToGrid(depth))];
         }
 
         return null;
     }
 
     public void removeDepth(final Direction dir, final double depth) {
-        final List<GServerDataHolder> holders = this.blockData.get(dir);
-        if (holders != null) {
-            if (!holders.isEmpty()) {
-                final double snapped = GServerBlock.snapToGrid(depth);
+        final GServerDataHolder[] holders = this.blockData.get(dir);
+        holders[this.fromDepthToIndex(GServerBlock.snapToGrid(depth))] = null;
 
-                final Iterator<GServerDataHolder> iter = holders.iterator();
-                while (iter.hasNext()) {
-                    final GServerDataHolder data = iter.next();
-
-                    if (data.getDepth() == snapped) {
-                        iter.remove();
-                        break;
-                    }
-                }
+        boolean isEmpty = true;
+        for (final GServerDataHolder holder : holders) {
+            if (holder != null) {
+                isEmpty = false;
+                break;
             }
+        }
 
-            if (holders.isEmpty()) {
-                this.blockData.remove(dir);
-            }
+        if (isEmpty) {
+            this.blockData.remove(dir);
         }
     }
 
@@ -113,7 +140,9 @@ public class BlockDataMapper {
 
         this.blockData.forEach((dir, holder) -> {
             for (final GServerDataHolder gServerDataHolder : holder) {
-                compiled.add(new TempData(gServerDataHolder, pos, dir));
+                if (gServerDataHolder != null) {
+                    compiled.add(new TempData(gServerDataHolder, pos, dir));
+                }
             }
         });
 
@@ -131,7 +160,17 @@ public class BlockDataMapper {
     /**
      * Pwetty pwease do not modify the entries inside
      */
-    public Iterable<Map.Entry<Direction, List<GServerDataHolder>>> getImmutableIterator() {
+    public Collection<Map.Entry<Direction, GServerDataHolder[]>> getImmutableIterator() {
         return Collections.unmodifiableCollection(this.blockData.entrySet());
+    }
+
+    /**
+     * Provides the relative index from the given depth. depth is assumed to already be normalized by 1/16th.
+     *
+     * @param depth The depth to calculate the index from.
+     * @return The index of the given depth
+     */
+    private int fromDepthToIndex(final double depth) {
+        return (int) (16 * depth) - 1;
     }
 }
