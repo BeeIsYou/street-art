@@ -1,7 +1,6 @@
 package com.streetart.client.manager;
 
 import com.streetart.ArtUtil;
-import com.streetart.GManager;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.rendering.LightMath;
 import com.streetart.component.ColorComponent;
@@ -14,28 +13,64 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class GClientManager extends GManager<GClientData, GClientBlock> {
+public class GClientManager implements AutoCloseable {
     private final Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
-
 
     public int nextID() {
         return StreetArtClient.tileAtlasManager.allocateID();
     }
 
-    @Override
+    public @Nullable GClientBlock get(final BlockPos pos) {
+        return this.getGraffiti().get(pos);
+    }
+
+    public @Nullable GClientData get(final BlockPos pos, final Direction dir, final int depth) {
+        final GClientBlock blockData = this.getGraffiti().get(pos);
+        if (blockData == null) {
+            return null;
+        }
+
+        return blockData.get(dir, depth);
+    }
+
+    public GClientData getOrCreate(final BlockPos pos, final Direction dir, final int depth) {
+        final GClientBlock blockData = this.getGraffiti().computeIfAbsent(pos, _ -> this.newBlockData(pos));
+        return blockData.getOrCreate(dir, depth, this);
+    }
+
+    public @Nullable GClientData getOrConditionalCreate(final BlockPos pos, final Direction dir, final int depth, final boolean clear) {
+        if (clear) {
+            return this.get(pos, dir, depth);
+        } else {
+            return this.getOrCreate(pos, dir, depth);
+        }
+    }
+
+    public void tryRemoveData(final BlockPos pos, final Direction dir, final int depth) {
+        final GClientBlock block = this.getGraffiti().get(pos);
+        if (block == null) {
+            return;
+        }
+
+        block.remove(dir, depth);
+        if (block.isEmpty(dir)) {
+            block.getBlockData().remove(dir);
+        }
+    }
+
     public GClientBlock newBlockData(final BlockPos pos) {
         return new GClientBlock(pos);
     }
 
-    @Override
     public Map<BlockPos, GClientBlock> getGraffiti() {
         return this.graffiti;
     }
@@ -82,9 +117,11 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
 
     public void forEach(final Consumer<GClientData> consumer) {
         for (final GClientBlock graffitis : this.getGraffiti().values()) {
-            for (final Map.Entry<Direction, List<GClientData>> tiles : graffitis.getBlockData().entrySet()) {
+            for (final Map.Entry<Direction, GClientData[]> tiles : graffitis.getBlockData().entrySet()) {
                 for (final GClientData tile : tiles.getValue()) {
-                    consumer.accept(tile);
+                    if (tile != null) {
+                        consumer.accept(tile);
+                    }
                 }
             }
         }
@@ -97,22 +134,18 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     }
 
     public void handleDataUpdate(final ClientBoundGraffitiSet packet, final ClientPlayNetworking.Context context) {
+        int depth = Mth.clamp(packet.depth(), 0, 15);
         if (packet.textureData().length == 16 * 16) {
-            final GClientData data = this.getOrCreate(packet.pos(), packet.dir(), packet.depth());
+            final GClientData data = this.getOrCreate(packet.pos(), packet.dir(), depth);
             data.update(packet.textureData());
             data.updateLight(context.client().level);
         } else {
             final GClientBlock block = this.getGraffiti().get(packet.pos());
             if (block != null) {
-                final List<GClientData> dataList = block.getBlockData().get(packet.dir());
-                if (dataList != null) {
-                    dataList.removeIf(d -> {
-                        final boolean remove = d.getDepth() == packet.depth();
-                        if (remove) {
-                            d.close();
-                        }
-                        return remove;
-                    });
+                final GClientData[] dataList = block.getBlockData().get(packet.dir());
+                if (dataList != null && dataList[depth] != null) {
+                    dataList[depth].close();
+                    dataList[depth] = null;
                 }
             }
         }
@@ -129,7 +162,8 @@ public class GClientManager extends GManager<GClientData, GClientBlock> {
     public void handleChange(final byte content, final TileKey key, final TileChange change, final ClientPlayNetworking.Context context) {
         final ColorComponent colorComponent = ArtUtil.generateComponentFromByte(content);
 
-        final GClientData data = this.getOrConditionalCreate(key.pos(), key.dir(), key.depth(), colorComponent == ColorComponent.CLEAR);
+        int depth = Mth.clamp(key.depth(), 0, 15);
+        final GClientData data = this.getOrConditionalCreate(key.pos(), key.dir(), depth, colorComponent == ColorComponent.CLEAR);
         if (data != null) {
             data.handleChange(colorComponent.argb, change);
             data.updateLight(context.client().level);

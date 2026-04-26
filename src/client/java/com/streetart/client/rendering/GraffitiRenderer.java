@@ -68,7 +68,7 @@ public class GraffitiRenderer {
     private static final Vector4f mutUV = new Vector4f();
     private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final TileAtlasManager tileAtlasManager, final GClientData data) {
         if (data.light0 != -1) {
-            final float depthOff = (float) (data.getDepth());
+            final float depthOff = 1 - data.depth / 16f;
 
             pose.translate(
                     data.pos.getX() + data.dir.getStepX() * depthOff,

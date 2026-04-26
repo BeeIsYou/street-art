@@ -38,8 +38,8 @@ public class BlockDataMapper {
         final EnumMap<Direction, GServerDataHolder[]> map = new EnumMap<>(Direction.class);
 
         for (final GServerDataHolder holder : holders) {
-            map.computeIfAbsent(holder.dir, _ -> new GServerDataHolder[MAX_SIZE])
-                    [this.fromDepthToIndex(holder.getDepth())] = holder;
+            map.computeIfAbsent(holder.dir, _ ->
+                    new GServerDataHolder[MAX_SIZE])[holder.depth] = holder;
         }
 
         this.blockData = map;
@@ -93,34 +93,32 @@ public class BlockDataMapper {
         return this.isCompletelyEmpty();
     }
 
-    public GServerDataHolder getOrCreate(final Direction dir, final double depth) {
+    public GServerDataHolder getOrCreate(final Direction dir, final int depth) {
         final GServerDataHolder[] dataList = this.blockData.computeIfAbsent(dir, _ -> new GServerDataHolder[MAX_SIZE]);
-        final double snappedDepth = GServerBlock.snapToGrid(depth);
 
-        final int index = this.fromDepthToIndex(snappedDepth);
-        GServerDataHolder holder = dataList[index];
+        GServerDataHolder holder = dataList[depth];
         if (holder != null) {
             return holder;
         }
 
-        holder = new GServerDataHolder(snappedDepth, dir);
-        dataList[index] = holder;
+        holder = new GServerDataHolder(depth, dir);
+        dataList[depth] = holder;
         return holder;
     }
 
     @Nullable
-    public GServerDataHolder getFromDepth(final Direction dir, final double depth) {
+    public GServerDataHolder getFromDepth(final Direction dir, final int depth) {
         final GServerDataHolder[] holders = this.blockData.get(dir);
         if (holders != null) {
-            return holders[this.fromDepthToIndex(GServerBlock.snapToGrid(depth))];
+            return holders[depth];
         }
 
         return null;
     }
 
-    public void removeDepth(final Direction dir, final double depth) {
+    public void removeDepth(final Direction dir, final int depth) {
         final GServerDataHolder[] holders = this.blockData.get(dir);
-        holders[this.fromDepthToIndex(GServerBlock.snapToGrid(depth))] = null;
+        holders[depth] = null;
 
         boolean isEmpty = true;
         for (final GServerDataHolder holder : holders) {

@@ -53,7 +53,7 @@ public class ArtUtil {
         return new Vector2i(x, y);
     }
 
-    public static double calculateDepth(final BlockHitResult hitResult) {
+    public static int calculateDepth(final BlockHitResult hitResult) {
         final Vec3 relativePos = hitResult.getLocation().subtract(Vec3.atLowerCornerOf(hitResult.getBlockPos()));
         double depth = switch (hitResult.getDirection().getAxis()) {
             case X -> relativePos.x;
@@ -61,10 +61,10 @@ public class ArtUtil {
             case Z -> relativePos.z;
         };
 
-        if (hitResult.getDirection().getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
+        if (hitResult.getDirection().getAxisDirection() == Direction.AxisDirection.POSITIVE) {
             depth = 1 - depth;
         }
-        return depth;
+        return Mth.clamp(Mth.floor(depth * 16), 0, 15);
     }
 
     /**
@@ -157,12 +157,18 @@ public class ArtUtil {
             final int iy2 = Mth.clamp(Mth.ceil(y2 * 16), 0, 16);
             final int iz2 = Mth.clamp(Mth.ceil(z2 * 16), 0, 16);
             faces.add(new ShapeFaces(
-                    new Face(y2, ix1, iz1, ix2, iz2),
-                    new Face(1 - y1, ix1, 16 - iz2, ix2, 16 - iz1),
-                    new Face(1 - z1, 16 - ix2, 16 - iy2, 16 - ix1, 16 - iy1),
-                    new Face(x2, 16 - iz2, 16 - iy2, 16 - iz1, 16 - iy1),
-                    new Face(z2, ix1, 16 - iy2, ix2, 16 - iy1),
-                    new Face(1 - x1, iz1, 16 - iy2, iz2, 16 - iy1)
+                    new Face(Mth.clamp(15 - iy2, 0, 15),
+                            ix1, iz1, ix2, iz2),
+                    new Face(Mth.clamp(iy1, 0, 15),
+                            ix1, 16 - iz2, ix2, 16 - iz1),
+                    new Face(Mth.clamp(iz1, 0, 15),
+                            16 - ix2, 16 - iy2, 16 - ix1, 16 - iy1),
+                    new Face(Mth.clamp(15 - ix2, 0, 15),
+                            16 - iz2, 16 - iy2, 16 - iz1, 16 - iy1),
+                    new Face(Mth.clamp(15 - iz2, 0, 15),
+                            ix1, 16 - iy2, ix2, 16 - iy1),
+                    new Face(Mth.clamp(ix1, 0, 15),
+                            iz1, 16 - iy2, iz2, 16 - iy1)
             ));
         });
         return faces;
@@ -207,7 +213,5 @@ public class ArtUtil {
         }
     }
 
-    public record Face(double depth, int x1, int y1, int x2, int y2) {
-
-    }
+    public record Face(int depth, int x1, int y1, int x2, int y2) {}
 }

@@ -38,7 +38,7 @@ public record BiDirectionalGraffitiChange(byte content, HashMap<TileKey, TileCha
         return TYPE;
     }
 
-    public void markChanged(final BlockPos pos, final Direction dir, final double depth, final int x, final int y) {
+    public void markChanged(final BlockPos pos, final Direction dir, final int depth, final int x, final int y) {
         final TileChange change = this.changes.computeIfAbsent(new TileKey(pos, dir, depth), _ -> TileChange.empty());
         change.markChanged(x, y);
     }
@@ -46,5 +46,4 @@ public record BiDirectionalGraffitiChange(byte content, HashMap<TileKey, TileCha
     public void markChanged(final BlockHitResult hitResult, final int x, final int y) {
         this.markChanged(hitResult.getBlockPos(), hitResult.getDirection(), ArtUtil.calculateDepth(hitResult), x, y);
     }
-
 }

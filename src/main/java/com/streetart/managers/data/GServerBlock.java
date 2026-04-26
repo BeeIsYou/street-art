@@ -51,15 +51,15 @@ public class GServerBlock {
         return this.blockData.randomDecay(level.getRandom());
     }
 
-    public GServerDataHolder getOrCreate(final Direction dir, final double depth) {
+    public GServerDataHolder getOrCreate(final Direction dir, final int depth) {
         return this.blockData.getOrCreate(dir, depth);
     }
 
-    public GServerDataHolder get(final Direction dir, final double depth) {
+    public GServerDataHolder get(final Direction dir, final int depth) {
         return this.blockData.getFromDepth(dir, depth);
     }
 
-    public void tryRemoveData(final Direction dir, final double depth) {
+    public void tryRemoveData(final Direction dir, final int depth) {
         this.blockData.removeDepth(dir, depth);
     }
 
@@ -76,10 +76,6 @@ public class GServerBlock {
 
     public boolean isEmpty() {
         return this.blockData.isCompletelyEmpty();
-    }
-
-    public static double snapToGrid(final double v) {
-        return Math.round(v * 16) / 16d;
     }
 
     public void blame(@Nullable final ServerPlayer player) {

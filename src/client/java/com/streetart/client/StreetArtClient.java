@@ -46,20 +46,20 @@ public class StreetArtClient implements ClientModInitializer {
                     textureManager = new HashMap<>();
                     tileAtlasManager = new TileAtlasManager(Minecraft.getInstance().getTextureManager(), 4);
 
-                    ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, (l, ll) -> {
-                        final GClientManager man = textureManager.computeIfAbsent(ChunkPos.containing(l.pos()), _ -> new GClientManager());
-                        man.handleDataUpdate(l, ll);
+                    ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, (packet, context) -> {
+                        final GClientManager man = textureManager.computeIfAbsent(ChunkPos.containing(packet.pos()), _ -> new GClientManager());
+                        man.handleDataUpdate(packet, context);
                     });
 
-                    ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, (l, ll) -> {
-                        final GClientManager manager = textureManager.computeIfAbsent(ChunkPos.containing(l.pos()), _ -> new GClientManager());
-                        manager.handleBlockInvalidate(l, ll);
+                    ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, (packet, context) -> {
+                        final GClientManager manager = textureManager.computeIfAbsent(ChunkPos.containing(packet.pos()), _ -> new GClientManager());
+                        manager.handleBlockInvalidate(packet, context);
                     });
 
-                    ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, (l, ll) -> {
-                        for (final Map.Entry<TileKey, TileChange> entries : l.changes().entrySet()) {
+                    ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, (packet, context) -> {
+                        for (final Map.Entry<TileKey, TileChange> entries : packet.changes().entrySet()) {
                             final GClientManager manager = textureManager.computeIfAbsent(ChunkPos.containing(entries.getKey().pos()), _ -> new GClientManager());
-                            manager.handleChange(l.content(), entries.getKey(), entries.getValue(), ll);
+                            manager.handleChange(packet.content(), entries.getKey(), entries.getValue(), context);
                         }
                     });
 

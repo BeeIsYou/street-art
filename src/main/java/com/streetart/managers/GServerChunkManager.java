@@ -22,6 +22,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Contract;
@@ -182,7 +183,7 @@ public class GServerChunkManager {
                 ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
                         value.getBlockPos(),
                         compileDatum.dir(),
-                        compileDatum.data().getDepth(),
+                        compileDatum.data().depth,
                         compileDatum.data().getGraffitiData().array()
                 ));
             }
@@ -190,10 +191,11 @@ public class GServerChunkManager {
     }
 
     public boolean handleChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final TileKey key, final TileChange change) {
+        final int depth = Mth.clamp(key.depth(), 0, 15);
         final GServerDataHolder tile = this.getOrConditionalCreateFace(
                 key.pos(),
                 key.dir(),
-                key.depth(),
+                depth,
                 packet.content() == ColorComponent.CLEAR.id
         );
 
@@ -202,7 +204,7 @@ public class GServerChunkManager {
         }
 
         if (tile.handleChange(packet.content(), change)) {
-            this.tryRemoveData(key.pos(), key.dir(), key.depth());
+            this.tryRemoveData(key.pos(), key.dir(), depth);
         }
 
         if (packet.content() != 0) {
@@ -219,7 +221,7 @@ public class GServerChunkManager {
         return true;
     }
 
-    public void tryRemoveData(final BlockPos pos, final Direction dir, final double depth) {
+    public void tryRemoveData(final BlockPos pos, final Direction dir, final int depth) {
         final GServerBlock block = this.graffiti.get(pos);
         if (block == null) {
             return;
@@ -229,7 +231,7 @@ public class GServerChunkManager {
     }
 
     public void tryRemoveData(final TempData pointer) {
-        this.tryRemoveData(pointer.pos(), pointer.dir(), pointer.data().getDepth());
+        this.tryRemoveData(pointer.pos(), pointer.dir(), pointer.data().depth);
     }
 
     /**
@@ -250,7 +252,7 @@ public class GServerChunkManager {
         return this.graffiti.get(pos);
     }
 
-    public @Nullable GServerDataHolder getOrConditionalCreateFace(final BlockPos pos, final Direction dir, final double depth, final boolean clear) {
+    public @Nullable GServerDataHolder getOrConditionalCreateFace(final BlockPos pos, final Direction dir, final int depth, final boolean clear) {
         if (clear) {
             return this.getFace(pos, dir, depth);
         } else {
@@ -258,12 +260,12 @@ public class GServerChunkManager {
         }
     }
 
-    public GServerDataHolder getOrCreateFace(final BlockPos pos, final Direction dir, final double depth) {
+    public GServerDataHolder getOrCreateFace(final BlockPos pos, final Direction dir, final int depth) {
         return this.graffiti.computeIfAbsent(pos, _ -> new GServerBlock(pos)).getOrCreate(dir, depth);
     }
 
     @Contract(pure = true)
-    public @Nullable GServerDataHolder getFace(final BlockPos pos, final Direction dir, final double depth) {
+    public @Nullable GServerDataHolder getFace(final BlockPos pos, final Direction dir, final int depth) {
         final GServerBlock blockData = this.graffiti.get(pos);
         if (blockData == null) {
             return null;

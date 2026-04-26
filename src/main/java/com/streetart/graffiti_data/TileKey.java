@@ -6,11 +6,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-public record TileKey(BlockPos pos, Direction dir, double depth) {
+public record TileKey(BlockPos pos, Direction dir, int depth) {
     public static final StreamCodec<ByteBuf, TileKey> CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, TileKey::pos,
             Direction.STREAM_CODEC, TileKey::dir,
-            ByteBufCodecs.DOUBLE, TileKey::depth,
+            ByteBufCodecs.INT, TileKey::depth,
             TileKey::new
     );
 
@@ -26,7 +26,7 @@ public record TileKey(BlockPos pos, Direction dir, double depth) {
     public int hashCode() {
         int result = this.pos.hashCode();
         result = 31 * result + this.dir.hashCode();
-        result = 31 * result + Double.hashCode(this.depth);
+        result = 31 * result + this.depth;
         return result;
     }
 }

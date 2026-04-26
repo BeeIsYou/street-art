@@ -43,7 +43,7 @@ public class LookingAtPaintEntry implements DebugScreenEntry {
                         block.getBlockData().forEach((dir, datas) -> {
                             lines.add(dir.toString());
                         for (final GClientData data : datas) {
-                            lines.add(String.format(" %d, (%.4f)", data.id, data.getDepth()));
+                            lines.add(String.format(" %d, (%d)", data.id, data.depth));
                         }
                         });
 

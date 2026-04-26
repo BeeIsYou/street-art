@@ -27,7 +27,7 @@ public class LightMath {
      */
     public void OhGodSoMuchMath(final GClientData data, final BlockAndTintGetter level, final BlockState state) {
         final Direction direction = data.dir;
-        final boolean faceCubic = data.getDepth() == 1;
+        final boolean faceCubic = data.depth == 0;
         final BlockPos centerPosition = data.pos;
         final BlockPos basePosition = faceCubic ? centerPosition.relative(direction) : centerPosition;
         final BlockModelLighter.AdjacencyInfo info = BlockModelLighter.AdjacencyInfo.fromFacing(direction);
