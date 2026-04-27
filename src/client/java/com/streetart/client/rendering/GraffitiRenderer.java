@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.streetart.AllGraffitiLayers;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.manager.GClientData;
 import com.streetart.client.mixin.LevelRendererAccessor;
@@ -22,6 +23,8 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
 
@@ -63,13 +66,20 @@ public class GraffitiRenderer {
         final Vec3 camPos = context.levelState().cameraRenderState.pos;
         pose.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
+        final Player player = Minecraft.getInstance().player;
+        final Level level = Minecraft.getInstance().level;
+
+        final Identifier active = AllGraffitiLayers.getActive(player, level).identifier();
+
         // todo layer ordering
         StreetArtClient.layers.forEach((identifier, atlas) -> {
             if (atlas.isActive(Minecraft.getInstance().player, Minecraft.getInstance().level)) {
+                final boolean opaque = active.equals(identifier);
+                final int mask = opaque ? 0xFFFFFFFF : 0x3FFFFFFF;
                 storage.submitCustomGeometry(pose, GRAFFITI_TYPE.apply(identifier), (_pose, buffer) -> {
                     final PoseStack.Pose original = _pose.copy();
                     atlas.forEach((_, manager) -> {
-                        manager.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data));
+                        manager.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data, mask));
                     });
                 });
             }
@@ -77,8 +87,9 @@ public class GraffitiRenderer {
     }
 
     private static final Vector4f mutUV = new Vector4f();
-    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final GraffitiAtlas tileAtlasManager, final GClientData data) {
+    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final GraffitiAtlas tileAtlasManager, final GClientData data, final int colorMask) {
         if (data.light0 != -1) {
+
             final float depthOff = 1 - data.depth / 16f;
 
             pose.translate(
@@ -94,7 +105,7 @@ public class GraffitiRenderer {
                     mutUV.x, mutUV.y,
                     mutUV.z, mutUV.w,
                     data.light0, data.light1, data.light2, data.light3,
-                    data.color0, data.color1, data.color2, data.color3
+                    data.color0 & colorMask, data.color1 & colorMask, data.color2 & colorMask, data.color3 & colorMask
             );
             pose.set(original);
         }
