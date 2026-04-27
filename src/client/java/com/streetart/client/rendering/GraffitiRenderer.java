@@ -9,19 +9,26 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.streetart.AllGraffitiLayers;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.manager.GClientData;
-import com.streetart.client.manager.GClientManager;
 import com.streetart.client.mixin.LevelRendererAccessor;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector4f;
+
+import java.util.function.Function;
 
 public class GraffitiRenderer {
     public static final DepthStencilState DEPTH_STENCIL = new DepthStencilState(
@@ -36,39 +43,54 @@ public class GraffitiRenderer {
                     .withDepthStencilState(DEPTH_STENCIL)
                     .withCull(false)
                     .build());
-    public static final RenderType GRAFFITI_TYPE;
+    public static final Function<Identifier, RenderType> GRAFFITI_TYPE;
     static {
-        final RenderSetup.RenderSetupBuilder setup = RenderSetup.builder(TRANSLUCENT_GRAFFITI)
-                .useLightmap()
-                .withTexture(
-                        "Sampler0",
-                        StreetArtClient.tileAtlasManager.atlasLocation,
-                        () -> RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST, true)
-                )
-                .sortOnUpload()
-                .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET);
-        GRAFFITI_TYPE = RenderType.create("street_art:graffiti", setup.createRenderSetup());
+        GRAFFITI_TYPE = Util.memoize(identifier -> RenderType.create("street_art:graffiti",
+                RenderSetup.builder(TRANSLUCENT_GRAFFITI)
+                    .useLightmap()
+                    .withTexture(
+                            "Sampler0",
+                            identifier,
+                            () -> RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST, true)
+                    )
+                    .sortOnUpload()
+                    .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
+                    .createRenderSetup()
+        ));
     }
 
     public static void render(final LevelTerrainRenderContext context) {
-        final SubmitNodeStorage storage = ((LevelRendererAccessor)context.levelRenderer()).getSubmitNodeStorage();
+        final SubmitNodeStorage storage = ((LevelRendererAccessor) context.levelRenderer()).getSubmitNodeStorage();
 
         final PoseStack pose = new PoseStack();
         final Vec3 camPos = context.levelState().cameraRenderState.pos;
         pose.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
-        storage.submitCustomGeometry(pose, GRAFFITI_TYPE, (_pose, buffer) -> {
-            final PoseStack.Pose original = _pose.copy();
-            for (final GClientManager entry : StreetArtClient.textureManager.values()) {
-                entry.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, StreetArtClient.tileAtlasManager, data));
+        final Player player = Minecraft.getInstance().player;
+        final Level level = Minecraft.getInstance().level;
+
+        final Identifier active = AllGraffitiLayers.getActive(player, level).identifier();
+
+        // todo layer ordering
+        StreetArtClient.layers.forEach((identifier, atlas) -> {
+            if (atlas.isActive(Minecraft.getInstance().player, Minecraft.getInstance().level)) {
+                final boolean opaque = active.equals(identifier);
+                final int mask = opaque ? 0xFFFFFFFF : 0x3FFFFFFF;
+                storage.submitCustomGeometry(pose, GRAFFITI_TYPE.apply(identifier), (_pose, buffer) -> {
+                    final PoseStack.Pose original = _pose.copy();
+                    atlas.forEach((_, manager) -> {
+                        manager.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data, mask));
+                    });
+                });
             }
         });
     }
 
     private static final Vector4f mutUV = new Vector4f();
-    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final TileAtlasManager tileAtlasManager, final GClientData data) {
+    private static void renderGraffiti(final PoseStack.Pose pose, final PoseStack.Pose original, final Vec3 camPos, final VertexConsumer buffer, final GraffitiAtlas tileAtlasManager, final GClientData data, final int colorMask) {
         if (data.light0 != -1) {
-            final float depthOff = (float) (data.getDepth());
+
+            final float depthOff = 1 - data.depth / 16f;
 
             pose.translate(
                     data.pos.getX() + data.dir.getStepX() * depthOff,
@@ -83,7 +105,7 @@ public class GraffitiRenderer {
                     mutUV.x, mutUV.y,
                     mutUV.z, mutUV.w,
                     data.light0, data.light1, data.light2, data.light3,
-                    data.color0, data.color1, data.color2, data.color3
+                    data.color0 & colorMask, data.color1 & colorMask, data.color2 & colorMask, data.color3 & colorMask
             );
             pose.set(original);
         }

@@ -10,7 +10,6 @@ import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
 import net.minecraft.client.gui.components.debug.DebugScreenEntry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
@@ -32,7 +31,7 @@ public class LookingAtPaintEntry implements DebugScreenEntry {
             if (result instanceof final BlockHitResult hitResult) {
                 final BlockPos pos = hitResult.getBlockPos();
 
-                GClientManager manager = StreetArtClient.textureManager.get(ChunkPos.containing(pos));
+                GClientManager manager = StreetArtClient.layers.active().get(pos);
                 if (manager != null) {
                     final GClientBlock block = manager.getGraffiti().get(pos);
 
@@ -43,7 +42,7 @@ public class LookingAtPaintEntry implements DebugScreenEntry {
                         block.getBlockData().forEach((dir, datas) -> {
                             lines.add(dir.toString());
                         for (final GClientData data : datas) {
-                            lines.add(String.format(" %d, (%.4f)", data.id, data.getDepth()));
+                            lines.add(String.format(" %d, (%d)", data.id, data.depth));
                         }
                         });
 

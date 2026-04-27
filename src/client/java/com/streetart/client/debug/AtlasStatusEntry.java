@@ -9,11 +9,14 @@ import org.jspecify.annotations.Nullable;
 
 public class AtlasStatusEntry implements DebugScreenEntry {
     @Override
-    public void display(DebugScreenDisplayer displayer, @Nullable Level serverOrClientLevel, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
-        int capacity = StreetArtClient.tileAtlasManager.getCapacity();
-        int size = StreetArtClient.tileAtlasManager.getSize();
-        displayer.addLine(
-                "Spray Paint Atlas: " + size + "/" + capacity
-        );
+    public void display(final DebugScreenDisplayer displayer, @Nullable final Level serverOrClientLevel, @Nullable final LevelChunk clientChunk, @Nullable final LevelChunk serverChunk) {
+        StreetArtClient.layers.forEach(((identifier, atlas) -> {
+            final int capacity = atlas.getCapacity();
+            final int size = atlas.getSize();
+            displayer.addLine(
+                    identifier + ": " + size + "/" + capacity
+            );
+        }));
+
     }
 }

@@ -3,15 +3,16 @@ package com.streetart.managers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.streetart.AllGameRules;
+import com.streetart.AllGraffitiLayers;
 import com.streetart.StreetArt;
 import com.streetart.arealib.AreaLib;
 import com.streetart.component.ColorComponent;
-import com.streetart.graffiti_data.TileChange;
-import com.streetart.graffiti_data.TileKey;
+import com.streetart.graffiti_data.GraffitiChangeData;
+import com.streetart.graffiti_data.GraffitiKey;
+import com.streetart.graffiti_data.GraffitiLayerType;
+import com.streetart.managers.data.ExposedGraffitiData;
 import com.streetart.managers.data.GServerBlock;
 import com.streetart.managers.data.GServerDataHolder;
-import com.streetart.managers.data.TempData;
-import com.streetart.managers.public_facing_interfaces.PublicFacingBlockData;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
@@ -21,8 +22,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Contract;
@@ -40,7 +43,7 @@ public class GServerChunkManager {
     );
 
     private final Map<BlockPos, GServerBlock> graffiti;
-    private final EnumMap<Type, List<TempData>> dirtyDatas;
+    private final EnumMap<Type, List<ExposedGraffitiData>> dirtyDatas;
     private final List<BiDirectionalGraffitiChange> patches = new ArrayList<>();
 
     public GServerChunkManager() {
@@ -62,13 +65,14 @@ public class GServerChunkManager {
      * @return true if anything was sent
      */
     private boolean sendAllDirty(final ServerLevel level, final ChunkPos pos, final Type type) {
-        final List<TempData> typeDatas = this.dirtyDatas.get(type);
-        for (final TempData tempData : typeDatas) {
-            final CustomPacketPayload packet = type.getPacket(tempData);
+        final List<ExposedGraffitiData> typeDatas = this.dirtyDatas.get(type);
+        for (final ExposedGraffitiData exposedGraffitiData : typeDatas) {
+            final CustomPacketPayload packet = type.getPacket(exposedGraffitiData);
             for (final ServerPlayer player : PlayerLookup.tracking(level, pos)) {
                 ServerPlayNetworking.send(player, packet);
             }
         }
+
         final boolean sent = !typeDatas.isEmpty();
         typeDatas.clear();
         return sent;
@@ -78,15 +82,16 @@ public class GServerChunkManager {
      * @param dataConsumer method to call for each data in the list
      * @return true if anything was set
      */
-    private boolean sendAllDirty(final ServerLevel level, final ChunkPos pos, final Type type, final Consumer<TempData> dataConsumer) {
-        final List<TempData> typeDatas = this.dirtyDatas.get(type);
-        for (final TempData tempData : typeDatas) {
-            final CustomPacketPayload packet = type.getPacket(tempData);
+    private boolean sendAllDirty(final ServerLevel level, final ChunkPos pos, final Type type, final Consumer<ExposedGraffitiData> dataConsumer) {
+        final List<ExposedGraffitiData> typeDatas = this.dirtyDatas.get(type);
+        for (final ExposedGraffitiData exposedGraffitiData : typeDatas) {
+            final CustomPacketPayload packet = type.getPacket(exposedGraffitiData);
             for (final ServerPlayer player : PlayerLookup.tracking(level, pos)) {
                 ServerPlayNetworking.send(player, packet);
             }
-            dataConsumer.accept(tempData);
+            dataConsumer.accept(exposedGraffitiData);
         }
+
         final boolean sent = !typeDatas.isEmpty();
         typeDatas.clear();
         return sent;
@@ -107,7 +112,7 @@ public class GServerChunkManager {
             return true;
         });
 
-        shouldSaveData |= this.sendAllDirty(level, pos, Type.SMOTHERED);
+        shouldSaveData |= this.sendAllDirty(level, pos, Type.SMOTHERED, this::tryRemoveData);
         shouldSaveData |= this.sendAllDirty(level, pos, Type.REMOVED,
                 tempData -> this.graffiti.remove(tempData.pos())
         );
@@ -115,16 +120,13 @@ public class GServerChunkManager {
         return shouldSaveData;
     }
 
-    public <T extends GServerBlock & PublicFacingBlockData> Iterable<T> allGraffitiBlockData() {
-        return (Iterable<T>) this.graffiti.values();
-    }
-
+    //TODO: REMOVE REMOVE REMOVE REMOVE
     public Iterable<BlockPos> allGraffitiBlocksPositions() {
         return this.graffiti.keySet();
     }
 
-    public void markFullResend(final GServerDataHolder data, final BlockPos pos, final Direction dir) {
-        this.dirtyDatas.get(Type.FULL_RESEND).add(new TempData(data, pos, dir));
+    public void markFullResend(final Identifier layer, final GServerDataHolder data, final BlockPos pos, final Direction dir) {
+        this.dirtyDatas.get(Type.FULL_RESEND).add(new ExposedGraffitiData(layer, data, pos, dir));
     }
 
     /**
@@ -132,9 +134,11 @@ public class GServerChunkManager {
      */
     public boolean markForRemoval(final BlockPos pos) {
         if (this.graffiti.containsKey(pos)) {
-            this.dirtyDatas.get(Type.REMOVED).add(new TempData(null, pos, null));
+            //TODO: just send pos data to client instead of graffiti data
+            this.dirtyDatas.get(Type.REMOVED).add(new ExposedGraffitiData(null, null, pos, null));
             return true;
         }
+
         return false;
     }
 
@@ -169,7 +173,10 @@ public class GServerChunkManager {
                         if (block.randomDecay(level)) {
                             this.markForRemoval(randomPos);
                         } else {
-                            this.dirtyDatas.get(Type.FULL_RESEND).addAll(block.compileData());
+                            final List<ExposedGraffitiData> exposed = block.compileData(AllGraffitiLayers.DEFAULT_LAYER.identifier());
+                            if (exposed != null) {
+                                this.dirtyDatas.get(Type.FULL_RESEND).addAll(exposed);
+                            }
                         }
                     }
                 }
@@ -179,22 +186,31 @@ public class GServerChunkManager {
 
     public void handleRequest(final ServerPlayNetworking.Context context) {
         for (final GServerBlock value : this.graffiti.values()) {
-            for (final TempData compileDatum : value.compileData()) {
-                ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
-                        value.getBlockPos(),
-                        compileDatum.dir(),
-                        compileDatum.data().getDepth(),
-                        compileDatum.data().getGraffitiData().array()
-                ));
+            for (GraffitiLayerType graffitiLayerType : AllGraffitiLayers.LAYER_REGISTRY) {
+                // todo conditional syncing if player cannot see layer?
+                final List<ExposedGraffitiData> exposedGraffitiData = value.compileData(graffitiLayerType.identifier());
+                if (exposedGraffitiData != null) {
+                    for (final ExposedGraffitiData compileDatum : exposedGraffitiData) {
+                        ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
+                                Optional.of(graffitiLayerType.identifier()),
+                                value.getBlockPos(),
+                                compileDatum.dir(),
+                                compileDatum.data().depth,
+                                compileDatum.data().getGraffitiData().array()
+                        ));
+                    }
+                }
             }
         }
     }
 
-    public boolean handleChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final TileKey key, final TileChange change) {
+    public boolean handleChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final GraffitiKey key, final GraffitiChangeData change) {
+        final int depth = Mth.clamp(key.depth(), 0, 15);
         final GServerDataHolder tile = this.getOrConditionalCreateFace(
+                packet.layer(),
                 key.pos(),
                 key.dir(),
-                key.depth(),
+                depth,
                 packet.content() == ColorComponent.CLEAR.id
         );
 
@@ -203,7 +219,7 @@ public class GServerChunkManager {
         }
 
         if (tile.handleChange(packet.content(), change)) {
-            this.tryRemoveData(key.pos(), key.dir(), key.depth());
+            this.tryRemoveData(packet.layer(), key);
         }
 
         if (packet.content() != 0) {
@@ -220,13 +236,23 @@ public class GServerChunkManager {
         return true;
     }
 
-    public void tryRemoveData(final BlockPos pos, final Direction dir, final double depth) {
-        final GServerBlock block = this.graffiti.get(pos);
+    public void tryRemoveData(final Identifier layer, final GraffitiKey key) {
+        final GServerBlock block = this.graffiti.get(key.pos());
         if (block == null) {
             return;
         }
 
-        block.tryRemoveData(dir, depth);
+        block.tryRemoveData(layer, key.dir(), key.depth());
+    }
+
+    public void tryRemoveData(final ExposedGraffitiData data) {
+        final GServerBlock block = this.graffiti.get(data.pos());
+        if (block == null) {
+            return;
+        }
+
+        assert data.data() != null;
+        block.tryRemoveData(data.layer(), data.dir(), data.data().depth);
     }
 
     /**
@@ -247,26 +273,20 @@ public class GServerChunkManager {
         return this.graffiti.get(pos);
     }
 
-    public @Nullable GServerDataHolder getOrConditionalCreateFace(final BlockPos pos, final Direction dir, final double depth, final boolean clear) {
+    @Nullable
+    public GServerDataHolder getOrConditionalCreateFace(final Identifier layer, final BlockPos pos, final Direction dir, final int depth, final boolean clear) {
+        //make sure we don't create new data if we're just clearing paint
         if (clear) {
-            return this.getFace(pos, dir, depth);
+            final GServerBlock block = this.graffiti.get(pos);
+            if (block != null) {
+                return block.get(layer, dir, depth);
+            }
         } else {
-            return this.getOrCreateFace(pos, dir, depth);
-        }
-    }
-
-    public GServerDataHolder getOrCreateFace(final BlockPos pos, final Direction dir, final double depth) {
-        return this.graffiti.computeIfAbsent(pos, _ -> new GServerBlock(pos)).getOrCreate(dir, depth);
-    }
-
-    @Contract(pure = true)
-    public @Nullable GServerDataHolder getFace(final BlockPos pos, final Direction dir, final double depth) {
-        final GServerBlock blockData = this.graffiti.get(pos);
-        if (blockData == null) {
-            return null;
+            return this.graffiti.computeIfAbsent(pos, _ -> new GServerBlock(pos))
+                    .getOrCreate(layer, dir, depth);
         }
 
-        return blockData.get(dir, depth);
+        return null;
     }
 
     public void blame(@Nullable final Entity entity, final BlockPos pos) {
@@ -282,14 +302,14 @@ public class GServerChunkManager {
         FULL_RESEND(ClientBoundGraffitiSet::getSetPacket),
         SMOTHERED(ClientBoundGraffitiSet::getSmotheredPacket),
         REMOVED(ClientBoundInvalidateBlock::getPacket);
-        private final Function<TempData, CustomPacketPayload> packetConstructor;
+        private final Function<ExposedGraffitiData, CustomPacketPayload> packetConstructor;
 
-        Type(final Function<TempData, CustomPacketPayload> packetConstructor) {
+        Type(final Function<ExposedGraffitiData, CustomPacketPayload> packetConstructor) {
             this.packetConstructor = packetConstructor;
         }
 
-        public CustomPacketPayload getPacket(final TempData tempData) {
-            return this.packetConstructor.apply(tempData);
+        public CustomPacketPayload getPacket(final ExposedGraffitiData exposedGraffitiData) {
+            return this.packetConstructor.apply(exposedGraffitiData);
         }
     }
 }

@@ -1,11 +1,12 @@
 package com.streetart;
 
 import com.streetart.component.ColorComponent;
-import com.streetart.graffiti_data.TileKey;
+import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.managers.GServerChunkManager;
 import com.streetart.managers.data.GServerDataHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -53,7 +54,7 @@ public class ArtUtil {
         return new Vector2i(x, y);
     }
 
-    public static double calculateDepth(final BlockHitResult hitResult) {
+    public static int calculateDepth(final BlockHitResult hitResult) {
         final Vec3 relativePos = hitResult.getLocation().subtract(Vec3.atLowerCornerOf(hitResult.getBlockPos()));
         double depth = switch (hitResult.getDirection().getAxis()) {
             case X -> relativePos.x;
@@ -61,10 +62,10 @@ public class ArtUtil {
             case Z -> relativePos.z;
         };
 
-        if (hitResult.getDirection().getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
+        if (hitResult.getDirection().getAxisDirection() == Direction.AxisDirection.POSITIVE) {
             depth = 1 - depth;
         }
-        return depth;
+        return Mth.clamp(Mth.floor(depth * 16), 0, 15);
     }
 
     /**
@@ -72,7 +73,8 @@ public class ArtUtil {
      *
      * @return true if any paint was applied
      */
-    public static boolean latherInPaint(@Nullable final Entity entity,
+    public static boolean latherInPaint(final Identifier layer,
+                                        @Nullable final Entity entity,
                                         final ServerLevel serverLevel,
                                         final List<ShapeFaces> shapeFaces,
                                         final BlockPos pos,
@@ -91,11 +93,11 @@ public class ArtUtil {
                     return false;
                 }
 
-                final TileKey key = new TileKey(pos, dir, face.depth());
-                final GServerDataHolder data = manager.getOrConditionalCreateFace(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                final GraffitiKey key = new GraffitiKey(pos, dir, face.depth());
+                final GServerDataHolder data = manager.getOrConditionalCreateFace(layer, key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
                     data.fillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2());
-                    manager.markFullResend(data, pos, dir);
+                    manager.markFullResend(layer, data, pos, dir);
                     manager.blame(entity, key.pos());
                     return true;
                 }
@@ -110,7 +112,8 @@ public class ArtUtil {
         return changed;
     }
 
-    public static void latherDirectionInPaint(@Nullable Entity entity,
+    public static void latherDirectionInPaint(final Identifier layer,
+                                              @Nullable final Entity entity,
                                               final ServerLevel serverLevel,
                                               final List<ShapeFaces> shapeFaces,
                                               final BlockPos pos,
@@ -127,14 +130,15 @@ public class ArtUtil {
             return;
         }
 
+
         boolean changed = false;
         for (final ShapeFaces faces : shapeFaces) {
             changed |= faces.doWith(thisDir, face -> {
-                final TileKey key = new TileKey(pos, thisDir, face.depth());
-                final GServerDataHolder data = manager.getOrConditionalCreateFace(key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
+                final GraffitiKey key = new GraffitiKey(pos, thisDir, face.depth());
+                final GServerDataHolder data = manager.getOrConditionalCreateFace(layer, key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
                     data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
-                    manager.markFullResend(data, pos, thisDir);
+                    manager.markFullResend(layer, data, pos, thisDir);
                     manager.blame(entity, key.pos());
                     return true;
                 }
@@ -157,12 +161,18 @@ public class ArtUtil {
             final int iy2 = Mth.clamp(Mth.ceil(y2 * 16), 0, 16);
             final int iz2 = Mth.clamp(Mth.ceil(z2 * 16), 0, 16);
             faces.add(new ShapeFaces(
-                    new Face(y2, ix1, iz1, ix2, iz2),
-                    new Face(1 - y1, ix1, 16 - iz2, ix2, 16 - iz1),
-                    new Face(1 - z1, 16 - ix2, 16 - iy2, 16 - ix1, 16 - iy1),
-                    new Face(x2, 16 - iz2, 16 - iy2, 16 - iz1, 16 - iy1),
-                    new Face(z2, ix1, 16 - iy2, ix2, 16 - iy1),
-                    new Face(1 - x1, iz1, 16 - iy2, iz2, 16 - iy1)
+                    new Face(Mth.clamp(16 - iy2, 0, 15),
+                            ix1, iz1, ix2, iz2),
+                    new Face(Mth.clamp(iy1, 0, 15),
+                            ix1, 16 - iz2, ix2, 16 - iz1),
+                    new Face(Mth.clamp(iz1, 0, 15),
+                            16 - ix2, 16 - iy2, 16 - ix1, 16 - iy1),
+                    new Face(Mth.clamp(16 - ix2, 0, 15),
+                            16 - iz2, 16 - iy2, 16 - iz1, 16 - iy1),
+                    new Face(Mth.clamp(16 - iz2, 0, 15),
+                            ix1, 16 - iy2, ix2, 16 - iy1),
+                    new Face(Mth.clamp(ix1, 0, 15),
+                            iz1, 16 - iy2, iz2, 16 - iy1)
             ));
         });
         return faces;
@@ -207,7 +217,5 @@ public class ArtUtil {
         }
     }
 
-    public record Face(double depth, int x1, int y1, int x2, int y2) {
-
-    }
+    public record Face(int depth, int x1, int y1, int x2, int y2) {}
 }
