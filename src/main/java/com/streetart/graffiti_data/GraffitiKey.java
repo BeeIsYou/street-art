@@ -5,11 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
 
-public record GraffitiKey(Identifier layer, BlockPos pos, Direction dir, int depth) {
+public record GraffitiKey(BlockPos pos, Direction dir, int depth) {
     public static final StreamCodec<ByteBuf, GraffitiKey> CODEC = StreamCodec.composite(
-            Identifier.STREAM_CODEC, GraffitiKey::layer,
             BlockPos.STREAM_CODEC, GraffitiKey::pos,
             Direction.STREAM_CODEC, GraffitiKey::dir,
             ByteBufCodecs.INT, GraffitiKey::depth,

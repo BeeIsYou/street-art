@@ -22,7 +22,9 @@ public class LevelRendererMixin {
         final FramePass pass = frame.addPass("street_art:spray_paint_upload");
         this.targets.main = pass.readsAndWrites(this.targets.main);
         pass.executes(() -> {
-            StreetArtClient.tileAtlasManager.checkDirty();
+            StreetArtClient.layers.forEach((_, atlas) -> {
+                atlas.checkDirty();
+            });
         });
     }
 }

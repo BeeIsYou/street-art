@@ -16,18 +16,17 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.HashMap;
 
-public record BiDirectionalGraffitiChange(byte content, HashMap<GraffitiKey, GraffitiChangeData> changes) implements CustomPacketPayload {
+public record BiDirectionalGraffitiChange(Identifier layer, byte content, HashMap<GraffitiKey, GraffitiChangeData> changes) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<BiDirectionalGraffitiChange> TYPE  = new Type<>(StreetArt.id("graffiti_delta"));
     public static final StreamCodec<ByteBuf, BiDirectionalGraffitiChange> CODEC = StreamCodec.composite(
-            ByteBufCodecs.BYTE,
-            BiDirectionalGraffitiChange::content,
-            ByteBufCodecs.map(HashMap::new, GraffitiKey.CODEC, GraffitiChangeData.CODEC),
-            BiDirectionalGraffitiChange::changes,
+            Identifier.STREAM_CODEC, BiDirectionalGraffitiChange::layer,
+            ByteBufCodecs.BYTE, BiDirectionalGraffitiChange::content,
+            ByteBufCodecs.map(HashMap::new, GraffitiKey.CODEC, GraffitiChangeData.CODEC), BiDirectionalGraffitiChange::changes,
             BiDirectionalGraffitiChange::new
     );
 
-    public static BiDirectionalGraffitiChange create(final ColorComponent color) {
-        return new BiDirectionalGraffitiChange(color.id, new HashMap<>());
+    public static BiDirectionalGraffitiChange create(final Identifier layer, final ColorComponent color) {
+        return new BiDirectionalGraffitiChange(layer, color.id, new HashMap<>());
     }
 
     public ColorComponent color() {
@@ -39,12 +38,12 @@ public record BiDirectionalGraffitiChange(byte content, HashMap<GraffitiKey, Gra
         return TYPE;
     }
 
-    public void markChanged(final BlockHitResult hitResult, final Identifier layer, final int x, final int y) {
-        this.markChanged(layer, hitResult.getBlockPos(), hitResult.getDirection(), ArtUtil.calculateDepth(hitResult), x, y);
+    public void markChanged(final BlockHitResult hitResult, final int x, final int y) {
+        this.markChanged(hitResult.getBlockPos(), hitResult.getDirection(), ArtUtil.calculateDepth(hitResult), x, y);
     }
 
-    public void markChanged(final Identifier layer, final BlockPos pos, final Direction dir, final int depth, final int x, final int y) {
-        final GraffitiChangeData change = this.changes.computeIfAbsent(new GraffitiKey(layer, pos, dir, depth), _ -> GraffitiChangeData.empty());
+    public void markChanged(final BlockPos pos, final Direction dir, final int depth, final int x, final int y) {
+        final GraffitiChangeData change = this.changes.computeIfAbsent(new GraffitiKey(pos, dir, depth), _ -> GraffitiChangeData.empty());
         change.markChanged(x, y);
     }
 }

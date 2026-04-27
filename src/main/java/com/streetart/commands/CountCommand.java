@@ -88,7 +88,7 @@ public class CountCommand {
         int c = 0;
 
         for (final GraffitiLayerType layer : AllGraffitiLayers.LAYER_REGISTRY) {
-            final Collection<Map.Entry<Direction, GServerDataHolder[]>> iter = block.getImmutableIterator(layer.graffityLayerId());
+            final Collection<Map.Entry<Direction, GServerDataHolder[]>> iter = block.getImmutableIterator(layer.identifier());
             if (iter != null) {
                 for (final Map.Entry<Direction, GServerDataHolder[]> entries : iter) {
                     for (final GServerDataHolder face : entries.getValue()) {

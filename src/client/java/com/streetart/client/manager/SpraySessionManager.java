@@ -16,7 +16,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -26,12 +25,14 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SpraySessionManager {
     public static boolean active = false;
     private static final List<SpraySnapshot> positionSnapshots = new ArrayList<>();
-    private static final Int2ObjectMap<BiDirectionalGraffitiChange> changes = new Int2ObjectOpenHashMap<>();
+    private static final Map<Identifier, Int2ObjectMap<BiDirectionalGraffitiChange>> layerChanges = new HashMap<>();
 
     public static void takeSnapshot(final Player player) {
         if (active) {
@@ -52,12 +53,12 @@ public class SpraySessionManager {
 
         final ItemStack stack = player.getUseItem();
         if (stack.getItem() instanceof final SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
-            //TODO replace with check for if sunglasses are held or something else to allow modifications of other layers :3
-            final Identifier defaultID = AllGraffitiLayers.LAYER_REGISTRY.getKey(AllGraffitiLayers.DEFAULT_LAYER);
+            final Identifier activeLayer = AllGraffitiLayers.getActive(player, minecraft.level).identifier();
 
             active = true;
             final ColorComponent color = sprayPaint.getColor(player, stack);
-            final BiDirectionalGraffitiChange change = changes.computeIfAbsent(color.id, _ -> BiDirectionalGraffitiChange.create(color));
+            final Int2ObjectMap<BiDirectionalGraffitiChange> activeLayerChanges = SpraySessionManager.layerChanges.computeIfAbsent(activeLayer, _ -> new Int2ObjectOpenHashMap<>());
+            final BiDirectionalGraffitiChange change = activeLayerChanges.computeIfAbsent(color.id, _ -> BiDirectionalGraffitiChange.create(activeLayer, color));
 
             final boolean rightClick = minecraft.options.keyUse.isDown();
             final int iterations = sprayPaint.iterationsPerTick(player, stack);
@@ -84,9 +85,9 @@ public class SpraySessionManager {
                         PermissionUtil.modificationAllowed(hitResult.getBlockPos(), player.level(), stack, player)) {
                     final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
 
-                    final GClientManager man = StreetArtClient.textureManager.computeIfAbsent(ChunkPos.containing(hitResult.getBlockPos()), _ -> new GClientManager());
+                    final GClientManager man = StreetArtClient.layers.get(activeLayer).getOrCreate(hitResult.getBlockPos());
                     if (man.applyPixelChangeAndLight(hitResult, coordinates, color.argb, minecraft.level)) {
-                        change.markChanged(hitResult, defaultID, coordinates.x, coordinates.y);
+                        change.markChanged(hitResult, coordinates.x, coordinates.y);
                     }
 
                     if (!madeParticle) {
@@ -107,11 +108,19 @@ public class SpraySessionManager {
             active = false;
             positionSnapshots.clear();
         }
+
+        if (minecraft.getConnection() != null) {
+            trySendServerUpdate();
+        } else {
+            layerChanges.clear();
+        }
     }
 
     public static void trySendServerUpdate() {
-        changes.forEach((_, change) -> ClientPlayNetworking.send(change));
-        changes.clear();
+        layerChanges.forEach((_, layerChanges) -> {
+            layerChanges.forEach((_, change) -> ClientPlayNetworking.send(change));
+        });
+        layerChanges.clear();
     }
 
     private static @Nullable SpraySnapshot sampleLerp(final float pt) {

@@ -64,6 +64,9 @@ public class AllItems {
     public static Item TRACK = register("track", Item::new,
             new Item.Properties());
 
+    public static Item SWAG = register("swag", Item::new,
+            new Item.Properties().equippable(EquipmentSlot.HEAD));
+
     public static CreativePressureWasherItem CREATIVE_PRESSURE_WASHER = register("creative_pressure_washer", CreativePressureWasherItem::new,
             new Item.Properties().stacksTo(1)
                     .component(AllDataComponents.CHARGE, new ChargeComponent(0, 3))

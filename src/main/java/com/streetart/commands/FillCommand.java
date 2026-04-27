@@ -3,6 +3,7 @@ package com.streetart.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.streetart.AllGraffitiLayers;
 import com.streetart.ArtUtil;
 import com.streetart.component.ColorComponent;
 import net.minecraft.commands.CommandSourceStack;
@@ -41,7 +42,10 @@ public class FillCommand {
         int count = 0;
         for (final BlockPos blockPos : BlockPos.betweenClosed(a, b)) {
             final List<ArtUtil.ShapeFaces> faces = ArtUtil.gatherShapeFaces(level.getBlockState(blockPos).getCollisionShape(level, blockPos));
-            if (ArtUtil.latherInPaint(context.getSource().getEntity(), level, faces, blockPos.immutable(), color.id)) {
+            // todo layer
+            if (ArtUtil.latherInPaint(AllGraffitiLayers.DEFAULT_LAYER.identifier(), context.getSource().getEntity(),
+                    level, faces, blockPos.immutable(), color.id)
+            ) {
                 count++;
             }
         }

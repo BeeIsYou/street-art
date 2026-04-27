@@ -8,7 +8,6 @@ import com.streetart.client.rendering.LightMath;
 import net.minecraft.client.renderer.chunk.RenderSectionRegion;
 import net.minecraft.client.renderer.chunk.SectionCompiler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,14 +24,16 @@ public class SectionCompilerMixin {
                                         @Local(ordinal = 2) final BlockPos pos,
                                         @Local final BlockState blockState
     ) {
-        final GClientManager manager = StreetArtClient.textureManager.get(ChunkPos.containing(pos));
+        StreetArtClient.layers.forEach((_, atlas) -> {
+            final GClientManager manager = atlas.get(pos);
 
-        if (manager != null) {
-            final LightMath math = new LightMath();
-            final GClientBlock block = manager.getGraffiti().get(pos);
-            if (block != null) {
-                block.forEach(data -> math.OhGodSoMuchMath(data, region, blockState));
+            if (manager != null) {
+                final LightMath math = new LightMath();
+                final GClientBlock block = manager.getGraffiti().get(pos);
+                if (block != null) {
+                    block.forEach(data -> math.OhGodSoMuchMath(data, region, blockState));
+                }
             }
-        }
+        });
     }
 }

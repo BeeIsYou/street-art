@@ -1,7 +1,7 @@
 package com.streetart.client.manager;
 
 import com.streetart.ArtUtil;
-import com.streetart.client.StreetArtClient;
+import com.streetart.client.rendering.GraffitiAtlas;
 import com.streetart.client.rendering.LightMath;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.GraffitiChangeData;
@@ -9,7 +9,6 @@ import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,10 +22,15 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class GClientManager implements AutoCloseable {
+    private final GraffitiAtlas atlas;
     private final Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
 
+    public GClientManager(GraffitiAtlas atlas) {
+        this.atlas = atlas;
+    }
+
     public int nextID() {
-        return StreetArtClient.tileAtlasManager.allocateID();
+        return this.atlas.allocateID();
     }
 
     public @Nullable GClientBlock get(final BlockPos pos) {
@@ -68,7 +72,7 @@ public class GClientManager implements AutoCloseable {
     }
 
     public GClientBlock newBlockData(final BlockPos pos) {
-        return new GClientBlock(pos);
+        return new GClientBlock(this.atlas, pos);
     }
 
     public Map<BlockPos, GClientBlock> getGraffiti() {
@@ -124,12 +128,6 @@ public class GClientManager implements AutoCloseable {
                     }
                 }
             }
-        }
-    }
-
-    public void tick(final Minecraft minecraft) {
-        if (minecraft.getConnection() != null) {
-            SpraySessionManager.trySendServerUpdate();
         }
     }
 

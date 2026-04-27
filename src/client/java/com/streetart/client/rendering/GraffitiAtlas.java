@@ -2,17 +2,38 @@ package com.streetart.client.rendering;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.streetart.StreetArt;
+import com.streetart.client.manager.GClientManager;
+import com.streetart.graffiti_data.GraffitiChangeData;
+import com.streetart.graffiti_data.GraffitiKey;
+import com.streetart.networking.BiDirectionalGraffitiChange;
+import com.streetart.networking.ClientBoundGraffitiSet;
+import com.streetart.networking.ClientBoundInvalidateBlock;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.joml.Vector4f;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Random;
+import java.util.function.BiConsumer;
 
-public class TileAtlasManager {
+public class GraffitiAtlas {
+    private final TextureManager textureManager;
+    private final Map<ChunkPos, GClientManager> graffitiChunks;
+    public final Identifier layer;
+    public final Identifier atlasLocation;
+    private DynamicMippedTexture atlasTexture;
+    private final int mipCount;
+
     private int entriesX = 128;
     private int entriesY = 128;
     private int idCount = this.entriesX * this.entriesY;
@@ -25,19 +46,18 @@ public class TileAtlasManager {
     private final IntSet freeIDs = new IntOpenHashSet(this.idCount);
     private final IntSet toReMip = new IntOpenHashSet(this.idCount);
 
-    private final TextureManager textureManager;
-    public Identifier atlasLocation;
-    private DynamicMippedTexture atlasTexture;
-    private final int mipCount;
 
     private boolean dirty;
 
     // todo respect mipmap setting ?
-    public TileAtlasManager(final TextureManager textureManager, final int mipLevels) {
+    public GraffitiAtlas(final TextureManager textureManager, final Identifier layer, final int mipLevels) {
         this.textureManager = textureManager;
-        this.atlasLocation = StreetArt.id("atlas");
+        this.graffitiChunks = new HashMap<>();
+        this.layer = layer;
+        this.atlasLocation = StreetArt.id("atlas_" + layer.toDebugFileName());
         this.mipCount = mipLevels + 1;
-        this.atlasTexture = new DynamicMippedTexture(() -> "street_art:atlas_" + this.entriesX,
+
+        this.atlasTexture = new DynamicMippedTexture(this.atlasLocation::toString,
                 this.entriesX * 16, this.entriesY * 16,
                 true, this.mipCount);
         this.textureManager.register(this.atlasLocation, this.atlasTexture);
@@ -60,7 +80,7 @@ public class TileAtlasManager {
 
     private void quadrupleSize() {
         final DynamicMippedTexture newTexture = new DynamicMippedTexture(
-                () -> "street_art:atlas_" + this.entriesX,
+                this.atlasLocation::toString,
                 this.entriesX * 32, this.entriesY * 32,
                 true, this.mipCount);
         final NativeImage[] newPix = newTexture.getPixels();
@@ -179,7 +199,10 @@ public class TileAtlasManager {
     }
 
     public void clear() {
-//        this.atlasTexture.setPixels(new NativeImage(this.entriesX * 16, this.entriesY * 16, true));
+        for (final NativeImage image : this.atlasTexture.getPixels()) {
+            image.fillRect(0, 0, image.getWidth(), image.getHeight(), 0);
+        }
+        this.dirty = true;
         this.freeIDs.clear();
         this.nextIndex = 0;
         this.useCount = 0;
@@ -195,7 +218,7 @@ public class TileAtlasManager {
     }
 
     public static final int COLOR_MASK = 0b00000000_00000011_00000011_00000011;
-    private static int SEED = new Random().nextInt(); //kill me I DARE you
+    private static int SEED = new Random().nextInt();
 
     private int nextRandom() {
         SEED ^= SEED << 13;
@@ -247,5 +270,56 @@ public class TileAtlasManager {
 
     public int getSize() {
         return this.useCount;
+    }
+
+    public GClientManager get(final BlockPos pos) {
+        return this.graffitiChunks.get(ChunkPos.containing(pos));
+    }
+
+    public GClientManager getOrCreate(final BlockPos pos) {
+        return this.graffitiChunks.computeIfAbsent(ChunkPos.containing(pos), _ -> new GClientManager(this));
+    }
+
+    public void handleSetPacket(final ClientBoundGraffitiSet packet, final ClientPlayNetworking.Context context) {
+        this.getOrCreate(packet.pos()).handleDataUpdate(packet, context);
+    }
+
+    public void handleInvalidatePacket(final ClientBoundInvalidateBlock packet, final ClientPlayNetworking.Context context) {
+        this.getOrCreate(packet.pos()).handleBlockInvalidate(packet, context);
+    }
+
+    public void handleChangePacket(final BiDirectionalGraffitiChange packet, final ClientPlayNetworking.Context context) {
+        for (final Map.Entry<GraffitiKey, GraffitiChangeData> change : packet.changes().entrySet()) {
+            this.getOrCreate(change.getKey().pos()).handleChange(
+                    packet.content(),
+                    change.getKey(),
+                    change.getValue(),
+                    context
+            );
+        }
+    }
+
+    public void checkClear(final Minecraft minecraft) {
+        if (minecraft.level == null) {
+            this.clear();
+        }
+    }
+
+    public void closeAll() {
+        for (final GClientManager manager : this.graffitiChunks.values()) {
+            manager.closeAll();
+        }
+        this.graffitiChunks.clear();
+    }
+
+    public void handleChunkUnload(final LevelChunk chunk) {
+        final GClientManager manager = this.graffitiChunks.get(chunk.getPos());
+        if (manager != null) {
+            manager.closeAll();
+        }
+    }
+
+    public void forEach(final BiConsumer<ChunkPos, GClientManager> consumer) {
+        this.graffitiChunks.forEach(consumer);
     }
 }

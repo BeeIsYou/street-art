@@ -1,6 +1,6 @@
 package com.streetart.client.manager;
 
-import com.streetart.client.StreetArtClient;
+import com.streetart.client.rendering.GraffitiAtlas;
 import com.streetart.client.rendering.LightMath;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.GraffitiChangeData;
@@ -10,6 +10,8 @@ import net.minecraft.core.Direction;
 import org.joml.Vector2i;
 
 public class GClientData implements AutoCloseable {
+    private final GraffitiAtlas atlas;
+
     public final Direction dir;
     public final BlockPos pos;
     public final int depth;
@@ -25,7 +27,8 @@ public class GClientData implements AutoCloseable {
     public int light2 = -1;
     public int light3 = -1;
 
-    public GClientData(final Direction dir, final int depth, final BlockPos pos, final int id) {
+    public GClientData(final GraffitiAtlas atlas, final Direction dir, final int depth, final BlockPos pos, final int id) {
+        this.atlas = atlas;
         this.dir = dir;
         this.pos = pos;
         this.depth = depth;;
@@ -81,17 +84,17 @@ public class GClientData implements AutoCloseable {
      * @return true if pixel changed
      */
     public boolean setPixel(final int x, final int y, final int color) {
-        final boolean changed = StreetArtClient.tileAtlasManager.getBasePixel(this.id, x, y) != color;
-        StreetArtClient.tileAtlasManager.setPixel(this.id, x, y, color);
+        final boolean changed = this.atlas.getBasePixel(this.id, x, y) != color;
+        this.atlas.setPixel(this.id, x, y, color);
         return changed;
     }
 
     public int getPixel(final int x, final int y) {
-        return StreetArtClient.tileAtlasManager.getBasePixel(this.id, x, y);
+        return this.atlas.getBasePixel(this.id, x, y);
     }
 
     @Override
     public void close() {
-        StreetArtClient.tileAtlasManager.freeID(this.id);
+        this.atlas.freeID(this.id);
     }
 }

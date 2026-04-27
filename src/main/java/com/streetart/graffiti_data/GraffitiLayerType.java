@@ -1,12 +1,12 @@
 package com.streetart.graffiti_data;
 
-import net.minecraft.world.level.ItemLike;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 /**
- * @param graffityLayerId
- * @param depth           The depth of this layer. higher depths will be rendered first.
- * @param requiredItem    The required item to see this layer. Can be null if layer is always visible.
+ * @param renderingPriority           The depth of this layer. higher depths will be rendered first.
  */
-public record GraffitiLayerType(net.minecraft.resources.Identifier graffityLayerId, int depth, @Nullable ItemLike requiredItem) {
+public record GraffitiLayerType(Identifier identifier, int renderingPriority,
+                                java.util.function.BiPredicate<Player, Level> visibility) {
 }

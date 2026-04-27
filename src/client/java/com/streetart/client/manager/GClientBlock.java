@@ -1,5 +1,6 @@
 package com.streetart.client.manager;
 
+import com.streetart.client.rendering.GraffitiAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -11,16 +12,18 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class GClientBlock implements AutoCloseable {
+    private final GraffitiAtlas atlas;
     public final BlockPos blockPos;
     private final Map<Direction, GClientData[]> blockData;
 
-    public GClientBlock(final BlockPos pos) {
+    public GClientBlock(final GraffitiAtlas atlas, final BlockPos pos) {
+        this.atlas = atlas;
         this.blockPos = pos;
         this.blockData = new HashMap<>();
     }
 
     public GClientData createData(final Direction dir, final int depth, final BlockPos pos, final GClientManager manager) {
-        return new GClientData(dir, depth, pos, manager.nextID());
+        return new GClientData(this.atlas, dir, depth, pos, manager.nextID());
     }
 
     @Override
@@ -40,7 +43,7 @@ public class GClientBlock implements AutoCloseable {
 
     public void forEach(final Consumer<GClientData> consumer) {
         this.blockData.forEach((_, list) -> {
-            for (GClientData data : list) {
+            for (final GClientData data : list) {
                 if (data != null) {
                     consumer.accept(data);
                 }
@@ -79,16 +82,16 @@ public class GClientBlock implements AutoCloseable {
     }
 
     // todo jomlfy this
-    public void spawnParticles(Level level) {
-        for (Map.Entry<Direction, GClientData[]> value : this.blockData.entrySet()) {
-            Direction dir = value.getKey();
-            Vec3 pos = Vec3.atLowerCornerOf(this.blockPos);
-            Vec3 dx = switch (dir.getAxis()) {
+    public void spawnParticles(final Level level) {
+        for (final Map.Entry<Direction, GClientData[]> value : this.blockData.entrySet()) {
+            final Direction dir = value.getKey();
+            final Vec3 pos = Vec3.atLowerCornerOf(this.blockPos);
+            final Vec3 dx = switch (dir.getAxis()) {
                 case X -> Vec3.Y_AXIS;
                 case Y -> Vec3.Z_AXIS;
                 case Z -> Vec3.X_AXIS;
             };
-            Vec3 dy = switch (dir.getAxis()) {
+            final Vec3 dy = switch (dir.getAxis()) {
                 case X -> Vec3.Z_AXIS;
                 case Y -> Vec3.X_AXIS;
                 case Z -> Vec3.Y_AXIS;
@@ -96,7 +99,7 @@ public class GClientBlock implements AutoCloseable {
 
             for (final GClientData tile : value.getValue()) {
                 if (tile != null) {
-                    Vec3 tilePos;
+                    final Vec3 tilePos;
                     if (dir.getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
                         tilePos = pos.add(dir.getUnitVec3().scale(tile.depth / 16d + 0.1));
                     } else {
@@ -104,11 +107,11 @@ public class GClientBlock implements AutoCloseable {
                     }
 
                     for (int i = 0; i < 15; i++) {
-                        int px = level.getRandom().nextInt(16);
-                        int py = level.getRandom().nextInt(16);
-                        int color = tile.getPixel(px, py);
+                        final int px = level.getRandom().nextInt(16);
+                        final int py = level.getRandom().nextInt(16);
+                        final int color = tile.getPixel(px, py);
                         if (color != 0) {
-                            Vec3 particlePos = tilePos.add(dx.scale(px / 16f)).add(dy.scale(py / 16f));
+                            final Vec3 particlePos = tilePos.add(dx.scale(px / 16f)).add(dy.scale(py / 16f));
                             level.addParticle(new DustParticleOptions(color, 1),
                                     particlePos.x, particlePos.y, particlePos.z, 0, 0, 0
                             );
@@ -123,13 +126,13 @@ public class GClientBlock implements AutoCloseable {
         return this.blockData;
     }
 
-    public boolean isEmpty(Direction dir) {
-        GClientData[] dataList = this.blockData.get(dir);
+    public boolean isEmpty(final Direction dir) {
+        final GClientData[] dataList = this.blockData.get(dir);
         if (dataList == null) {
             return true;
         }
 
-        for (GClientData data : dataList) {
+        for (final GClientData data : dataList) {
             if (data != null) {
                 return false;
             }

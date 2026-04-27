@@ -8,11 +8,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
-public record ClientBoundGraffitiSet(BlockPos pos, Direction dir, int depth, byte[] textureData) implements CustomPacketPayload {
+import java.util.Optional;
+
+public record ClientBoundGraffitiSet(Optional<Identifier> layer, BlockPos pos, Direction dir, int depth, byte[] textureData) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<ClientBoundGraffitiSet> TYPE  = new Type<>(StreetArt.id("client_graffiti_update"));
     public static final StreamCodec<ByteBuf, ClientBoundGraffitiSet> CODEC = StreamCodec.composite(
+            Identifier.STREAM_CODEC.apply(ByteBufCodecs::optional), ClientBoundGraffitiSet::layer,
             BlockPos.STREAM_CODEC, ClientBoundGraffitiSet::pos,
             Direction.STREAM_CODEC, ClientBoundGraffitiSet::dir,
             ByteBufCodecs.INT, ClientBoundGraffitiSet::depth,
@@ -26,7 +30,9 @@ public record ClientBoundGraffitiSet(BlockPos pos, Direction dir, int depth, byt
     }
 
     public static CustomPacketPayload getSetPacket(final ExposedGraffitiData exposedGraffitiData) {
+        assert exposedGraffitiData.data() != null;
         return new ClientBoundGraffitiSet(
+                Optional.ofNullable(exposedGraffitiData.layer()),
                 exposedGraffitiData.pos(),
                 exposedGraffitiData.dir(),
                 exposedGraffitiData.data().depth,
@@ -35,7 +41,9 @@ public record ClientBoundGraffitiSet(BlockPos pos, Direction dir, int depth, byt
     }
 
     public static CustomPacketPayload getSmotheredPacket(final ExposedGraffitiData exposedGraffitiData) {
+        assert exposedGraffitiData.data() != null;
         return new ClientBoundGraffitiSet(
+                Optional.empty(),
                 exposedGraffitiData.pos(),
                 exposedGraffitiData.dir(),
                 exposedGraffitiData.data().depth,

@@ -2,6 +2,7 @@ package com.streetart;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
@@ -34,7 +35,8 @@ public class SplashUtil {
                                          final byte content,
                                          final Predicate<BlockPos> modificationAllowed) {
         final SplashExposure exposure = collectBlocks(level, origin, range);
-        applyPaint(entity, level, exposure, intensityScale, content, modificationAllowed);
+        // todo layer
+        applyPaint(AllGraffitiLayers.DEFAULT_LAYER.identifier(), entity, level, exposure, intensityScale, content, modificationAllowed);
     }
 
     /**
@@ -109,7 +111,8 @@ public class SplashUtil {
         );
     }
 
-    public static void applyPaint(@Nullable final Entity entity,
+    public static void applyPaint(final Identifier layer,
+                                  @Nullable final Entity entity,
                                   final ServerLevel level,
                                   final SplashExposure exposure,
                                   final float intensityScale,
@@ -122,7 +125,7 @@ public class SplashUtil {
                 blockEntry.getValue().forEach((dir, hits) -> {
                     final Vector4f hitsGradient = getHitsGradient(exposure, pos, dir);
                     hitsGradient.mul(0.01f * intensityScale);
-                    ArtUtil.latherDirectionInPaint(entity, level, faces, pos, dir, content, hitsGradient);
+                    ArtUtil.latherDirectionInPaint(layer, entity, level, faces, pos, dir, content, hitsGradient);
                 });
             }
         }

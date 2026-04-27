@@ -9,6 +9,7 @@ import com.streetart.arealib.AreaLib;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.GraffitiChangeData;
 import com.streetart.graffiti_data.GraffitiKey;
+import com.streetart.graffiti_data.GraffitiLayerType;
 import com.streetart.managers.data.ExposedGraffitiData;
 import com.streetart.managers.data.GServerBlock;
 import com.streetart.managers.data.GServerDataHolder;
@@ -172,7 +173,7 @@ public class GServerChunkManager {
                         if (block.randomDecay(level)) {
                             this.markForRemoval(randomPos);
                         } else {
-                            final List<ExposedGraffitiData> exposed = block.compileData(AllGraffitiLayers.DEFAULT_LAYER.graffityLayerId());
+                            final List<ExposedGraffitiData> exposed = block.compileData(AllGraffitiLayers.DEFAULT_LAYER.identifier());
                             if (exposed != null) {
                                 this.dirtyDatas.get(Type.FULL_RESEND).addAll(exposed);
                             }
@@ -185,15 +186,19 @@ public class GServerChunkManager {
 
     public void handleRequest(final ServerPlayNetworking.Context context) {
         for (final GServerBlock value : this.graffiti.values()) {
-            final List<ExposedGraffitiData> exposedGraffitiData = value.compileData(AllGraffitiLayers.DEFAULT_LAYER.graffityLayerId());
-            if (exposedGraffitiData != null) {
-                for (final ExposedGraffitiData compileDatum : exposedGraffitiData) {
-                    ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
-                            value.getBlockPos(),
-                            compileDatum.dir(),
-                            compileDatum.data().depth,
-                            compileDatum.data().getGraffitiData().array()
-                    ));
+            for (GraffitiLayerType graffitiLayerType : AllGraffitiLayers.LAYER_REGISTRY) {
+                // todo conditional syncing if player cannot see layer?
+                final List<ExposedGraffitiData> exposedGraffitiData = value.compileData(graffitiLayerType.identifier());
+                if (exposedGraffitiData != null) {
+                    for (final ExposedGraffitiData compileDatum : exposedGraffitiData) {
+                        ServerPlayNetworking.send(context.player(), new ClientBoundGraffitiSet(
+                                Optional.of(graffitiLayerType.identifier()),
+                                value.getBlockPos(),
+                                compileDatum.dir(),
+                                compileDatum.data().depth,
+                                compileDatum.data().getGraffitiData().array()
+                        ));
+                    }
                 }
             }
         }
@@ -202,7 +207,7 @@ public class GServerChunkManager {
     public boolean handleChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final GraffitiKey key, final GraffitiChangeData change) {
         final int depth = Mth.clamp(key.depth(), 0, 15);
         final GServerDataHolder tile = this.getOrConditionalCreateFace(
-                key.layer(),
+                packet.layer(),
                 key.pos(),
                 key.dir(),
                 depth,
@@ -214,7 +219,7 @@ public class GServerChunkManager {
         }
 
         if (tile.handleChange(packet.content(), change)) {
-            this.tryRemoveData(key);
+            this.tryRemoveData(packet.layer(), key);
         }
 
         if (packet.content() != 0) {
@@ -231,13 +236,13 @@ public class GServerChunkManager {
         return true;
     }
 
-    public void tryRemoveData(final GraffitiKey key) {
+    public void tryRemoveData(final Identifier layer, final GraffitiKey key) {
         final GServerBlock block = this.graffiti.get(key.pos());
         if (block == null) {
             return;
         }
 
-        block.tryRemoveData(key.layer(), key.dir(), key.depth());
+        block.tryRemoveData(layer, key.dir(), key.depth());
     }
 
     public void tryRemoveData(final ExposedGraffitiData data) {
@@ -246,6 +251,7 @@ public class GServerChunkManager {
             return;
         }
 
+        assert data.data() != null;
         block.tryRemoveData(data.layer(), data.dir(), data.data().depth);
     }
 
