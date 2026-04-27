@@ -39,8 +39,8 @@ public class GraffitiAtlas {
     private DynamicMippedTexture atlasTexture;
     private final int mipCount;
 
-    private int entriesX = 8;
-    private int entriesY = 8;
+    private int entriesX = 128;
+    private int entriesY = 128;
     private int idCount = this.entriesX * this.entriesY;
 
     private float uSize = 1f / this.entriesX;
@@ -209,6 +209,9 @@ public class GraffitiAtlas {
             image.fillRect(0, 0, image.getWidth(), image.getHeight(), 0);
         }
         this.dirty = true;
+        for (GClientManager manager : this.graffitiChunks.values()) {
+            manager.closeAll();
+        }
         this.freeIDs.clear();
         this.nextIndex = 0;
         this.useCount = 0;
@@ -307,6 +310,7 @@ public class GraffitiAtlas {
 
     public void checkClear(final Minecraft minecraft) {
         if (minecraft.level == null) {
+            // todo do not do this every tick
             this.clear();
         }
     }
