@@ -23,10 +23,8 @@ public class GraffitiAtlasLayers {
 
     public GraffitiAtlasLayers(final TextureManager textureManager) {
         for (final GraffitiLayerType graffitiLayerType : AllGraffitiLayers.LAYER_REGISTRY) {
-            final Identifier identifier = AllGraffitiLayers.LAYER_REGISTRY.getKey(graffitiLayerType);
-            assert identifier != null;
-            this.atlasLayers.put(identifier, new GraffitiAtlas(
-                    textureManager, identifier, 4
+            this.atlasLayers.put(graffitiLayerType.identifier(), new GraffitiAtlas(
+                    textureManager, graffitiLayerType, 4
             ));
         }
     }

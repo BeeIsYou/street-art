@@ -13,6 +13,7 @@ import com.streetart.client.StreetArtClient;
 import com.streetart.client.manager.GClientData;
 import com.streetart.client.mixin.LevelRendererAccessor;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.rendertype.OutputTarget;
@@ -64,13 +65,14 @@ public class GraffitiRenderer {
 
         // todo layer ordering
         StreetArtClient.layers.forEach((identifier, atlas) -> {
-            storage.submitCustomGeometry(pose, GRAFFITI_TYPE.apply(identifier), (_pose, buffer) -> {
-                final PoseStack.Pose original = _pose.copy();
-                atlas.forEach((_, manager) -> {
-                    manager.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data));
+            if (atlas.isActive(Minecraft.getInstance().player, Minecraft.getInstance().level)) {
+                storage.submitCustomGeometry(pose, GRAFFITI_TYPE.apply(identifier), (_pose, buffer) -> {
+                    final PoseStack.Pose original = _pose.copy();
+                    atlas.forEach((_, manager) -> {
+                        manager.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data));
+                    });
                 });
-            });
-
+            }
         });
     }
 

@@ -5,6 +5,7 @@ import com.streetart.StreetArt;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.graffiti_data.GraffitiChangeData;
 import com.streetart.graffiti_data.GraffitiKey;
+import com.streetart.graffiti_data.GraffitiLayerType;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
@@ -15,7 +16,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.joml.Vector4f;
 
@@ -25,17 +28,19 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 
 public class GraffitiAtlas {
     private final TextureManager textureManager;
+    private final BiPredicate<Player, Level> visibility;
+    public final int renderingPriority;
     private final Map<ChunkPos, GClientManager> graffitiChunks;
     public final Identifier layer;
-    public final Identifier atlasLocation;
     private DynamicMippedTexture atlasTexture;
     private final int mipCount;
 
-    private int entriesX = 128;
-    private int entriesY = 128;
+    private int entriesX = 8;
+    private int entriesY = 8;
     private int idCount = this.entriesX * this.entriesY;
 
     private float uSize = 1f / this.entriesX;
@@ -50,17 +55,18 @@ public class GraffitiAtlas {
     private boolean dirty;
 
     // todo respect mipmap setting ?
-    public GraffitiAtlas(final TextureManager textureManager, final Identifier layer, final int mipLevels) {
+    public GraffitiAtlas(final TextureManager textureManager, final GraffitiLayerType layer, final int mipLevels) {
         this.textureManager = textureManager;
         this.graffitiChunks = new HashMap<>();
-        this.layer = layer;
-        this.atlasLocation = StreetArt.id("atlas_" + layer.toDebugFileName());
+        this.layer = layer.identifier();
+        this.visibility = layer.visibility();
+        this.renderingPriority = layer.renderingPriority();
         this.mipCount = mipLevels + 1;
 
-        this.atlasTexture = new DynamicMippedTexture(this.atlasLocation::toString,
+        this.atlasTexture = new DynamicMippedTexture(this.layer::toString,
                 this.entriesX * 16, this.entriesY * 16,
                 true, this.mipCount);
-        this.textureManager.register(this.atlasLocation, this.atlasTexture);
+        this.textureManager.register(this.layer, this.atlasTexture);
     }
 
     public int allocateID() {
@@ -80,7 +86,7 @@ public class GraffitiAtlas {
 
     private void quadrupleSize() {
         final DynamicMippedTexture newTexture = new DynamicMippedTexture(
-                this.atlasLocation::toString,
+                this.layer::toString,
                 this.entriesX * 32, this.entriesY * 32,
                 true, this.mipCount);
         final NativeImage[] newPix = newTexture.getPixels();
@@ -118,7 +124,7 @@ public class GraffitiAtlas {
 
         this.atlasTexture.close();
         this.atlasTexture = newTexture;
-        this.textureManager.register(this.atlasLocation, this.atlasTexture);
+        this.textureManager.register(this.layer, this.atlasTexture);
 
         this.entriesX *= 2;
         this.entriesY *= 2;
@@ -321,5 +327,9 @@ public class GraffitiAtlas {
 
     public void forEach(final BiConsumer<ChunkPos, GClientManager> consumer) {
         this.graffitiChunks.forEach(consumer);
+    }
+
+    public boolean isActive(final Player player, final Level level) {
+        return this.visibility.test(player, level);
     }
 }
