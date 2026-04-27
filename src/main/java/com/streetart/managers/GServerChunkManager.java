@@ -133,6 +133,7 @@ public class GServerChunkManager {
      */
     public boolean markForRemoval(final BlockPos pos) {
         if (this.graffiti.containsKey(pos)) {
+            //TODO: just send pos data to client instead of graffiti data
             this.dirtyDatas.get(Type.REMOVED).add(new ExposedGraffitiData(null, null, pos, null));
             return true;
         }
