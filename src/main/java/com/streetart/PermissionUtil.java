@@ -5,6 +5,7 @@ import com.streetart.networking.ClientBoundGameRuleSync;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AdventureModePredicate;
@@ -14,8 +15,8 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
 
 public class PermissionUtil {
-    public static boolean modificationAllowed(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player) {
-        final boolean adventurePermitted = getAdventurePermitted(pos, level, stack, player);
+    public static boolean modificationAllowed(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player, final Identifier activeLayer) {
+        final boolean adventurePermitted = getAdventurePermitted(pos, level, stack, player, activeLayer);
 
         final boolean opped =
                 player != null &&
@@ -32,13 +33,19 @@ public class PermissionUtil {
         return adventurePermitted;
     }
 
-    public static boolean getAdventurePermitted(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player) {
-        if (ClientBoundGameRuleSync.get(level).adventurePainting()) {
-            return true;
+    public static boolean getAdventurePermitted(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player, final Identifier activeLayer) {
+        if (activeLayer.equals(AllGraffitiLayers.GLASSES_LAYER.identifier())) {
+            if (ClientBoundGameRuleSync.get(level).adventureSecondLayerPainting()) {
+                return true;
+            }
+        } else {
+            if (ClientBoundGameRuleSync.get(level).adventurePainting()) {
+                return true;
+            }
         }
 
         if (player == null) {
-            if (level instanceof ServerLevel serverLevel) {
+            if (level instanceof final ServerLevel serverLevel) {
                 if (!serverLevel.getGameRules().get(AllGameRules.NON_PLAYERS_ADVENTURE)) {
                     return true;
                 }

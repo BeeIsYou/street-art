@@ -14,13 +14,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gamerules.GameRule;
 
 public record ClientBoundGameRuleSync(
-                boolean adventurePainting
+                boolean adventurePainting,
+                boolean adventureSecondLayerPainting
         ) implements CustomPacketPayload {
-    public static ClientBoundGameRuleSync CLIENT_CURRENT = new ClientBoundGameRuleSync(false);
+    public static ClientBoundGameRuleSync CLIENT_CURRENT = new ClientBoundGameRuleSync(false, false);
 
     public static final CustomPacketPayload.Type<ClientBoundGameRuleSync> TYPE = new Type<>(StreetArt.id("game_rule_sync"));
     public static final StreamCodec<ByteBuf, ClientBoundGameRuleSync> CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL, ClientBoundGameRuleSync::adventurePainting,
+            ByteBufCodecs.BOOL, ClientBoundGameRuleSync::adventureSecondLayerPainting,
             ClientBoundGameRuleSync::new
     );
 
@@ -35,7 +37,8 @@ public record ClientBoundGameRuleSync(
 
     public static ClientBoundGameRuleSync fromServer(final MinecraftServer server) {
         return new ClientBoundGameRuleSync(
-                server.getGameRules().get(AllGameRules.ADVENTURE_PAINTING)
+                server.getGameRules().get(AllGameRules.ADVENTURE_PAINTING),
+                server.getGameRules().get(AllGameRules.ONLY_SWAG_GUYS_PAINT_ON_SECOND_LAYERS)
         );
     }
 
@@ -43,6 +46,7 @@ public record ClientBoundGameRuleSync(
         if (level instanceof final ServerLevel serverLevel) {
             return fromServer(serverLevel.getServer());
         }
+
         return CLIENT_CURRENT;
     }
 

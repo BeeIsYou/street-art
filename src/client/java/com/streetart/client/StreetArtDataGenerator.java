@@ -180,6 +180,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 
 			translationBuilder.add("gamerule.category.street_art.game_rules", "Street Art");
 			translationBuilder.add("gamerule.street_art.adventure_painting", "Allow Adventure Players to Paint");
+			translationBuilder.add("gamerule.street_art.second_layer_adventure_painting", "Allow Adventure Players to Paint on the secondary layer");
 			translationBuilder.add("gamerule.street_art.non_players_adventure", "Non-Player Painting counts as Adventure");
 			translationBuilder.add("gamerule.street_art.random_decay_speed", "Random Paint Decay Speed");
 		}
