@@ -178,6 +178,10 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add("commands.street_art.count.any_success", "Counted %s %s");
 			translationBuilder.add("commands.street_art.count.color_success", "Counted %s %s with color %s");
 
+			translationBuilder.add("commands.street_art_client.swag_mode.disabled", "Swag Mode Disabled");
+			translationBuilder.add("commands.street_art_client.swag_mode.enabled", "Swag Mode Enabled");
+			translationBuilder.add("commands.street_art_client.swag_mode.already_in_mode", "Swag Mode was not changed");
+
 			translationBuilder.add("gamerule.category.street_art.game_rules", "Street Art");
 			translationBuilder.add("gamerule.street_art.adventure_painting", "Allow Adventure Players to Paint");
 			translationBuilder.add("gamerule.street_art.second_layer_adventure_painting", "Allow Adventure Players to Paint on the secondary layer");

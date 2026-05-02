@@ -2,6 +2,7 @@ package com.streetart.client;
 
 import com.streetart.AllEntityTypes;
 import com.streetart.StreetArt;
+import com.streetart.client.commands.SwagCommand;
 import com.streetart.client.manager.SpraySessionManager;
 import com.streetart.client.rendering.GraffitiAtlasLayers;
 import com.streetart.client.rendering.GraffitiRenderer;
@@ -9,6 +10,7 @@ import com.streetart.client.rendering.TrackRenderer;
 import com.streetart.client.rendering.rollerblades.RollerbladeRenderer;
 import com.streetart.networking.ClientBoundGameRuleSync;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -50,6 +52,10 @@ public class StreetArtClient implements ClientModInitializer {
         new RollerbladeRenderer().init();
         AllDataComponentProperties.init();
         AllTintSources.init();
+
+        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, buildContext) -> {
+            SwagCommand.register(dispatcher);
+        }));
 
         if (FabricLoader.getInstance().isModLoaded("area_lib")) {
             ClientAreaLibStuff.init();
