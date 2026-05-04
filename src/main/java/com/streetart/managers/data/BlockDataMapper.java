@@ -27,7 +27,7 @@ public class BlockDataMapper {
     );
 
     private final EnumMap<Direction, GServerDataHolder[]> blockData;
-    private static final int MAX_SIZE = 16;
+    public static final int MAX_SIZE = 16;
 
     public BlockDataMapper() {
         this.blockData = new EnumMap<>(Direction.class);

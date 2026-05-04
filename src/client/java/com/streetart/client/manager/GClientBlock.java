@@ -1,6 +1,7 @@
 package com.streetart.client.manager;
 
 import com.streetart.client.rendering.GraffitiAtlas;
+import com.streetart.managers.data.BlockDataMapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -61,7 +62,7 @@ public class GClientBlock implements AutoCloseable {
     }
 
     public GClientData getOrCreate(final Direction dir, final int depth, final GClientManager manager) {
-        final GClientData[] dataList = this.blockData.computeIfAbsent(dir, _ -> new GClientData[15]);
+        final GClientData[] dataList = this.blockData.computeIfAbsent(dir, _ -> new GClientData[BlockDataMapper.MAX_SIZE]);
         if (dataList[depth] == null) {
             dataList[depth] = this.createData(dir, depth, this.blockPos, manager);
         }
