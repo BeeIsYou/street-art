@@ -3,6 +3,7 @@ package com.streetart.client.manager;
 import com.streetart.AllGraffitiLayers;
 import com.streetart.ArtUtil;
 import com.streetart.PermissionUtil;
+import com.streetart.StreetArtConfig;
 import com.streetart.client.StreetArtClient;
 import com.streetart.component.ColorComponent;
 import com.streetart.item.SprayPaintInteractor;
@@ -44,6 +45,12 @@ public class SpraySessionManager {
     }
 
     public static void tick(final Minecraft minecraft) {
+        if (StreetArtConfig.ignoreEverything()) {
+            positionSnapshots.clear();
+            layerChanges.clear();
+            return;
+        }
+
         final LocalPlayer player = minecraft.player;
         if (player == null) {
             active = false;

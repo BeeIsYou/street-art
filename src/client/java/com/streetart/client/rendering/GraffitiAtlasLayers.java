@@ -1,6 +1,7 @@
 package com.streetart.client.rendering;
 
 import com.streetart.AllGraffitiLayers;
+import com.streetart.StreetArtConfig;
 import com.streetart.graffiti_data.GraffitiLayerType;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
@@ -70,7 +71,9 @@ public class GraffitiAtlasLayers {
         });
 
         ClientChunkEvents.CHUNK_LOAD.register((_, chunk) -> {
-            ClientPlayNetworking.send(new ServerBoundRequestDataPacket(chunk.getPos()));
+            if (!StreetArtConfig.ignoreEverything()) {
+                ClientPlayNetworking.send(new ServerBoundRequestDataPacket(chunk.getPos()));
+            }
         });
 
         ClientTickEvents.END_CLIENT_TICK.register((minecraft) -> {

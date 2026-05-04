@@ -10,6 +10,7 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.streetart.AllGraffitiLayers;
+import com.streetart.StreetArtConfig;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.manager.GClientData;
 import com.streetart.client.mixin.LevelRendererAccessor;
@@ -60,6 +61,10 @@ public class GraffitiRenderer {
     }
 
     public static void render(final LevelTerrainRenderContext context) {
+        if (StreetArtConfig.ignoreEverything()) {
+            return;
+        }
+
         final SubmitNodeStorage storage = ((LevelRendererAccessor) context.levelRenderer()).getSubmitNodeStorage();
 
         final PoseStack pose = new PoseStack();

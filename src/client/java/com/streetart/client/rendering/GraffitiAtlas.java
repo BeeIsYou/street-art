@@ -2,6 +2,7 @@ package com.streetart.client.rendering;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.streetart.StreetArt;
+import com.streetart.StreetArtConfig;
 import com.streetart.client.manager.GClientManager;
 import com.streetart.graffiti_data.GraffitiChangeData;
 import com.streetart.graffiti_data.GraffitiKey;
@@ -290,21 +291,27 @@ public class GraffitiAtlas {
     }
 
     public void handleSetPacket(final ClientBoundGraffitiSet packet, final ClientPlayNetworking.Context context) {
-        this.getOrCreate(packet.pos()).handleDataUpdate(packet, context);
+        if (!StreetArtConfig.ignoreEverything()) {
+            this.getOrCreate(packet.pos()).handleDataUpdate(packet, context);
+        }
     }
 
     public void handleInvalidatePacket(final ClientBoundInvalidateBlock packet, final ClientPlayNetworking.Context context) {
-        this.getOrCreate(packet.pos()).handleBlockInvalidate(packet, context);
+        if (!StreetArtConfig.ignoreEverything()) {
+            this.getOrCreate(packet.pos()).handleBlockInvalidate(packet, context);
+        }
     }
 
     public void handleChangePacket(final BiDirectionalGraffitiChange packet, final ClientPlayNetworking.Context context) {
-        for (final Map.Entry<GraffitiKey, GraffitiChangeData> change : packet.changes().entrySet()) {
-            this.getOrCreate(change.getKey().pos()).handleChange(
-                    packet.content(),
-                    change.getKey(),
-                    change.getValue(),
-                    context
-            );
+        if (!StreetArtConfig.ignoreEverything()) {
+            for (final Map.Entry<GraffitiKey, GraffitiChangeData> change : packet.changes().entrySet()) {
+                this.getOrCreate(change.getKey().pos()).handleChange(
+                        packet.content(),
+                        change.getKey(),
+                        change.getValue(),
+                        context
+                );
+            }
         }
     }
 

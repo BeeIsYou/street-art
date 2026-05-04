@@ -19,6 +19,11 @@ repositories {
 			includeGroup "maven.modrinth"
 		}
 	}
+
+	maven {
+		name 'Xander Maven'
+		url 'https://maven.isxander.dev/releases'
+	}
 }
 
 loom {
@@ -48,6 +53,8 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	implementation "dev.isxander:yet-another-config-lib:${project.yacl_version}-fabric"
 
 	// soft dependency
 	compileOnly "maven.modrinth:area_lib:${project.area_lib_version}"
@@ -108,10 +115,11 @@ modrinth {
 	versionNumber = "${mod_version}"
 	// versionName = 'My swagalicious release'
 	uploadFile = jar
-	gameVersions = ['26.1.1']
+	gameVersions = ['26.1.X']
 	loaders = ['fabric']
 	dependencies = [
 			new ModDependency('P7dR8mSH', 'required'), // fabric api
+			new ModDependency('1eAoo2KR', 'required'), // yet another config lib
 			new ModDependency('IBuXDbma', 'optional')  // area lib
 	]
 }
