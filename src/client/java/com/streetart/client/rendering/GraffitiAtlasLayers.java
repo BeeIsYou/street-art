@@ -52,10 +52,11 @@ public class GraffitiAtlasLayers {
 
     public void registerPacketsAndEvents() {
         ClientPlayNetworking.registerGlobalReceiver(ClientBoundGraffitiSet.TYPE, (packet, context) -> {
-            if (packet.layer().isEmpty()) { // shouldn't happen
-                return;
+            if (packet.layer().isPresent()) {
+                this.get(packet.layer().get()).handleSetPacket(packet, context);
+            } else {
+                this.atlasLayers.forEach((_, layer) -> layer.handleSetPacket(packet, context));
             }
-            this.get(packet.layer().get()).handleSetPacket(packet, context);
         });
 
         ClientPlayNetworking.registerGlobalReceiver(ClientBoundInvalidateBlock.TYPE, (packet, context) -> {
