@@ -64,7 +64,8 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generateTranslations(final HolderLookup.Provider provider, final TranslationBuilder translationBuilder) {
 			AllItems.SPRAY_CANS.forEach((color, item) -> {
-				translationBuilder.add(item, StringUtils.capitalize(color.getName() + " Spray Can"));
+				final String dyeName = WordUtils.capitalize(color.getName().replace("_", " "));
+				translationBuilder.add(item, StringUtils.capitalize(dyeName + " Spray Can"));
 				translationBuilder.add("lore.street_art." + color.getName() + "_spray_can",
 						"""
                                 The perfect tool for freeform expression
@@ -89,7 +90,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			AllItems.PAINT_BALLOONS.forEach((color, item) -> {
 				final String dyeName = WordUtils.capitalize(color.getName().replace("_", " "));
 				translationBuilder.add(item, StringUtils.capitalize(dyeName + " Paint Balloon"));
-				translationBuilder.add("lore.street_art." + dyeName + "_paint_balloon",
+				translationBuilder.add("lore.street_art." + color.getName() + "_paint_balloon",
 						"Throw to spread a small area of paint"
 				);
 			});
