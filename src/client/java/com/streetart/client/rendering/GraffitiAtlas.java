@@ -139,6 +139,11 @@ public class GraffitiAtlas {
     public void freeID(final int id) {
         this.freeIDs.add(id);
         this.useCount--;
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                this.setPixel(id, x, y, 0);
+            }
+        }
     }
 
     public void checkDirty() {
