@@ -98,8 +98,16 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllItems.RED_ROLLERBLADES, "Red Rollerblades");
 			translationBuilder.add("lore.street_art.red_rollerblades",
 					"""
-							Why called rollerblade if no sword"""
-			); // todo ran out of funny juice :(
+							Fashionable and speedy streetwear, second only to spirit vectors
+							The red makes it go faster"""
+			);
+
+			translationBuilder.add(AllItems.GREEN_ROLLERBLADES, "Green Rollerblades");
+			translationBuilder.add("lore.street_art.green_rollerblades",
+					"""
+							Fashionable and speedy streetwear, second only to spirit vectors
+							Now with 100%% more slime!"""
+			);
 
 			translationBuilder.add(AllItems.TAPE_RECORDER, "Tape Recorder");
 			translationBuilder.add("lore.street_art.tape_recorder",
@@ -163,6 +171,7 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllTags.Items.SPRAY_CANS, "Spray Cans");
 			translationBuilder.add(AllTags.Items.PAINT_BALLOONS, "Paint Balloons");
 			translationBuilder.add(AllTags.Items.PAINT_CREATORS, "Paint Creators");
+			translationBuilder.add(AllTags.Items.ROLLERBLADES, "Rollerblades");
 
 			translationBuilder.add("street_art.tape_recorder.message.start", "Track Recording Started");
 			translationBuilder.add("street_art.tape_recorder.message.cancel", "Track Recording Cancelled");
@@ -335,6 +344,9 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			for (final Item item : AllItems.ROLLERBLADES) {
 				rollerblades.add(item);
 			}
+
+			this.valueLookupBuilder(AllTags.Items.SLIMY_ARMOR)
+					.add(AllItems.GREEN_ROLLERBLADES);
 		}
 	}
 

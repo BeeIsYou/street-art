@@ -120,6 +120,7 @@ modrinth {
 	dependencies = [
 			new ModDependency('P7dR8mSH', 'required'), // fabric api
 			new ModDependency('1eAoo2KR', 'required'), // yet another config lib
-			new ModDependency('IBuXDbma', 'optional')  // area lib
+			new ModDependency('IBuXDbma', 'optional'), // area lib
+			new ModDependency('RRsJmoGM', 'optional'), // slime time
 	]
 }

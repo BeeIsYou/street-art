@@ -43,6 +43,7 @@
 		"yet_another_config_lib_v3": ">=3.9.3"
 	},
 	"suggests": {
-		"area_lib": ">=0.8.0"
+		"area_lib": ">=0.8.0",
+		"slime_time": "*"
 	}
 }

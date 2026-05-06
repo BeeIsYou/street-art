@@ -7,21 +7,25 @@ import com.streetart.component.RollerbladeComponent;
 import com.streetart.item.*;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.block.DispenserBlock;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class AllItems {
@@ -54,6 +58,18 @@ public class AllItems {
     );
 
     public static Item RED_ROLLERBLADES = registerRollerblades("red_rollerblades");
+
+    public static Item GREEN_ROLLERBLADES = registerRollerblades("green_rollerblades", properties -> {
+        Optional<Holder.Reference<Attribute>> bounciness = BuiltInRegistries.ATTRIBUTE.get(
+                Identifier.fromNamespaceAndPath("slime_time", "bounciness")
+        );
+        bounciness.ifPresent(attributeHolder -> properties.attributes(ItemAttributeModifiers.builder()
+                .add(
+                        attributeHolder,
+                        new AttributeModifier(StreetArt.id("bouncy_skates"), 1, AttributeModifier.Operation.ADD_VALUE),
+                        EquipmentSlotGroup.FEET
+                ).build()));
+    });
 
     public static Item TAPE_RECORDER = register("tape_recorder", TapeRecorderItem::new,
             new Item.Properties().stacksTo(1).useCooldown(1f));
@@ -144,11 +160,15 @@ public class AllItems {
     }
 
     private static Item registerRollerblades(final String name) {
-        final Item item = register(name, Item::new,
-                new Item.Properties().stacksTo(1)
-                        .equippable(EquipmentSlot.FEET)
-                        .component(AllDataComponents.ROLLER_BLADES, RollerbladeComponent.streetArt(name))
-        );
+        return registerRollerblades(name, _ -> {});
+    }
+
+    private static Item registerRollerblades(final String name, Consumer<Item.Properties> propertiesModifier) {
+        Item.Properties properties = new Item.Properties().stacksTo(1)
+                .equippable(EquipmentSlot.FEET)
+                .component(AllDataComponents.ROLLER_BLADES, RollerbladeComponent.streetArt(name));
+        propertiesModifier.accept(properties);
+        final Item item = register(name, Item::new, properties);
         ROLLERBLADES.add(item);
         return item;
     }
