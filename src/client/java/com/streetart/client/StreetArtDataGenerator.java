@@ -98,14 +98,14 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add(AllItems.RED_ROLLERBLADES, "Red Rollerblades");
 			translationBuilder.add("lore.street_art.red_rollerblades",
 					"""
-							Fashionable and speedy streetwear, second only to spirit vectors
-							The red makes it go faster"""
+							Fashionable and speedy streetwear with unorthodox movement
+							It is believed its coloration makes it go faster"""
 			);
 
 			translationBuilder.add(AllItems.GREEN_ROLLERBLADES, "Green Rollerblades");
 			translationBuilder.add("lore.street_art.green_rollerblades",
 					"""
-							Fashionable and speedy streetwear, second only to spirit vectors
+							Fashionable and speedy streetwear with unorthodox movement
 							Now with 100%% more slime!"""
 			);
 
