@@ -23,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -186,7 +187,7 @@ public class GServerChunkManager {
 
     public void handleRequest(final ServerPlayNetworking.Context context) {
         for (final GServerBlock value : this.graffiti.values()) {
-            for (GraffitiLayerType graffitiLayerType : AllGraffitiLayers.LAYER_REGISTRY) {
+            for (final GraffitiLayerType graffitiLayerType : AllGraffitiLayers.LAYER_REGISTRY) {
                 // todo conditional syncing if player cannot see layer?
                 final List<ExposedGraffitiData> exposedGraffitiData = value.compileData(graffitiLayerType.identifier());
                 if (exposedGraffitiData != null) {
@@ -271,6 +272,15 @@ public class GServerChunkManager {
     @Contract(pure = true)
     public @Nullable GServerBlock getBlock(final BlockPos pos) {
         return this.graffiti.get(pos);
+    }
+
+    public GServerBlock copyTo(final BlockPos pos, final GServerBlock block) {
+        final GServerBlock newBlock = new GServerBlock(pos);
+        newBlock.copyFrom(block);
+        for (final Map.Entry<ResourceKey<GraffitiLayerType>, GraffitiLayerType> entry : AllGraffitiLayers.LAYER_REGISTRY.entrySet()) {
+            this.dirtyDatas.get(Type.FULL_RESEND).addAll(newBlock.compileData(entry.getValue().identifier()));
+        }
+        return this.graffiti.put(pos, newBlock);
     }
 
     @Nullable

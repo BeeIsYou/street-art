@@ -1,5 +1,7 @@
 {
   "commands.street_art.clear.success": "Explodiated paint off of %s blocks",
+  "commands.street_art.clone.overlap": "The source and destination areas cannot overlap",
+  "commands.street_art.clone.success": "Made derivative work of %s blocks",
   "commands.street_art.count.any_success": "Counted %s %s",
   "commands.street_art.count.color_success": "Counted %s %s with color %s",
   "commands.street_art.fill.success": "It's all over %s blocks",

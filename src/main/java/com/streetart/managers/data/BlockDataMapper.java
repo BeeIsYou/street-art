@@ -168,4 +168,19 @@ public class BlockDataMapper {
     private int fromDepthToIndex(final double depth) {
         return (int) (16 * depth) - 1;
     }
+
+    public BlockDataMapper copy() {
+        final BlockDataMapper newData = new BlockDataMapper();
+        for (final Map.Entry<Direction, GServerDataHolder[]> entry : this.blockData.entrySet()) {
+            final GServerDataHolder[] copiedData = new GServerDataHolder[MAX_SIZE];
+            for (int i = 0; i < MAX_SIZE; i++) {
+                if (entry.getValue()[i] != null) {
+                    copiedData[i] = entry.getValue()[i].copy();
+                }
+            }
+            newData.blockData.put(entry.getKey(), copiedData);
+        }
+
+        return newData;
+    }
 }

@@ -178,6 +178,8 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add("commands.street_art.fill.success", "It's all over %s blocks");
 			translationBuilder.add("commands.street_art.count.any_success", "Counted %s %s");
 			translationBuilder.add("commands.street_art.count.color_success", "Counted %s %s with color %s");
+			translationBuilder.add("commands.street_art.clone.overlap", "The source and destination areas cannot overlap");
+			translationBuilder.add("commands.street_art.clone.success", "Made derivative work of %s blocks");
 
 			translationBuilder.add("commands.street_art_client.swag_mode.disabled", "Swag Mode Disabled");
 			translationBuilder.add("commands.street_art_client.swag_mode.enabled", "Swag Mode Enabled");

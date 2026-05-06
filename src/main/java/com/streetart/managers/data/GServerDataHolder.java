@@ -38,11 +38,11 @@ public class GServerDataHolder {
 
     public final Direction dir;
 
-    public GServerDataHolder(final int depth, Direction dir) {
+    public GServerDataHolder(final int depth, final Direction dir) {
         this(ByteBuffer.allocate(PIXEL_BYTE_SIZE * 16 * 16), depth, 0, dir);
     }
 
-    public GServerDataHolder(final ByteBuffer buf, final int depth, final int graceTimer, Direction dir) {
+    public GServerDataHolder(final ByteBuffer buf, final int depth, final int graceTimer, final Direction dir) {
         this.depth = depth;
         this.graffitiData = buf;
         this.graceTimer = graceTimer;
@@ -152,5 +152,11 @@ public class GServerDataHolder {
         }
 
         return true;
+    }
+
+    public GServerDataHolder copy() {
+        final ByteBuffer clone = ByteBuffer.allocate(this.getGraffitiData().capacity());
+        clone.put(this.getGraffitiData().asReadOnlyBuffer().flip());
+        return new GServerDataHolder(clone, this.depth, this.graceTimer, this.dir);
     }
 }

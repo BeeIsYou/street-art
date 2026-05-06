@@ -9,7 +9,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import org.apache.logging.log4j.core.appender.SmtpAppender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +36,13 @@ public class GServerBlock {
         this.layerMap = new HashMap<>();
     }
 
+    public void copyFrom(final GServerBlock other) {
+        this.layerMap.clear();
+        for (Map.Entry<Identifier, BlockDataMapper> entries : other.layerMap.entrySet()) {
+            this.layerMap.put(entries.getKey(), entries.getValue().copy());
+        }
+    }
+
     private GServerBlock(final Map<Identifier, BlockDataMapper> layerMap, final BlockPos pos, final Optional<UUID> recentPlayerID) {
         this.blockPos = pos;
 
@@ -58,7 +64,6 @@ public class GServerBlock {
         });
     }
 
-    @Nullable
     public List<ExposedGraffitiData> compileData(final Identifier layer) {
         final List<ExposedGraffitiData> list = new ArrayList<>();
 
