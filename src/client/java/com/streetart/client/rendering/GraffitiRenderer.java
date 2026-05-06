@@ -13,8 +13,6 @@ import com.streetart.AllGraffitiLayers;
 import com.streetart.StreetArtConfig;
 import com.streetart.client.StreetArtClient;
 import com.streetart.client.manager.GClientData;
-import com.streetart.client.mixin.LevelRendererAccessor;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeStorage;
@@ -60,15 +58,12 @@ public class GraffitiRenderer {
         ));
     }
 
-    public static void render(final LevelTerrainRenderContext context) {
+    public static void render(final SubmitNodeStorage storage, Vec3 camPos) {
         if (StreetArtConfig.ignoreEverything()) {
             return;
         }
 
-        final SubmitNodeStorage storage = ((LevelRendererAccessor) context.levelRenderer()).getSubmitNodeStorage();
-
         final PoseStack pose = new PoseStack();
-        final Vec3 camPos = context.levelState().cameraRenderState.pos;
         pose.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
         final Player player = Minecraft.getInstance().player;
@@ -81,7 +76,7 @@ public class GraffitiRenderer {
             if (atlas.isActive(Minecraft.getInstance().player, Minecraft.getInstance().level)) {
                 final boolean opaque = active.equals(identifier);
                 final int mask = opaque ? 0xFFFFFFFF : 0x3FFFFFFF;
-                storage.submitCustomGeometry(pose, GRAFFITI_TYPE.apply(identifier), (_pose, buffer) -> {
+                storage.order(-1).submitCustomGeometry(pose, GRAFFITI_TYPE.apply(identifier), (_pose, buffer) -> {
                     final PoseStack.Pose original = _pose.copy();
                     atlas.forEach((_, manager) -> {
                         manager.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data, mask));

@@ -3,9 +3,7 @@ package com.streetart.client.rendering;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.streetart.StreetArt;
-import com.streetart.client.mixin.LevelRendererAccessor;
 import com.streetart.tracks.RecordedTrack;
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -17,18 +15,15 @@ import java.util.Collection;
 import java.util.List;
 
 public class TrackRenderer {
-    public static void render(final LevelTerrainRenderContext context) {
+    public static void render(final SubmitNodeStorage storage, final Vec3 camPos, final long gameTime) {
         final List<RecordedTrack.Point> currentRecording = StreetArt.recordingManager.getPoints();
         final Collection<RecordedTrack> heldRecordings = StreetArt.recordingManager.findInventoryRecordings(Minecraft.getInstance().player);
 
-        final SubmitNodeStorage storage = ((LevelRendererAccessor)context.levelRenderer()).getSubmitNodeStorage();
-
         final PoseStack poseStack = new PoseStack();
-        final Vec3 camPos = context.levelState().cameraRenderState.pos;
 
         final RenderType renderType = RenderTypes.lines();
         final double partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
-        final double offset = 1 - (partialTick + context.levelState().gameTime % 20) / 20f;
+        final double offset = 1 - (partialTick + gameTime % 20) / 20f;
         storage.submitCustomGeometry(poseStack, renderType, (pose, buffer) -> {
             if (currentRecording != null) {
                 renderTrack(pose, buffer, camPos, currentRecording,
