@@ -9,6 +9,7 @@ import com.streetart.client.rendering.GraffitiAtlasLayers;
 import com.streetart.client.rendering.GraffitiRenderer;
 import com.streetart.client.rendering.TrackRenderer;
 import com.streetart.client.rendering.rollerblades.RollerbladeRenderer;
+import com.streetart.item.TapeRecorderItem;
 import com.streetart.networking.ClientBoundGameRuleSync;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -50,6 +51,9 @@ public class StreetArtClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register((l) -> {
             SpraySessionManager.tick(l);
             StreetArt.recordingManager.tick(l.player, l.level);
+            if (l.player != null && !l.isPaused()) {
+                TapeRecorderItem.tickInventoryProgress(l.player);
+            }
         });
 
         EntityRenderers.register(AllEntityTypes.PAINT_BALLOON, ThrownItemRenderer::new);

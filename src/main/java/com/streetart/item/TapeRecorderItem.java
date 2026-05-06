@@ -4,7 +4,9 @@ import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
 import com.streetart.StreetArt;
 import com.streetart.component.TapeRecorderContents;
+import com.streetart.tracks.RecordedTrack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,6 +18,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.Nullable;
+
+import java.text.DecimalFormat;
 
 public class TapeRecorderItem extends Item {
     public TapeRecorderItem(final Properties properties) {
@@ -42,10 +47,65 @@ public class TapeRecorderItem extends Item {
             if (contents != null) {
                 if (contents.getContained().is(AllItems.BLANK_TRACK)) {
                     StreetArt.recordingManager.itemUseEmptyTrack(player);
+                } else {
+                    final RecordedTrack track = contents.getContained().get(AllDataComponents.TRACK_RECORDING);
+                    if (track != null) {
+                        if (track.running) {
+                            int sec = track.progress / 20;
+                            final int min = sec / 60;
+                            sec %= 60;
+                            final double ms = (track.getPoints().size() % 20) / 20d;
+                            final DecimalFormat formatter = new DecimalFormat("#.00");
+                            player.sendOverlayMessage(Component.literal(String.format("%d:%02d%s", min, sec, formatter.format(ms))));
+                        }
+                        if (player.isShiftKeyDown()) {
+                            track.running = false;
+                        } else {
+                            track.running = !track.running;
+                        }
+                        track.progress = 0;
+                        track.partialTick = 0;
+                    }
                 }
             }
         }
         return InteractionResult.CONSUME;
+    }
+
+    public static @Nullable RecordedTrack findTrackInHand(final Player player) {
+        ItemStack item = player.getMainHandItem();
+        TapeRecorderContents contents = item.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+        if (contents != null) {
+            final RecordedTrack track = contents.getContained().get(AllDataComponents.TRACK_RECORDING);
+            if (track != null) {
+                return track;
+            }
+        }
+
+        item = player.getOffhandItem();
+        contents = item.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+        if (contents != null) {
+            final RecordedTrack track = contents.getContained().get(AllDataComponents.TRACK_RECORDING);
+            if (track != null) {
+                return track;
+            }
+        }
+
+        return null;
+    }
+
+    public static void tickInventoryProgress(final Player player) {
+        for (final ItemStack itemStack : player.getInventory()) {
+            final TapeRecorderContents contents = itemStack.get(AllDataComponents.TAPE_RECORDER_CONTENTS);
+            if (contents != null) {
+                final RecordedTrack track = contents.getContained().get(AllDataComponents.TRACK_RECORDING);
+                if (track != null) {
+                    if (track.running) {
+                        track.progress++;
+                    }
+                }
+            }
+        }
     }
 
     @Override

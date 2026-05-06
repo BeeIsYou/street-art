@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class RecordedTrack implements TooltipProvider {
+    public boolean running = false;
+    public int progress = 0;
+    public double partialTick = 0;
+
     public static final int MAX_POINTS = 20*60*2;
 
     public static final Codec<RecordedTrack> CODEC = RecordCodecBuilder.create(instance -> instance.group(
