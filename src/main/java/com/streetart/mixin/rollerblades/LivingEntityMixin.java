@@ -124,11 +124,4 @@ public abstract class LivingEntityMixin extends Entity implements IHasRollerblad
             cir.setReturnValue(false);
         }
     }
-
-    @Override
-    protected void spawnSprintParticle() {
-        if (!this.controller.isActive()) {
-            super.spawnSprintParticle();
-        }
-    }
 }

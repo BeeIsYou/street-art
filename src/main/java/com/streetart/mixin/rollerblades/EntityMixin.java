@@ -1,5 +1,6 @@
 package com.streetart.mixin.rollerblades;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.streetart.mixinterface.IHasRollerbladeController;
@@ -53,4 +54,12 @@ public class EntityMixin {
         }
         return original;
     }
+
+	@ModifyReturnValue(method = "canSpawnSprintParticle", at = @At("RETURN"))
+	private boolean streetArt$preventSprintParticle(boolean original) {
+		if (original && this instanceof IHasRollerbladeController controller && controller.getController().isActive()) {
+			return false;
+		}
+		return original;
+	}
 }
