@@ -55,24 +55,27 @@ public class PaintPlacerUtil {
                     .xRot(-swing2 * 0.7F);
             return player.getEyePosition(1).add(viewVec);
         } else {
-            final float ownerYRot = (player.yHeadRot - 5) * (float) (Math.PI / 180.0);
+            final float ownerYRot = (player.yHeadRot - 5 * invert) * (float) (Math.PI / 180.0);
             final double sin = Mth.sin(ownerYRot);
             final double cos = Mth.cos(ownerYRot);
             final float playerScale = player.getScale();
             final Vec2 offsets = placer.thirdPersonOffset();
             final float yOffset = player.isCrouching() ? -0.1875F : 0.0F;
             return player.getEyePosition(1).add(
-                (-cos * offsets.x - sin * offsets.y) * playerScale,
+                (-cos * offsets.x * invert - sin * offsets.y) * playerScale,
                 yOffset - 0.45 * playerScale,
-                (-sin * offsets.x + cos * offsets.y) * playerScale
+                (-sin * offsets.x * invert + cos * offsets.y) * playerScale
             );
         }
     }
 
     static Vec3 getParticleDirection(final Player player) {
+        final boolean isMain = player.getUsedItemHand() == InteractionHand.MAIN_HAND;
+        final boolean isLeftHanded = player.getMainArm() == HumanoidArm.LEFT;
+        final int invert = isMain ^ isLeftHanded ? 1 : -1;
         return player.calculateViewVector(
                 player.getXRot(),
-                player.getYRot() - 10
+                player.getYRot() - 10 * invert
         ).scale(0.3);
     }
 }
