@@ -1,6 +1,7 @@
 package com.streetart;
 
 import com.streetart.component.*;
+import com.streetart.component.paint_placer.PaintPlacerComponent;
 import com.streetart.tracks.RecordedTrack;
 import net.fabricmc.fabric.api.item.v1.ItemComponentTooltipProviderRegistry;
 import net.minecraft.core.Registry;
@@ -14,6 +15,10 @@ import java.util.function.UnaryOperator;
 public class AllDataComponents {
     public static final DataComponentType<ColorComponent> COLOR = register("content", builder -> builder
             .persistent(ColorComponent.CODEC).networkSynchronized(ColorComponent.STREAM_CODEC)
+    );
+
+    public static final DataComponentType<PaintPlacerComponent> PAINT_PLACER = register("paint_placer", builder -> builder
+            .persistent(PaintPlacerComponent.CODEC).networkSynchronized(PaintPlacerComponent.STREAM_CODEC)
     );
 
     public static final DataComponentType<ChargeComponent> CHARGE = register("charge", builder -> builder

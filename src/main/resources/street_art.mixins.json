@@ -6,6 +6,7 @@
     "BundleContentsMixin",
     "ChunkMapInvoker",
     "GameRulesMixin",
+    "ItemMixin",
     "LevelMixin",
     "LivingEntityInvoker",
     "PlayerMixin",

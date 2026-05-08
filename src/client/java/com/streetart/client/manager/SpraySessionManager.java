@@ -1,18 +1,16 @@
 package com.streetart.client.manager;
 
-import com.streetart.AllGraffitiLayers;
-import com.streetart.ArtUtil;
-import com.streetart.PermissionUtil;
-import com.streetart.StreetArtConfig;
+import com.streetart.*;
 import com.streetart.client.StreetArtClient;
-import com.streetart.component.ColorComponent;
-import com.streetart.item.SprayPaintInteractor;
+import com.streetart.component.paint_placer.PaintPlacerComponent;
+import com.streetart.component.paint_placer.Spray;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -59,58 +57,17 @@ public class SpraySessionManager {
         }
 
         final ItemStack stack = player.getUseItem();
-        if (stack.getItem() instanceof final SprayPaintInteractor sprayPaint && sprayPaint.hasColor(player, stack)) {
-            final Identifier activeLayer = AllGraffitiLayers.getActive(player, minecraft.level).identifier();
+        final PaintPlacerComponent placer = stack.get(AllDataComponents.PAINT_PLACER);
 
-            active = true;
-            final ColorComponent color = sprayPaint.getColor(player, stack);
-            final Int2ObjectMap<BiDirectionalGraffitiChange> activeLayerChanges = SpraySessionManager.layerChanges.computeIfAbsent(activeLayer, _ -> new Int2ObjectOpenHashMap<>());
-            final BiDirectionalGraffitiChange change = activeLayerChanges.computeIfAbsent(color.id, _ -> BiDirectionalGraffitiChange.create(activeLayer, color));
-
+        if (placer != null) {
             final boolean rightClick = minecraft.options.keyUse.isDown();
-            final int iterations = sprayPaint.iterationsPerTick(player, stack);
-
-            takeSnapshot(player);
-            boolean madeParticle = false;
-            for (int i = 0; i < iterations; i++) {
-                final float pt = (float) i / iterations;
-
-                SpraySnapshot snapshot = sampleLerp(pt);
-                if (snapshot == null) {
-                    snapshot = new SpraySnapshot(player.getEyePosition(), new Vec2(player.getXRot(), player.getYRot()));
-                }
-
-                final Vec3 originalView = player.calculateViewVector(snapshot.look.x, snapshot.look.y);
-
-                final Vec3 view = sprayPaint.getLookVector(player, snapshot.look, originalView, stack, pt, rightClick);
-
-                final double range = player.blockInteractionRange();
-                final Vec3 to = snapshot.pos.add(view.x * range, view.y * range, view.z * range);
-                final BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-
-                if (hitResult.getType() == HitResult.Type.BLOCK &&
-                        PermissionUtil.modificationAllowed(hitResult.getBlockPos(), player.level(), stack, player, activeLayer)) {
-                    final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
-
-                    final GClientManager man = StreetArtClient.layers.get(activeLayer).getOrCreate(hitResult.getBlockPos());
-                    if (man.applyPixelChangeAndLight(hitResult, coordinates, color.argb, minecraft.level)) {
-                        change.markChanged(hitResult, coordinates.x, coordinates.y);
-                    }
-
-                    if (!madeParticle) {
-                        madeParticle = true;
-                        player.level().addParticle(sprayPaint.getParticleAtPoint(player, stack),
-                                hitResult.getLocation().x - view.x * 0.2,
-                                hitResult.getLocation().y - view.y * 0.2,
-                                hitResult.getLocation().z - view.z * 0.2,
-                                0, 0, 0
-                        );
-                    }
-                }
+            final Spray spray = placer.getSpray(rightClick);
+            if (spray != null) {
+                performSpray(player, minecraft, stack, spray);
+            } else {
+                active = false;
+                positionSnapshots.clear();
             }
-
-            positionSnapshots.clear();
-            takeSnapshot(player);
         } else {
             active = false;
             positionSnapshots.clear();
@@ -121,6 +78,62 @@ public class SpraySessionManager {
         } else {
             layerChanges.clear();
         }
+    }
+
+    private static void performSpray(final Player player, final Minecraft minecraft, final ItemStack stack, final Spray spray) {
+        final Identifier activeLayer = AllGraffitiLayers.getActive(player, minecraft.level).identifier();
+
+        active = true;
+        final Int2ObjectMap<BiDirectionalGraffitiChange> activeLayerChanges =
+                SpraySessionManager.layerChanges.computeIfAbsent(activeLayer, _ -> new Int2ObjectOpenHashMap<>());
+        final BiDirectionalGraffitiChange change = activeLayerChanges.computeIfAbsent(
+                spray.color().id, _ -> BiDirectionalGraffitiChange.create(activeLayer, spray.color())
+        );
+
+        takeSnapshot(player);
+        boolean madeParticle = false;
+        for (int i = 0; i < spray.iterations(); i++) {
+            final float pt = (float) i / spray.iterations();
+
+            SpraySnapshot snapshot = sampleLerp(pt);
+            if (snapshot == null) {
+                snapshot = new SpraySnapshot(player.getEyePosition(), new Vec2(player.getXRot(), player.getYRot()));
+            }
+
+            final Vec3 originalView = player.calculateViewVector(snapshot.look.x, snapshot.look.y);
+
+            final Vec3 view = spray.getLookVector(player, snapshot.look, originalView, pt);
+
+            final double range = player.blockInteractionRange();
+            final Vec3 to = snapshot.pos.add(view.x * range, view.y * range, view.z * range);
+            final BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+
+            if (hitResult.getType() == HitResult.Type.BLOCK &&
+                    PermissionUtil.modificationAllowed(hitResult.getBlockPos(), player.level(), stack, player, activeLayer)) {
+                final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
+
+                final GClientManager man = StreetArtClient.layers.get(activeLayer).getOrCreate(hitResult.getBlockPos());
+                if (man.applyPixelChangeAndLight(hitResult, coordinates, spray.color().argb, minecraft.level)) {
+                    change.markChanged(hitResult, coordinates.x, coordinates.y);
+                }
+
+                if (!madeParticle) {
+                    madeParticle = true;
+                    final ParticleOptions particle = spray.getParticle();
+                    if (particle != null) {
+                        player.level().addParticle(particle,
+                                hitResult.getLocation().x - view.x * 0.2,
+                                hitResult.getLocation().y - view.y * 0.2,
+                                hitResult.getLocation().z - view.z * 0.2,
+                                0, 0, 0
+                        );
+                    }
+                }
+            }
+        }
+
+        positionSnapshots.clear();
+        takeSnapshot(player);
     }
 
     public static void trySendServerUpdate() {
