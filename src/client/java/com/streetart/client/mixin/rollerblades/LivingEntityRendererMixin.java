@@ -7,6 +7,7 @@ import com.streetart.client.rendering.rollerblades.LivingEntityRenderStateExtras
 import com.streetart.misc.OverwrittenWalkAnimationState;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,7 +31,11 @@ public abstract class LivingEntityRendererMixin {
     private void streetArt$fiveFootEleven(final CallbackInfo ci, @Local(argsOnly = true) final LivingEntityRenderState state, @Local(argsOnly = true) final PoseStack poseStack) {
         if (state instanceof final HumanoidRenderState humanoidState) {
             if (humanoidState.feetEquipment.has(AllDataComponents.ROLLER_BLADES)) {
-                poseStack.translate(0, -3/16f, 0);
+                if (humanoidState instanceof ArmorStandRenderState) {
+                    poseStack.translate(0, -4 / 16f, 0);
+                } else {
+                    poseStack.translate(0, -3 / 16f, 0);
+                }
             }
         }
     }
