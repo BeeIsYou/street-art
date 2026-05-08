@@ -3,8 +3,6 @@ package com.streetart.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.streetart.AllDataComponents;
-import com.streetart.AllItems;
-import com.streetart.StreetArt;
 import com.streetart.component.paint_placer.PaintPlacerComponent;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -37,10 +35,6 @@ public class MinecraftMixin {
             if (paintPlacer != null && paintPlacer.leftClick().isPresent()) {
                 instance.gameMode.useItem(instance.player, InteractionHand.MAIN_HAND);
                 operation.call(instance, false);
-                this.wasDown = true;
-                return;
-            } else if (mainhand.is(AllItems.TAPE_RECORDER) && !this.wasDown) {
-                StreetArt.recordingManager.markSignificant();
                 this.wasDown = true;
                 return;
             }

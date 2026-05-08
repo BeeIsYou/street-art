@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class RecordingManager {
-    private boolean nextSignificant = false;
     private List<RecordedTrack.Point> points = null;
 
     public void itemUseEmptyTrack(final Player player) {
@@ -71,10 +70,8 @@ public class RecordingManager {
             this.points.add(new RecordedTrack.Point(
                     recorder.position().x,
                     recorder.position().y + 0.1,
-                    recorder.position().z,
-                    this.nextSignificant
+                    recorder.position().z
             ));
-            this.nextSignificant = false;
         }
     }
 
@@ -93,11 +90,5 @@ public class RecordingManager {
         ClientPlayNetworking.send(new ServerBoundSaveRecordingPacket(this.points));
         this.points = null;
         // message sent when server gives item with recording
-    }
-
-    public void markSignificant() {
-        if (this.points != null) {
-            this.nextSignificant = true;
-        }
     }
 }

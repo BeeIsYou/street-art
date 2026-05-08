@@ -116,13 +116,11 @@ public class RecordedTrack implements TooltipProvider {
 
     }
 
-    public record Point(double x, double y, double z, boolean significant) {
-        public static final Codec<Point> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.DOUBLE.fieldOf("x").forGetter(Point::x),
-                Codec.DOUBLE.fieldOf("y").forGetter(Point::y),
-                Codec.DOUBLE.fieldOf("z").forGetter(Point::z),
-                Codec.BOOL.fieldOf("significant").forGetter(Point::significant)
-        ).apply(instance, Point::new));
+    public record Point(double x, double y, double z) {
+        public static final Codec<Point> CODEC = Codec.DOUBLE.listOf(3, 3).xmap(
+                doubles -> new Point(doubles.get(0), doubles.get(1), doubles.get(2)),
+                point -> List.of(point.x, point.y, point.z)
+        );
 
         public static final StreamCodec<ByteBuf, Point> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.DOUBLE,
@@ -131,8 +129,6 @@ public class RecordedTrack implements TooltipProvider {
                 Point::y,
                 ByteBufCodecs.DOUBLE,
                 Point::z,
-                ByteBufCodecs.BOOL,
-                Point::significant,
                 Point::new
         );
     }

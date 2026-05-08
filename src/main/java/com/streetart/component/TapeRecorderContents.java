@@ -5,6 +5,7 @@ import com.streetart.AllDataComponents;
 import com.streetart.AllItems;
 import com.streetart.tracks.RecordedTrack;
 import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.TooltipProvider;
 
 import java.util.function.Consumer;
@@ -52,6 +54,10 @@ public class TapeRecorderContents implements TooltipProvider {
 
     @Override
     public void addToTooltip(final Item.TooltipContext context, final Consumer<Component> consumer, final TooltipFlag flag, final DataComponentGetter components) {
+        final ItemLore lore = this.getContained().get(DataComponents.LORE);
+        if (lore != null) {
+            lore.addToTooltip(context, consumer, flag, components);
+        }
         final RecordedTrack recording = this.getContained().get(AllDataComponents.TRACK_RECORDING);
         if (recording != null) {
             recording.addToTooltip(context, consumer, flag, components);
