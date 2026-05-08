@@ -49,14 +49,6 @@ public class TrackRenderer {
 
         final RenderType lineType = RenderTypes.lines();
         storage.submitCustomGeometry(poseStack, lineType, (pose, buffer) -> {
-            final List<RecordedTrack.Point> points = new ArrayList<>();
-            points.add(new RecordedTrack.Point(0, 0, 0, false));
-            points.add(new RecordedTrack.Point(0, 1, 0, false));
-            renderTrack(pose, buffer, camPos,
-                    points,
-                    0xFF000000, -1,
-                    0.5, 1f
-            );
             if (currentRecording != null) {
                 renderTrack(pose, buffer, camPos, currentRecording,
                         DyeColor.WHITE.getTextColor(),
