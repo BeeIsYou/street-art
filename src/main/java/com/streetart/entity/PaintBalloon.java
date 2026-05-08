@@ -54,7 +54,10 @@ public class PaintBalloon extends ThrowableItemProjectile {
                 owner = null;
             }
 
-            SplashUtil.createPaintSplash(owner, serverLevel, splashOrigin, 3, 1f, component.id,
+            SplashUtil.createPaintSplash(owner, serverLevel, splashOrigin,
+                    3, 1000, 1f,
+                    SplashUtil.VariableThreshold.perlin(this.random),
+                    component.id,
                     b -> PermissionUtil.modificationAllowed(b, serverLevel, item, owner, AllGraffitiLayers.DEFAULT_LAYER.identifier()));
         }
 

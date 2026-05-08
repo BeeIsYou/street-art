@@ -119,8 +119,9 @@ public class ArtUtil {
                                               final BlockPos pos,
                                               final Direction thisDir,
                                               final byte content,
-                                              final Vector4f gradient
-    ) {
+                                              final Vector4f gradient,
+                                              final SplashUtil.VariableThreshold threshold
+                                              ) {
         final ChunkAccess chunk = serverLevel.getChunk(pos);
         final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
 
@@ -137,7 +138,7 @@ public class ArtUtil {
                 final GraffitiKey key = new GraffitiKey(pos, thisDir, face.depth());
                 final GServerDataHolder data = manager.getOrConditionalCreateFace(layer, key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
                 if (data != null) {
-                    data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, serverLevel.getRandom());
+                    data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, key.pos(), threshold);
                     manager.markFullResend(layer, data, pos, thisDir);
                     manager.blame(entity, key.pos());
                     return true;
