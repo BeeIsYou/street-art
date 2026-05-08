@@ -17,7 +17,6 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -73,15 +72,20 @@ public class TrackRenderer {
                     recording.partialTick = partialTick;
                 }
                 if (recording.running || recording == heldTrack) {
-                    final double time = recording.progress + recording.partialTick;
-                    renderPoint(pose, buffer, camPos, recording.colorB.getTextColor(), recording.getPoints(), time);
+                    for (int i = 0; i < 10; i++) {
+                    final double time = recording.progress + recording.partialTick - i * 2;
+                        renderPoint(pose, buffer, camPos,
+                                0.25f - i * 0.025f,
+                                mixColors(i / 10d, recording.colorB.getTextColor(), recording.colorA.getTextColor()),
+                                recording.getPoints(), time);
+                    }
                 }
             }
         });
     }
 
     private static void renderPoint(final PoseStack.Pose pose, final VertexConsumer buffer, final Vec3 camPos,
-                                    final int color, final List<RecordedTrack.Point> points, final double time) {
+                                    final float size, final int color, final List<RecordedTrack.Point> points, final double time) {
         final Vector3f pos;
         if (points.size() >= 2) {
             int i = Mth.floor(time);
@@ -104,38 +108,37 @@ public class TrackRenderer {
             );
         }
         pos.y += 0.2f;
-        final float s = 0.25f;
 
         // -x face
-        buffer.addVertex(pos.x - s, pos.y - s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y - s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y + s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y + s, pos.z - s).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y - size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y - size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y + size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y + size, pos.z - size).setColor(color);
         // +x face
-        buffer.addVertex(pos.x + s, pos.y + s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y + s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y - s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y - s, pos.z - s).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y + size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y + size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y - size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y - size, pos.z - size).setColor(color);
         // -y face
-        buffer.addVertex(pos.x - s, pos.y - s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y - s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y - s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y - s, pos.z + s).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y - size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y - size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y - size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y - size, pos.z + size).setColor(color);
         // +y face
-        buffer.addVertex(pos.x - s, pos.y + s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y + s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y + s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y + s, pos.z - s).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y + size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y + size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y + size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y + size, pos.z - size).setColor(color);
         // -z face
-        buffer.addVertex(pos.x - s, pos.y - s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y + s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y + s, pos.z - s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y - s, pos.z - s).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y - size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y + size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y + size, pos.z - size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y - size, pos.z - size).setColor(color);
         // +z face
-        buffer.addVertex(pos.x + s, pos.y - s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x + s, pos.y + s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y + s, pos.z + s).setColor(color);
-        buffer.addVertex(pos.x - s, pos.y - s, pos.z + s).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y - size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x + size, pos.y + size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y + size, pos.z + size).setColor(color);
+        buffer.addVertex(pos.x - size, pos.y - size, pos.z + size).setColor(color);
     }
 
     private static void renderTrack(final PoseStack.Pose pose, final VertexConsumer buffer, final Vec3 camPos, final List<RecordedTrack.Point> points,

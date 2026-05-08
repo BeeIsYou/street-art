@@ -57,14 +57,17 @@ public class TapeRecorderItem extends Item {
                             final double ms = (track.getPoints().size() % 20) / 20d;
                             final DecimalFormat formatter = new DecimalFormat("#.00");
                             player.sendOverlayMessage(Component.literal(String.format("%d:%02d%s", min, sec, formatter.format(ms))));
+                        } else {
+                            track.progress = 0;
+                            track.partialTick = 0;
                         }
                         if (player.isShiftKeyDown()) {
                             track.running = false;
+                            track.progress = 0;
+                            track.partialTick = 0;
                         } else {
                             track.running = !track.running;
                         }
-                        track.progress = 0;
-                        track.partialTick = 0;
                     }
                 }
             }
