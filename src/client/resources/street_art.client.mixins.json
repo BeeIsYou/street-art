@@ -5,10 +5,10 @@
   "client": [
     "DebugRendererMixin",
     "DustParticleMixin",
+   	"EntityMixin",
     "ItemMixin",
     "LevelRendererAccessor",
     "LevelRendererMixin",
-    "LocalPlayerMixin",
     "MinecraftMixin",
     "SectionCompilerMixin",
     "rollerblades.AbstractClientPlayerMixin",
