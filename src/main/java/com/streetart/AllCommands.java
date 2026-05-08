@@ -30,6 +30,7 @@ public class AllCommands {
         FillCommand.register(root);
         CountCommand.register(root);
         CloneCommand.register(root);
+        SplashCommand.register(root);
 
         dispatcher.register(root);
     }

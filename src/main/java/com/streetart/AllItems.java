@@ -4,6 +4,7 @@ import com.streetart.arealib.AreaLib;
 import com.streetart.component.ChargeComponent;
 import com.streetart.component.ColorComponent;
 import com.streetart.component.RollerbladeComponent;
+import com.streetart.component.paint_placer.PaintPlacerComponent;
 import com.streetart.item.*;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
@@ -38,13 +39,14 @@ public class AllItems {
 
     public static Map<DyeColor, SprayCanItem> SPRAY_CANS = registerDyed("spray_can", SprayCanItem::new,
             dye -> new Item.Properties().stacksTo(1)
-                    .component(AllDataComponents.COLOR, ColorComponent.fromDye(dye))
+                    .component(AllDataComponents.PAINT_PLACER, PaintPlacerComponent.sprayCan(ColorComponent.fromDye(dye)))
                     .component(AllDataComponents.BUNDLE_STACK_SIZE_OVERRIDE, 16)
                     .component(DataComponents.USE_EFFECTS, NONE)
     );
 
     public static PressureWasherItem PRESSURE_WASHER = register("pressure_washer", PressureWasherItem::new,
             new Item.Properties().stacksTo(1)
+                    .component(AllDataComponents.PAINT_PLACER, PaintPlacerComponent.pressureWasher())
                     .component(DataComponents.USE_EFFECTS, NONE)
     );
 
