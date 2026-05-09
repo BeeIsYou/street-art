@@ -24,6 +24,11 @@ repositories {
 		name 'Xander Maven'
 		url 'https://maven.isxander.dev/releases'
 	}
+
+	maven {
+		name "CaffeineMC"
+		url "https://maven.caffeinemc.net/releases"
+	}
 }
 
 loom {
@@ -59,6 +64,8 @@ dependencies {
 	// soft dependency
 	compileOnly "maven.modrinth:area_lib:${project.area_lib_version}"
 	runtimeOnly "maven.modrinth:area_lib:${project.area_lib_version}"
+
+	compileOnly "net.caffeinemc:sodium-fabric:${project.sodium_version}"
 }
 
 processResources {

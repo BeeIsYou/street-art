@@ -16,7 +16,8 @@
     "rollerblades.CameraMixin",
     "rollerblades.HumanoidModelMixin",
     "rollerblades.LivingEntityRendererMixin",
-    "rollerblades.LocalPlayerMixin"
+    "rollerblades.LocalPlayerMixin",
+    "sodium.ChunkBuilderMeshingTaskMixin"
   ],
   "injectors": {
     "defaultRequire": 1

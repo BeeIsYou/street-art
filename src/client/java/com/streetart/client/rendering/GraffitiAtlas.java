@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -289,6 +290,13 @@ public class GraffitiAtlas {
 
     public GClientManager get(final BlockPos pos) {
         return this.graffitiChunks.get(ChunkPos.containing(pos));
+    }
+
+    public GClientManager get(final int blockX, final int blockZ) {
+        return this.graffitiChunks.get(new ChunkPos(
+                SectionPos.blockToSectionCoord(blockX),
+                SectionPos.blockToSectionCoord(blockZ)
+        ));
     }
 
     public GClientManager getOrCreate(final BlockPos pos) {
