@@ -1,16 +1,12 @@
 package com.streetart.client.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.streetart.AllGraffitiLayers;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.network.chat.Component;
 
 public class SwagCommand {
     // dumb and hacky but im outta time :p
     public static void register(final CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(ClientCommands.literal("street_art_client")
+        /*dispatcher.register(ClientCommands.literal("street_art_client")
             .then(ClientCommands.literal("swag_mode")
                 .executes(context -> {
                     if (AllGraffitiLayers.SWAG_MODE) {
@@ -40,6 +36,6 @@ public class SwagCommand {
 
                 )
             )
-        );
+        );*/
     }
 }

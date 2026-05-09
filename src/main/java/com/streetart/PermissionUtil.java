@@ -15,14 +15,16 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
 
 public class PermissionUtil {
-    public static boolean modificationAllowed(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player, final Identifier activeLayer) {
-        final boolean adventurePermitted = getAdventurePermitted(pos, level, stack, player, activeLayer);
-
-        final boolean opped =
-                player != null &&
-                player.gameMode() != null &&
+    public static boolean isOpped(final Player player) {
+        return player.gameMode() != null &&
                 player.gameMode().isCreative() &&
-                Commands.LEVEL_ADMINS.check(player.permissions());
+                Commands.LEVEL_GAMEMASTERS.check(player.permissions());
+    }
+
+    public static boolean sprayingAllowed(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player, final Identifier activeLayer) {
+        final boolean adventurePermitted = getAdventureSprayingPermitted(pos, level, stack, player, activeLayer);
+
+        final boolean opped = player != null && isOpped(player);
 
         if (StreetArt.AREA_LIB.isInRegion(level, pos, AreaLib.Type.PROTECTED)) {
             if (!adventurePermitted || !opped) {
@@ -33,16 +35,30 @@ public class PermissionUtil {
         return adventurePermitted;
     }
 
-    public static boolean getAdventurePermitted(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player, final Identifier activeLayer) {
-        if (activeLayer.equals(AllGraffitiLayers.GLASSES_LAYER.identifier())) {
+    public static boolean splashingAllowed(final BlockPos pos, final ServerLevel level, @Nullable final Player player) {
+        final boolean adventurePermitted = getAdventureSplashingAllowed(pos, level, player);
+
+        final boolean opped = player != null && isOpped(player);
+
+        if (StreetArt.AREA_LIB.isInRegion(level, pos, AreaLib.Type.PROTECTED)) {
+            if (!adventurePermitted || !opped) {
+                return false;
+            }
+        }
+
+        return adventurePermitted;
+    }
+
+    public static boolean getAdventureSprayingPermitted(final BlockPos pos, final Level level, final ItemStack stack, @Nullable final Player player, final Identifier activeLayer) {
+        /*if (activeLayer.equals(AllGraffitiLayers.GLASSES_LAYER.identifier())) {
             if (ClientBoundGameRuleSync.get(level).adventureSecondLayerPainting()) {
                 return true;
             }
-        } else {
+        } else {*/
             if (ClientBoundGameRuleSync.get(level).adventurePainting()) {
                 return true;
             }
-        }
+//        }
 
         if (player == null) {
             if (level instanceof final ServerLevel serverLevel) {
@@ -53,7 +69,25 @@ public class PermissionUtil {
         }
 
         if (player == null || player.gameMode() == null || player.gameMode().isBlockPlacingRestricted()) {
-            return canPlaceOn(pos, level, stack) || StreetArt.AREA_LIB.isInRegion(level, pos, AreaLib.Type.MODIFYING_ALLOWED);
+            return canPlaceOn(pos, level, stack) || StreetArt.AREA_LIB.isInRegion(level, pos, AreaLib.Type.SPRAYING_ALLOWED);
+        }
+
+        return true;
+    }
+
+    public static boolean getAdventureSplashingAllowed(final BlockPos pos, final ServerLevel level, @Nullable final Player player) {
+        if (player == null) {
+            if (!level.getGameRules().get(AllGameRules.NON_PLAYERS_ADVENTURE)) {
+                return true;
+            }
+        }
+
+        if (level.getGameRules().get(AllGameRules.ADVENTURE_SPLASHING)) {
+            return true;
+        }
+
+        if (player == null || player.gameMode() == null || player.gameMode().isBlockPlacingRestricted()) {
+            return StreetArt.AREA_LIB.isInRegion(level, pos, AreaLib.Type.SPLASHES_ALLOWED);
         }
 
         return true;

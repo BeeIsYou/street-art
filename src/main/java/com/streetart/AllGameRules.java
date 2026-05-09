@@ -15,9 +15,10 @@ public class AllGameRules {
     public static final GameRuleCategory CATEGORY = GameRuleCategory.register(StreetArt.id("game_rules"));
 
     public static final GameRule<Boolean> ADVENTURE_PAINTING = registerBoolean("adventure_painting", CATEGORY, false);
+    public static final GameRule<Boolean> ADVENTURE_SPLASHING = registerBoolean("adventure_splashing", CATEGORY, false);
     public static final GameRule<Boolean> NON_PLAYERS_ADVENTURE = registerBoolean("non_players_adventure", CATEGORY, true);
     public static final GameRule<Integer> RANDOM_DECAY_SPEED = registerInteger("random_decay_speed", CATEGORY, 0, 0, 1000);
-    public static final GameRule<Boolean> ONLY_SWAG_GUYS_PAINT_ON_SECOND_LAYERS = registerBoolean("second_layer_adventure_painting", CATEGORY, false);
+//    public static final GameRule<Boolean> ONLY_SWAG_GUYS_PAINT_ON_SECOND_LAYERS = registerBoolean("second_layer_adventure_painting", CATEGORY, false);
 
     private static GameRule<Boolean> registerBoolean(final String id, final GameRuleCategory category, final boolean defaultValue) {
         return register(id, category, GameRuleType.BOOL, BoolArgumentType.bool(), Codec.BOOL, defaultValue, GameRuleTypeVisitor::visitBoolean, b -> b != false ? 1 : 0);

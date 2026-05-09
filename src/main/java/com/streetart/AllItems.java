@@ -96,7 +96,12 @@ public class AllItems {
                     .component(DataComponents.USE_EFFECTS, NONE)
     );
 
-    public static AreaModifierItem PERMIT_WAND = register("permit_wand", AreaModifierItem.forType(AreaLib.Type.MODIFYING_ALLOWED),
+    public static AreaModifierItem SPRAY_PAINT_WAND = register("spray_paint_wand", AreaModifierItem.forType(AreaLib.Type.SPRAYING_ALLOWED),
+            new Item.Properties().stacksTo(1)
+                    .component(DataComponents.USE_EFFECTS, NONE)
+    );
+
+    public static AreaModifierItem SPLASH_WAND = register("splash_wand", AreaModifierItem.forType(AreaLib.Type.SPLASHES_ALLOWED),
             new Item.Properties().stacksTo(1)
                     .component(DataComponents.USE_EFFECTS, NONE)
     );
@@ -132,7 +137,8 @@ public class AllItems {
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.OP_BLOCKS).register(content -> {
             content.accept(CREATIVE_PRESSURE_WASHER);
             content.accept(SEALANT);
-            content.accept(PERMIT_WAND);
+            content.accept(SPRAY_PAINT_WAND);
+            content.accept(SPLASH_WAND);
             content.accept(DENY_WAND);
         });
         DispenserBlock.registerProjectileBehavior(WATER_BALLOON);

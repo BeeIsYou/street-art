@@ -109,7 +109,7 @@ public class SpraySessionManager {
             final BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 
             if (hitResult.getType() == HitResult.Type.BLOCK &&
-                    PermissionUtil.modificationAllowed(hitResult.getBlockPos(), player.level(), stack, player, activeLayer)) {
+                    PermissionUtil.sprayingAllowed(hitResult.getBlockPos(), player.level(), stack, player, activeLayer)) {
                 final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
 
                 final GClientManager man = StreetArtClient.layers.get(activeLayer).getOrCreate(hitResult.getBlockPos());

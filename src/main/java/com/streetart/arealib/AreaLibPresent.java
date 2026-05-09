@@ -16,14 +16,18 @@ import net.minecraft.world.phys.Vec3;
 public class AreaLibPresent extends AreaLib {
     public static SampledAreaComponentType<Unit> getComponent(final Type type) {
         return switch (type) {
-            case MODIFYING_ALLOWED -> MODIFYING_ALLOWED;
+            case SPRAYING_ALLOWED -> SPRAYING_ALLOWED;
+            case SPLASHES_ALLOWED -> SPLASHING_ALLOWED;
             case PROTECTED -> PROTECTED;
             case NO_DECAY -> NO_DECAY;
         };
     }
 
-    public static final SampledAreaComponentType<Unit> MODIFYING_ALLOWED =
-            AreaComponentRegistry.registerSampled(StreetArt.id("modifying_allowed"), Unit.CODEC);
+    public static final SampledAreaComponentType<Unit> SPRAYING_ALLOWED =
+            AreaComponentRegistry.registerSampled(StreetArt.id("spraying_allowed"), Unit.CODEC);
+
+    public static final SampledAreaComponentType<Unit> SPLASHING_ALLOWED =
+            AreaComponentRegistry.registerSampled(StreetArt.id("splashing_allowed"), Unit.CODEC);
 
     public static final SampledAreaComponentType<Unit> PROTECTED =
             AreaComponentRegistry.registerSampled(StreetArt.id("protected"), Unit.CODEC);

@@ -46,7 +46,7 @@ public class AreaModifierItem extends Item {
     @Override
     public boolean canDestroyBlock(final ItemStack itemStack, final BlockState state, final Level level, final BlockPos pos, final LivingEntity user) {
         if (user instanceof final ServerPlayer player) {
-            if (!Commands.LEVEL_ADMINS.check(player.permissions())) {
+            if (!Commands.LEVEL_GAMEMASTERS.check(player.permissions())) {
                 return false;
             }
 
@@ -64,7 +64,7 @@ public class AreaModifierItem extends Item {
     public boolean releaseUsing(final ItemStack itemStack, final Level level, final LivingEntity entity, final int remainingTime) {
         final AreaSelectComponent areaSelect = itemStack.get(AllDataComponents.AREA_SELECT);
         if (entity instanceof final ServerPlayer player && areaSelect != null) {
-            if (!Commands.LEVEL_ADMINS.check(player.permissions())) {
+            if (!Commands.LEVEL_GAMEMASTERS.check(player.permissions())) {
                 return false;
             }
 

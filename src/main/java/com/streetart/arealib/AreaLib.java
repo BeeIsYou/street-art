@@ -6,8 +6,10 @@ import net.minecraft.world.level.Level;
 
 public class AreaLib {
     public enum Type {
-        /** Adventure players can always modify */
-        MODIFYING_ALLOWED("modifying_allowed"),
+        /** Adventure players can always modify with spray cans and pressure washers */
+        SPRAYING_ALLOWED("modifying_allowed"),
+        /** Adventure players can always modify with paint balloons */
+        SPLASHES_ALLOWED("paint_balloon_allowed"),
         /** Only opped players can modify */
         PROTECTED("protected"),
         /** Will not naturally disappear over time */

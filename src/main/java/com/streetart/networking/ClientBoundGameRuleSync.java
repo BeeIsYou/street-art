@@ -38,7 +38,8 @@ public record ClientBoundGameRuleSync(
     public static ClientBoundGameRuleSync fromServer(final MinecraftServer server) {
         return new ClientBoundGameRuleSync(
                 server.getGameRules().get(AllGameRules.ADVENTURE_PAINTING),
-                server.getGameRules().get(AllGameRules.ONLY_SWAG_GUYS_PAINT_ON_SECOND_LAYERS)
+                false
+//                server.getGameRules().get(AllGameRules.ONLY_SWAG_GUYS_PAINT_ON_SECOND_LAYERS)
         );
     }
 

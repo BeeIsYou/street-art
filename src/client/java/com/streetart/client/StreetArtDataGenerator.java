@@ -148,13 +148,22 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 							Spray paint within will not degrade over time"""
 			);
 
-			translationBuilder.add(AllItems.PERMIT_WAND, "Permit Wand");
-			translationBuilder.add("lore.street_art.permit_wand",
+			translationBuilder.add(AllItems.SPRAY_PAINT_WAND, "Spray Paint Wand");
+			translationBuilder.add("lore.street_art.spray_paint_wand",
 					"""
 							Sorry I got lazy (Operator only)
 							Hold R-Click and drag to define a region
 							L-Click on a region to remove
-							Adventure mode players can modify paint on blocks within"""
+							Adventure mode players can always use spray cans and pressure washers within"""
+			);
+
+			translationBuilder.add(AllItems.SPLASH_WAND, "Splash Wand");
+			translationBuilder.add("lore.street_art.splash_wand",
+					"""
+							Sorry I got lazy (Operator only)
+							Hold R-Click and drag to define a region
+							L-Click on a region to remove
+							Adventure mode players can always use paint balloons within"""
 			);
 
 			translationBuilder.add(AllItems.DENY_WAND, "Deny Wand");
@@ -318,7 +327,8 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 					StreetArt.id("item/track/color_b"));
 			itemModelGenerators.generateFlatItem(AllItems.WATER_BALLOON, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.SEALANT, ModelTemplates.FLAT_ITEM);
-			itemModelGenerators.generateFlatItem(AllItems.PERMIT_WAND, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.SPRAY_PAINT_WAND, ModelTemplates.FLAT_ITEM);
+			itemModelGenerators.generateFlatItem(AllItems.SPLASH_WAND, ModelTemplates.FLAT_ITEM);
 			itemModelGenerators.generateFlatItem(AllItems.DENY_WAND, ModelTemplates.FLAT_ITEM);
 		}
 	}

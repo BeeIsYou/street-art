@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "street_art:item/permit_wand"
+    "model": "street_art:item/splash_wand"
   }
 }

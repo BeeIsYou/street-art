@@ -11,16 +11,16 @@ import net.minecraft.world.level.Level;
 import java.util.function.BiPredicate;
 
 public class AllGraffitiLayers {
-    public static boolean SWAG_MODE = false;
+//    public static boolean SWAG_MODE = false;
 
     public static final ResourceKey<Registry<GraffitiLayerType>> GRAFFITI_LAYER_KEY = ResourceKey.createRegistryKey(StreetArt.id("graffiti_layer"));
     public static final Registry<GraffitiLayerType> LAYER_REGISTRY = FabricRegistryBuilder.create(GRAFFITI_LAYER_KEY).buildAndRegister();
 
     public static final GraffitiLayerType DEFAULT_LAYER = register("default", 0, (_, _) -> true);
-    public static final GraffitiLayerType GLASSES_LAYER = register("glasses", 1,
+    /*public static final GraffitiLayerType GLASSES_LAYER = register("glasses", 1,
 //            (p, _) -> p.getItemBySlot(EquipmentSlot.HEAD).is(AllItems.SWAG)
             (_, _) -> SWAG_MODE // dumb and hacky but im outta time :p
-    );
+    );*/
 
     public static void init() {
 
