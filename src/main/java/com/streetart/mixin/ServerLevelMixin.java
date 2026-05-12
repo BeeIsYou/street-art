@@ -31,8 +31,16 @@ public abstract class ServerLevelMixin extends Level {
         final GServerChunkManager manager = chunk.getAttached(AttachmentTypes.CHUNK_MANAGER);
         if (manager != null) {
             final ServerLevel sl = (ServerLevel) (Object) this;
-            if (manager.tick(sl, chunk.getPos())) {
-                chunk.markUnsaved();
+
+            switch (manager.tick(sl, chunk.getPos())) {
+                case SAVED -> {
+                    chunk.markUnsaved();
+                }
+
+                case REMOVED -> {
+                    chunk.removeAttached(AttachmentTypes.CHUNK_MANAGER);
+                    chunk.markUnsaved();
+                }
             }
         }
 

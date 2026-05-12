@@ -16,6 +16,7 @@ import com.streetart.managers.data.GServerDataHolder;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
@@ -48,7 +49,7 @@ public class GServerChunkManager {
     private final List<BiDirectionalGraffitiChange> patches = new ArrayList<>();
 
     public GServerChunkManager() {
-        this.graffiti = new HashMap<>();
+        this.graffiti = new Object2ObjectOpenHashMap<>();
         this.dirtyDatas = new EnumMap<>(Type.class);
         for (final Type value : Type.values()) {
             this.dirtyDatas.put(value, new ArrayList<>());
@@ -98,7 +99,7 @@ public class GServerChunkManager {
         return sent;
     }
 
-    public boolean tick(final ServerLevel level, final ChunkPos pos) {
+    public TickResult tick(final ServerLevel level, final ChunkPos pos) {
         this.tickDecay(level, pos);
 
         boolean shouldSaveData = false;
@@ -118,7 +119,11 @@ public class GServerChunkManager {
                 tempData -> this.graffiti.remove(tempData.pos())
         );
 
-        return shouldSaveData;
+        if (this.graffiti.isEmpty()) {
+            return TickResult.REMOVED;
+        }
+
+        return shouldSaveData ? TickResult.SAVED : TickResult.UNSAVED;
     }
 
     //TODO: REMOVE REMOVE REMOVE REMOVE
@@ -334,5 +339,9 @@ public class GServerChunkManager {
         public CustomPacketPayload getPacket(final ExposedGraffitiData exposedGraffitiData) {
             return this.packetConstructor.apply(exposedGraffitiData);
         }
+    }
+
+    public enum TickResult {
+        UNSAVED, SAVED, REMOVED
     }
 }
