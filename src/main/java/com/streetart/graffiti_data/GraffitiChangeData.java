@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 /**
  * An individual plane being modified
  *
- * @param modifiedPixels a 1024 bit (32 byte) mask for where to apply
+ * @param modifiedPixels a 256 bit (32 byte) mask for where to apply
  */
 public record GraffitiChangeData(byte[] modifiedPixels) {
     public static final StreamCodec<ByteBuf, GraffitiChangeData> CODEC = StreamCodec.composite(

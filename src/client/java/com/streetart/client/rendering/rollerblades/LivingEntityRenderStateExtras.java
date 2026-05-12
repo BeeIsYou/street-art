@@ -12,6 +12,6 @@ public class LivingEntityRenderStateExtras {
     }
 
     public static float getSweep(final LivingEntityRenderState state) {
-        return state.getData(legSweepSpeed);
+        return state.getDataOrDefault(legSweepSpeed, 1f);
     }
 }
