@@ -208,7 +208,7 @@ public class GServerChunkManager {
     public boolean handleChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final GraffitiKey key, final GraffitiChangeData change) {
         final int depth = Mth.clamp(key.depth(), 0, 15);
         final GServerDataHolder tile = this.getOrConditionalCreateFace(
-                packet.layer(),
+                packet.layer().identifier(),
                 key.pos(),
                 key.dir(),
                 depth,
@@ -220,7 +220,7 @@ public class GServerChunkManager {
         }
 
         if (tile.handleChange(packet.content(), change)) {
-            this.tryRemoveData(packet.layer(), key);
+            this.tryRemoveData(packet.layer().identifier(), key);
         }
 
         if (packet.content() != 0) {

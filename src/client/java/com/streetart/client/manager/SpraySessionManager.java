@@ -4,6 +4,7 @@ import com.streetart.*;
 import com.streetart.client.StreetArtClient;
 import com.streetart.component.paint_placer.PaintPlacerComponent;
 import com.streetart.component.paint_placer.Spray;
+import com.streetart.graffiti_data.GraffitiLayerType;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -81,11 +82,12 @@ public class SpraySessionManager {
     }
 
     private static void performSpray(final Player player, final Minecraft minecraft, final ItemStack stack, final Spray spray) {
-        final Identifier activeLayer = AllGraffitiLayers.getActive(player, minecraft.level).identifier();
+        final GraffitiLayerType activeLayer = AllGraffitiLayers.getActive(player, minecraft.level);
+        final Identifier activeLayerID = activeLayer.identifier();
 
         active = true;
         final Int2ObjectMap<BiDirectionalGraffitiChange> activeLayerChanges =
-                SpraySessionManager.layerChanges.computeIfAbsent(activeLayer, _ -> new Int2ObjectOpenHashMap<>());
+                SpraySessionManager.layerChanges.computeIfAbsent(activeLayerID, _ -> new Int2ObjectOpenHashMap<>());
         final BiDirectionalGraffitiChange change = activeLayerChanges.computeIfAbsent(
                 spray.color().id, _ -> BiDirectionalGraffitiChange.create(activeLayer, spray.color())
         );
@@ -109,10 +111,10 @@ public class SpraySessionManager {
             final BlockHitResult hitResult = player.level().clip(new ClipContext(snapshot.pos, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 
             if (hitResult.getType() == HitResult.Type.BLOCK &&
-                    PermissionUtil.sprayingAllowed(hitResult.getBlockPos(), player.level(), stack, player, activeLayer)) {
+                    PermissionUtil.sprayingAllowed(hitResult.getBlockPos(), player.level(), stack, player, activeLayerID)) {
                 final Vector2i coordinates = ArtUtil.calculatePixelCoordinates(hitResult);
 
-                final GClientManager man = StreetArtClient.layers.get(activeLayer).getOrCreate(hitResult.getBlockPos());
+                final GClientManager man = StreetArtClient.layers.get(activeLayerID).getOrCreate(hitResult.getBlockPos());
                 if (man.applyPixelChangeAndLight(hitResult, coordinates, spray.color().argb, minecraft.level)) {
                     change.markChanged(hitResult, coordinates.x, coordinates.y);
                 }

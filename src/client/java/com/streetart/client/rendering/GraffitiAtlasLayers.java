@@ -68,7 +68,7 @@ public class GraffitiAtlasLayers {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(BiDirectionalGraffitiChange.TYPE, (packet, context) -> {
-            this.atlasLayers.get(packet.layer()).handleChangePacket(packet, context);
+            this.atlasLayers.get(packet.layer().identifier()).handleChangePacket(packet, context);
         });
 
         ClientChunkEvents.CHUNK_LOAD.register((_, chunk) -> {

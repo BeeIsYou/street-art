@@ -5,27 +5,27 @@ import com.streetart.StreetArt;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.GraffitiChangeData;
 import com.streetart.graffiti_data.GraffitiKey;
-import io.netty.buffer.ByteBuf;
+import com.streetart.graffiti_data.GraffitiLayerType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.HashMap;
 
-public record BiDirectionalGraffitiChange(Identifier layer, byte content, HashMap<GraffitiKey, GraffitiChangeData> changes) implements CustomPacketPayload {
+public record BiDirectionalGraffitiChange(GraffitiLayerType layer, byte content, HashMap<GraffitiKey, GraffitiChangeData> changes) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<BiDirectionalGraffitiChange> TYPE  = new Type<>(StreetArt.id("graffiti_delta"));
-    public static final StreamCodec<ByteBuf, BiDirectionalGraffitiChange> CODEC = StreamCodec.composite(
-            Identifier.STREAM_CODEC, BiDirectionalGraffitiChange::layer,
+    public static final StreamCodec<RegistryFriendlyByteBuf, BiDirectionalGraffitiChange> CODEC = StreamCodec.composite(
+            GraffitiLayerType.STREAM_CODEC, BiDirectionalGraffitiChange::layer,
             ByteBufCodecs.BYTE, BiDirectionalGraffitiChange::content,
             ByteBufCodecs.map(HashMap::new, GraffitiKey.CODEC, GraffitiChangeData.CODEC), BiDirectionalGraffitiChange::changes,
             BiDirectionalGraffitiChange::new
     );
 
-    public static BiDirectionalGraffitiChange create(final Identifier layer, final ColorComponent color) {
+    public static BiDirectionalGraffitiChange create(final GraffitiLayerType layer, final ColorComponent color) {
         return new BiDirectionalGraffitiChange(layer, color.id, new HashMap<>());
     }
 
