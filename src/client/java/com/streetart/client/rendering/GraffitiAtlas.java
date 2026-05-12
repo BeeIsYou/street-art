@@ -236,7 +236,7 @@ public class GraffitiAtlas {
     public static final int COLOR_MASK = 0b00000000_00000011_00000011_00000011;
     private static int SEED = new Random().nextInt();
 
-    private int nextRandom() {
+    private static int nextRandom() {
         SEED ^= SEED << 13;
         SEED ^= SEED >> 17;
         SEED ^= SEED << 5;
@@ -248,7 +248,7 @@ public class GraffitiAtlas {
         y += (id / this.entriesX) * 16;
 
         if (color != 0) {
-            color = color ^ (COLOR_MASK & this.nextRandom());
+            color = color ^ (COLOR_MASK & nextRandom());
         }
 
         this.toReMip.add(id);

@@ -25,10 +25,22 @@ public class AreaLib {
         return false;
     }
 
+    public SavedData getSavedData(final Level level) {
+        return SavedData.INSTANCE;
+    }
+
     public boolean isInRegion(final Level level, final BlockPos pos, final Type type) {
+        return false;
+    }
+
+    public boolean isInRegion(final SavedData data, final Level level, final BlockPos pos, final Type type) {
         return false;
     }
 
     public void createRegion(final ServerLevel level, final Type type, final BlockPos a, final BlockPos b) {}
     public void removeRegion(final ServerLevel level, final Type type, final BlockPos pos) {}
+
+    public interface SavedData {
+        SavedData INSTANCE = new SavedData() {};
+    }
 }

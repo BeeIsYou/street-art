@@ -41,9 +41,20 @@ public class AreaLibPresent extends AreaLib {
     }
 
     @Override
-    public boolean isInRegion(Level level, BlockPos pos, Type type) {
+    public SavedData getSavedData(final Level level) {
+        return new SavedDataPresent(dev.doublekekse.area_lib.AreaLib.getSavedData(level));
+    }
+
+    @Override
+    public boolean isInRegion(final Level level, final BlockPos pos, final Type type) {
         final AreaSavedData data = dev.doublekekse.area_lib.AreaLib.getSavedData(level);
         return data.isInSampledAreaWith(getComponent(type), level, Vec3.atCenterOf(pos));
+    }
+
+    @Override
+    public boolean isInRegion(final SavedData data, final Level level, final BlockPos pos, final Type type) {
+        // a bit hacky but whatever
+        return ((SavedDataPresent)data).wrapped.isInSampledAreaWith(getComponent(type), level, Vec3.atCenterOf(pos));
     }
 
     public void createRegion(final ServerLevel level, final Type type, final BlockPos a, final BlockPos b) {
@@ -71,4 +82,6 @@ public class AreaLibPresent extends AreaLib {
             }
         }
     }
+
+    public record SavedDataPresent(AreaSavedData wrapped) implements SavedData { }
 }

@@ -13,6 +13,7 @@ import org.joml.Vector3d;
 import org.joml.Vector4f;
 
 import java.nio.ByteBuffer;
+import java.util.Random;
 
 public class GServerDataHolder {
 
@@ -157,19 +158,31 @@ public class GServerDataHolder {
         this.graceTimer = 8;
     }
 
+
+
+    private static int SEED = new Random().nextInt();
+    private static int nextRandom() {
+        SEED ^= SEED << 13;
+        SEED ^= SEED >> 17;
+        SEED ^= SEED << 5;
+        return SEED;
+    }
+
     /**
      * @return true if all values are updated to zero (transparent)
      */
-    public boolean randomDecay(final RandomSource random) {
+    public boolean randomDecay(final RandomSource random, final GraffitiChangeData data) {
         if (this.graceTimer > 0) {
             this.graceTimer--;
             return false;
         }
 
         for (int i = 0; i < 6; i++) {
-            final int x = random.nextInt(16);
-            final int y = random.nextInt(16);
+            final int rand = nextRandom();
+            final int x = rand & 0xF;
+            final int y = (rand >> 4) & 0xF;
             this.set((byte) 0, x, y);
+            data.markChanged(x, y);
         }
 
         return this.checkEmpty();

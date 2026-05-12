@@ -155,32 +155,45 @@ public class GServerChunkManager {
     }
 
     public void tickDecay(final ServerLevel level, final ChunkPos chunkPos) {
+        if (this.graffiti.isEmpty()) {
+            return;
+        }
+
         final int decaySpeed = level.getGameRules().get(AllGameRules.RANDOM_DECAY_SPEED);
 
-        for (int i = 0; i < level.getSectionsCount(); i++) {
-            final int sectionY = level.getSectionYFromSectionIndex(i);
-            for (int j = 0; j < decaySpeed; j++) {
-                final BlockPos randomPos = level.getBlockRandomPos(
-                        chunkPos.getMinBlockX(),
-                        SectionPos.sectionToBlockCoord(sectionY),
-                        chunkPos.getMinBlockZ(),
-                        15
-                );
+        if (decaySpeed == 0) {
+            return;
+        }
 
-                if (!StreetArt.AREA_LIB.isInRegion(level, randomPos, AreaLib.Type.NO_DECAY)) {
-                    final GServerBlock block = this.graffiti.get(randomPos);
-                    if (block != null) {
+        final AreaLib.SavedData data = StreetArt.AREA_LIB.getSavedData(level);
 
-                        if (block.randomDecay(level)) {
-                            this.markForRemoval(randomPos);
-                        } else {
-                            final List<ExposedGraffitiData> exposed = block.compileData(AllGraffitiLayers.DEFAULT_LAYER.identifier());
-                            if (exposed != null) {
-                                this.dirtyDatas.get(Type.FULL_RESEND).addAll(exposed);
+        for (final Map.Entry<ResourceKey<GraffitiLayerType>, GraffitiLayerType> entry : AllGraffitiLayers.LAYER_REGISTRY.entrySet()) {
+            final BiDirectionalGraffitiChange change = BiDirectionalGraffitiChange.create(entry.getValue(), ColorComponent.CLEAR);
+
+            for (int i = 0; i < level.getSectionsCount(); i++) {
+                final int sectionY = level.getSectionYFromSectionIndex(i);
+                for (int j = 0; j < decaySpeed; j++) {
+                    final BlockPos randomPos = level.getBlockRandomPos(
+                            chunkPos.getMinBlockX(),
+                            SectionPos.sectionToBlockCoord(sectionY),
+                            chunkPos.getMinBlockZ(),
+                            15
+                    );
+
+                    if (!StreetArt.AREA_LIB.isInRegion(data, level, randomPos, AreaLib.Type.NO_DECAY)) {
+                        final GServerBlock block = this.graffiti.get(randomPos);
+                        if (block != null) {
+
+                            if (block.randomDecay(level, change)) {
+                                this.markForRemoval(randomPos);
                             }
                         }
                     }
                 }
+            }
+
+            if (!change.changes().isEmpty()) {
+                this.addPatch(change);
             }
         }
     }

@@ -2,6 +2,7 @@ package com.streetart.managers.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.streetart.networking.BiDirectionalGraffitiChange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -77,11 +78,11 @@ public class GServerBlock {
         return list;
     }
 
-    public boolean randomDecay(final ServerLevel level) {
+    public boolean randomDecay(final ServerLevel level, final BiDirectionalGraffitiChange change) {
         //TODO: do we want to only allow decay for default layer? for now all layers are affected.
 
         final RandomSource random = level.getRandom();
-        this.layerMap.entrySet().removeIf(entry -> entry.getValue().randomDecay(random));
+        this.layerMap.entrySet().removeIf(entry -> entry.getValue().randomDecay(random, this.blockPos, change));
 
         return this.layerMap.isEmpty();
     }

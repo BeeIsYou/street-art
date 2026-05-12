@@ -2,6 +2,10 @@ package com.streetart.managers.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.streetart.graffiti_data.GraffitiChangeData;
+import com.streetart.graffiti_data.GraffitiKey;
+import com.streetart.networking.BiDirectionalGraffitiChange;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
@@ -59,7 +63,7 @@ public class BlockDataMapper {
         return null;
     }
 
-    public boolean randomDecay(final RandomSource source) {
+    public boolean randomDecay(final RandomSource source, final BlockPos pos, final BiDirectionalGraffitiChange change) {
         this.blockData.entrySet().removeIf(eSet -> {
             boolean passWithoutFullClear = false; //only true when a decay happens but doesn't remove all data
             boolean dataAvailable = false; //only true when there is still data left inside array
@@ -73,7 +77,9 @@ public class BlockDataMapper {
                     continue;
                 }
 
-                if (holder.randomDecay(source)) {
+                final GraffitiChangeData data = change.changes().computeIfAbsent(
+                        new GraffitiKey(pos, holder.dir, holder.depth), _ -> GraffitiChangeData.empty());
+                if (holder.randomDecay(source, data)) {
                     if (!passWithoutFullClear) {
                         dataAvailable = false;
                     }
