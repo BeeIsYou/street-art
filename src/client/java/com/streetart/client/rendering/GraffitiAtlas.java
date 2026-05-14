@@ -39,7 +39,7 @@ public class GraffitiAtlas {
     private final Map<ChunkPos, GClientManager> graffitiChunks;
     public final Identifier layer;
     private DynamicMippedTexture atlasTexture;
-    private final int mipCount;
+    private final int textureCount;
 
     private int entriesX = 128;
     private int entriesY = 128;
@@ -51,7 +51,7 @@ public class GraffitiAtlas {
     private int nextIndex = 0;
     private int useCount = 0;
     private final IntSet freeIDs = new IntOpenHashSet(this.idCount);
-    private final IntSet toReMip = new IntOpenHashSet(this.idCount);
+    private final IntSet modified = new IntOpenHashSet(this.idCount);
 
 
     private boolean dirty;
@@ -63,11 +63,11 @@ public class GraffitiAtlas {
         this.layer = layer.identifier();
         this.visibility = layer.visibility();
         this.renderingPriority = layer.renderingPriority();
-        this.mipCount = mipLevels + 1;
+        this.textureCount = mipLevels + 1;
 
         this.atlasTexture = new DynamicMippedTexture(this.layer::toString,
                 this.entriesX * 16, this.entriesY * 16,
-                true, this.mipCount);
+                true, this.textureCount);
         this.textureManager.register(this.layer, this.atlasTexture);
     }
 
@@ -90,7 +90,7 @@ public class GraffitiAtlas {
         final DynamicMippedTexture newTexture = new DynamicMippedTexture(
                 this.layer::toString,
                 this.entriesX * 32, this.entriesY * 32,
-                true, this.mipCount);
+                true, this.textureCount);
         final NativeImage[] newPix = newTexture.getPixels();
         final NativeImage[] oldPix = this.atlasTexture.getPixels();
         // puts textures into the atlas in such a way that an id for NxN will point to the same block of data in 2Nx2N
@@ -150,11 +150,12 @@ public class GraffitiAtlas {
     public void checkDirty() {
         if (this.dirty) {
             this.dirty = false;
-            for (final int id : this.toReMip) {
+            for (final int id : this.modified) {
                 this.reMip(id);
+                this.uploadTexture(id);
             }
-            this.toReMip.clear();
-            this.atlasTexture.upload();
+            this.modified.clear();
+//            this.atlasTexture.upload();
         }
     }
 
@@ -211,17 +212,25 @@ public class GraffitiAtlas {
         }
     }
 
+    private void uploadTexture(final int id) {
+        final int x = (id % this.entriesX) * 16;
+        final int y = (id / this.entriesX) * 16;
+        this.atlasTexture.upload(x, y, 16, 16);
+    }
+
     public void clear() {
-        for (final NativeImage image : this.atlasTexture.getPixels()) {
-            image.fillRect(0, 0, image.getWidth(), image.getHeight(), 0);
+        if (this.useCount > 0) {
+            for (final NativeImage image : this.atlasTexture.getPixels()) {
+                image.fillRect(0, 0, image.getWidth(), image.getHeight(), 0);
+            }
+            this.dirty = true;
+            for (final GClientManager manager : this.graffitiChunks.values()) {
+                manager.closeAll();
+            }
+            this.freeIDs.clear();
+            this.nextIndex = 0;
+            this.useCount = 0;
         }
-        this.dirty = true;
-        for (GClientManager manager : this.graffitiChunks.values()) {
-            manager.closeAll();
-        }
-        this.freeIDs.clear();
-        this.nextIndex = 0;
-        this.useCount = 0;
     }
 
     public void writeUVs(final int id, final Vector4f uv) {
@@ -251,7 +260,7 @@ public class GraffitiAtlas {
             color = color ^ (COLOR_MASK & nextRandom());
         }
 
-        this.toReMip.add(id);
+        this.modified.add(id);
 
         for (int i = 0; i < this.atlasTexture.getPixels().length; i++) {
             this.atlasTexture.getPixels()[i].setPixel(x >> i, y >> i, color);
