@@ -134,6 +134,8 @@ public class GraffitiAtlas {
         this.uSize /= 2;
         this.vSize /= 2;
 
+        this.atlasTexture.upload();
+
         StreetArt.LOGGER.info("Resizing spray paint atlas to {}x{} ({} entries)", this.entriesX * 16, this.entriesY * 16, this.entriesX * this.entriesY);
     }
 
