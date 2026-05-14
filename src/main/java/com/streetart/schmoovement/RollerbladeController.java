@@ -33,7 +33,7 @@ public class RollerbladeController {
     private final WallCollideStatus wallCollideStatus = new WallCollideStatus();
 
     public final double accelCapStart = 0.15;
-    public final double stepBonus = 0.30;
+    public final double stepBonus = 0.25;
     public final double accelCapEnd = 0.45;
 
     private final List<Movement> movements;
@@ -52,20 +52,21 @@ public class RollerbladeController {
 
     public static RollerbladeController advanced(final LivingEntity owner) {
         return new RollerbladeController(owner, c -> {
-            final ChargingMovement charging = new ChargingMovement(c, owner);
+            final DriftingMovement drifting = new DriftingMovement(c, owner);
             final GroundedMovement grounded = new GroundedMovement(c, owner);
             final WallrunMovement wallrun = new WallrunMovement(c, owner);
             final WindstateMovement windstate = new WindstateMovement(c, owner);
             final AirborneMovement airborne = new AirborneMovement(c, owner);
 
-            charging.linkWallrun(wallrun);
+            drifting.linkWallrun(wallrun);
             grounded.linkWallrun(wallrun);
             wallrun.linkWindstate(windstate);
 
-            return List.of(charging, grounded, wallrun, windstate, airborne);
+            return List.of(drifting, grounded, wallrun, windstate, airborne);
         });
     }
 
+    // todo support for rebuilding the movement list (e.g. data-driven movement ability)
     public RollerbladeController(final LivingEntity owner, final Function<RollerbladeController, List<Movement>> movements) {
         this.owner = owner;
         this.movements = movements.apply(this);
@@ -82,6 +83,9 @@ public class RollerbladeController {
 
     public void alwaysTick() {
         this.active = this.canRoll();
+        if (!this.active) {
+            this.transitionTo(this.movements.getLast());
+        }
     }
 
     public boolean isActive() {
@@ -166,8 +170,11 @@ public class RollerbladeController {
                 return 1 - (1 - original) * 0.1;
             }
         }
+        if (this.owner.isCrouching()) {
+            return 1 - (1 - original) * 0.01;
+        }
         if (speed > 1) {
-            return 0.99;
+            return Math.clamp(1 - (1 - original) * 0.0025 * speed, 0, 1);
         }
         return 1;
     }
@@ -218,6 +225,13 @@ public class RollerbladeController {
 
         dest.lerp(vec, scaleBack);
         return dest;
+    }
+
+    public static double deltaAngle(final Vector2d a, final Vector2d b) {
+        final double angleA = Math.atan2(a.y, a.x);
+        final double angleB = Math.atan2(b.y, b.x);
+
+        return ((((angleB - angleA + Math.PI) % Math.TAU) + Math.TAU) % Math.TAU) - Math.PI;
     }
 
     /**
