@@ -16,6 +16,7 @@ import com.streetart.client.manager.GClientData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -58,7 +59,7 @@ public class GraffitiRenderer {
         ));
     }
 
-    public static void render(final SubmitNodeStorage storage, Vec3 camPos) {
+    public static void render(final SubmitNodeStorage storage, Vec3 camPos, Frustum frustum) {
         if (StreetArtConfig.ignoreEverything()) {
             return;
         }
@@ -79,7 +80,7 @@ public class GraffitiRenderer {
                 storage.order(-1).submitCustomGeometry(pose, GRAFFITI_TYPE.apply(identifier), (_pose, buffer) -> {
                     final PoseStack.Pose original = _pose.copy();
                     atlas.forEach((_, manager) -> {
-                        manager.forEach(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data, mask));
+                        manager.forEachRender(data -> renderGraffiti(_pose, original, camPos, buffer, atlas, data, mask), frustum);
                     });
                 });
             }
@@ -98,7 +99,7 @@ public class GraffitiRenderer {
                     data.pos.getZ() + data.dir.getStepZ() * depthOff
             );
 
-            pose.rotateAround(data.dir.getRotation(), 0.5f, 0.5f, 0.5f);
+            pose.mulPose(Directions.matrices.get(data.dir));
             tileAtlasManager.writeUVs(data.id, mutUV);
             GraffitiRenderer.renderDecal(
                     pose, buffer,

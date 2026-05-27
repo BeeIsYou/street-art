@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.world.phys.Vec3;
@@ -33,7 +34,8 @@ public class StreetArtClient implements ClientModInitializer {
         LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register(context -> {
             final SubmitNodeStorage storage = ((LevelRendererAccessor) context.levelRenderer()).getSubmitNodeStorage();
             final Vec3 camPos = context.levelState().cameraRenderState.pos;
-            GraffitiRenderer.render(storage, camPos);
+            final Frustum frustum = context.levelState().cameraRenderState.cullFrustum;
+            GraffitiRenderer.render(storage, camPos, frustum);
             TrackRenderer.render(storage, camPos, context.levelState().gameTime);
         });
 

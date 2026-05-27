@@ -8,7 +8,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -20,7 +20,7 @@ public class GClientBlock implements AutoCloseable {
     public GClientBlock(final GraffitiAtlas atlas, final BlockPos pos) {
         this.atlas = atlas;
         this.blockPos = pos;
-        this.blockData = new HashMap<>();
+        this.blockData = new EnumMap<>(Direction.class);
     }
 
     public GClientData createData(final Direction dir, final int depth, final BlockPos pos, final GClientManager manager) {
