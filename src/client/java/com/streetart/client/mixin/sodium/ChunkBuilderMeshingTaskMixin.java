@@ -36,7 +36,7 @@ public class ChunkBuilderMeshingTaskMixin {
             if (manager != null) {
                 final LightMath math = new LightMath();
                 pos.set(x, y, z);
-                final GClientBlock block = manager.getGraffiti().get(pos);
+                final GClientBlock block = manager.get(pos);
                 if (block != null) {
                     block.forEach(data -> math.OhGodSoMuchMath(data, region, blockState));
                 }

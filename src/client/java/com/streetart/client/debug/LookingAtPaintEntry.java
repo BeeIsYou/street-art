@@ -33,7 +33,7 @@ public class LookingAtPaintEntry implements DebugScreenEntry {
 
                 GClientManager manager = StreetArtClient.layers.active().get(pos);
                 if (manager != null) {
-                    final GClientBlock block = manager.getGraffiti().get(pos);
+                    final GClientBlock block = manager.get(pos);
 
                     if (block != null) {
                         final List<String> lines = new ArrayList<>();

@@ -14,7 +14,7 @@ public class SprayPaintBlockRenderer implements DebugRenderer.SimpleDebugRendere
     @Override
     public void emitGizmos(final double camX, final double camY, final double camZ, final DebugValueAccess debugValues, final Frustum frustum, final float partialTicks) {
         StreetArtClient.layers.active().forEach((_, manager) -> {
-            manager.getGraffiti().keySet().forEach(block -> {
+            manager.fastForEachKey(block -> {
                 Gizmos.cuboid(
                         new AABB(block).inflate(0.05),
                         GizmoStyle.fill(ARGB.colorFromFloat(0.5f, 1, 1, 1))

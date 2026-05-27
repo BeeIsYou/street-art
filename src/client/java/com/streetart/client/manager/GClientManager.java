@@ -8,22 +8,26 @@ import com.streetart.graffiti_data.GraffitiChangeData;
 import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.ShortIterator;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class GClientManager implements AutoCloseable {
     private final GraffitiAtlas atlas;
-    private final Map<BlockPos, GClientBlock> graffiti = new HashMap<>();
+    private final Long2ObjectMap<GClientSection> graffiti = new Long2ObjectOpenHashMap<>();
 
     public GClientManager(GraffitiAtlas atlas) {
         this.atlas = atlas;
@@ -33,12 +37,37 @@ public class GClientManager implements AutoCloseable {
         return this.atlas.allocateID();
     }
 
+    private static long packSectionIndex(final BlockPos pos) {
+        return BlockPos.asLong(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
+    }
+
+    private static AABB renderBox(final long sectionPos) {
+        final int x = BlockPos.getX(sectionPos) << 4;
+        final int y = BlockPos.getY(sectionPos) << 4;
+        final int z = BlockPos.getZ(sectionPos) << 4;
+
+        return new AABB(x, y, z, x + 16, y + 16, z + 16);
+    }
+
+    private @Nullable GClientSection getSection(final BlockPos pos) {
+        return this.graffiti.get(packSectionIndex(pos));
+    }
+
+    private GClientSection getOrCreateSection(final BlockPos pos) {
+        return this.graffiti.computeIfAbsent(packSectionIndex(pos), _ -> new GClientSection());
+    }
+
     public @Nullable GClientBlock get(final BlockPos pos) {
-        return this.getGraffiti().get(pos);
+        final GClientSection section = this.getSection(pos);
+        if (section == null) {
+            return null;
+        }
+
+        return section.get(pos);
     }
 
     public @Nullable GClientData get(final BlockPos pos, final Direction dir, final int depth) {
-        final GClientBlock blockData = this.getGraffiti().get(pos);
+        final GClientBlock blockData = this.get(pos);
         if (blockData == null) {
             return null;
         }
@@ -47,7 +76,8 @@ public class GClientManager implements AutoCloseable {
     }
 
     public GClientData getOrCreate(final BlockPos pos, final Direction dir, final int depth) {
-        final GClientBlock blockData = this.getGraffiti().computeIfAbsent(pos, _ -> this.newBlockData(pos));
+        final GClientSection section = this.getOrCreateSection(pos);
+        final GClientBlock blockData = section.computeIfAbsent(pos, _ -> this.newBlockData(pos));
         return blockData.getOrCreate(dir, depth, this);
     }
 
@@ -60,7 +90,7 @@ public class GClientManager implements AutoCloseable {
     }
 
     public void tryRemoveData(final BlockPos pos, final Direction dir, final int depth) {
-        final GClientBlock block = this.getGraffiti().get(pos);
+        final GClientBlock block = this.get(pos);
         if (block == null) {
             return;
         }
@@ -73,10 +103,6 @@ public class GClientManager implements AutoCloseable {
 
     public GClientBlock newBlockData(final BlockPos pos) {
         return new GClientBlock(this.atlas, pos);
-    }
-
-    public Map<BlockPos, GClientBlock> getGraffiti() {
-        return this.graffiti;
     }
 
     /**
@@ -119,12 +145,47 @@ public class GClientManager implements AutoCloseable {
         return data.applyPixel(coordinates, color);
     }
 
+    public void fastForEachKey(final Consumer<BlockPos> consumer) {
+        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (final Long2ObjectMap.Entry<GClientSection> entry : Long2ObjectMaps.fastIterable(this.graffiti)) {
+            final int x = BlockPos.getX(entry.getLongKey()) << 4;
+            final int y = BlockPos.getY(entry.getLongKey()) << 4;
+            final int z = BlockPos.getZ(entry.getLongKey()) << 4;
+
+            final ShortIterator itr = entry.getValue().getRawPositions().iterator();
+            while (itr.hasNext()) {
+                consumer.accept(GClientSection.fromIndex(pos, x, y, z, itr.nextShort()));
+            }
+        }
+    }
+
+    public void forEachRender(final Consumer<GClientData> consumer, final Frustum frustum) {
+        for (final Long2ObjectMap.Entry<GClientSection> section : Long2ObjectMaps.fastIterable(this.graffiti)) {
+            if (!frustum.isVisible(renderBox(section.getLongKey()))) {
+                continue;
+            }
+
+            for (final GClientBlock graffitis : section.getValue().getBlocks()) {
+                for (final GClientData[] tiles : graffitis.getBlockData().values()) {
+                    for (final GClientData tile : tiles) {
+                        if (tile != null) {
+                            consumer.accept(tile);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Deprecated(forRemoval = true)
     public void forEach(final Consumer<GClientData> consumer) {
-        for (final GClientBlock graffitis : this.getGraffiti().values()) {
-            for (final Map.Entry<Direction, GClientData[]> tiles : graffitis.getBlockData().entrySet()) {
-                for (final GClientData tile : tiles.getValue()) {
-                    if (tile != null) {
-                        consumer.accept(tile);
+        for (final Long2ObjectMap.Entry<GClientSection> section : Long2ObjectMaps.fastIterable(this.graffiti)) {
+            for (final GClientBlock graffitis : section.getValue().getBlocks()) {
+                for (final GClientData[] tiles : graffitis.getBlockData().values()) {
+                    for (final GClientData tile : tiles) {
+                        if (tile != null) {
+                            consumer.accept(tile);
+                        }
                     }
                 }
             }
@@ -138,7 +199,7 @@ public class GClientManager implements AutoCloseable {
             data.update(packet.textureData());
             data.updateLight(context.client().level);
         } else {
-            final GClientBlock block = this.getGraffiti().get(packet.pos());
+            final GClientBlock block = this.get(packet.pos());
             if (block != null) {
                 final GClientData[] dataList = block.getBlockData().get(packet.dir());
                 if (dataList != null && dataList[depth] != null) {
@@ -150,10 +211,21 @@ public class GClientManager implements AutoCloseable {
     }
 
     public void handleBlockInvalidate(final ClientBoundInvalidateBlock packet, final ClientPlayNetworking.Context context) {
-        final GClientBlock block = this.getGraffiti().remove(packet.pos());
+        final long sectionPos = packSectionIndex(packet.pos());
+
+        final GClientSection section = this.graffiti.get(sectionPos);
+        if (section == null) {
+            return;
+        }
+
+        final GClientBlock block = section.remove(packet.pos());
         if (block != null) {
             block.spawnParticles(context.client().level);
             block.close();
+
+            if (section.isEmpty()) {
+                this.graffiti.remove(sectionPos);
+            }
         }
     }
 
@@ -169,8 +241,8 @@ public class GClientManager implements AutoCloseable {
     }
 
     public void closeAll() {
-        for (final GClientBlock graffitis : this.getGraffiti().values()) {
-            graffitis.close();
+        for (final GClientSection section : this.graffiti.values()) {
+            section.close();
         }
 
         this.graffiti.clear();

@@ -7,6 +7,7 @@ import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ClientBoundGraffitiSet;
 import com.streetart.networking.ClientBoundInvalidateBlock;
 import com.streetart.networking.ServerBoundRequestDataPacket;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -15,12 +16,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class GraffitiAtlasLayers {
-    private final Map<Identifier, GraffitiAtlas> atlasLayers = new HashMap<>();
+    private final Map<Identifier, GraffitiAtlas> atlasLayers = new Object2ObjectOpenHashMap<>();
 
     public GraffitiAtlasLayers(final TextureManager textureManager) {
         for (final GraffitiLayerType graffitiLayerType : AllGraffitiLayers.LAYER_REGISTRY) {

@@ -29,7 +29,7 @@ public class SectionCompilerMixin {
 
             if (manager != null) {
                 final LightMath math = new LightMath();
-                final GClientBlock block = manager.getGraffiti().get(pos);
+                final GClientBlock block = manager.get(pos);
                 if (block != null) {
                     block.forEach(data -> math.OhGodSoMuchMath(data, region, blockState));
                 }
