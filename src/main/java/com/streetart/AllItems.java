@@ -121,10 +121,8 @@ public class AllItems {
                 }
                 output.accept(WATER_BALLOON);
                 for (DyeColor color : DyeColor.values()) {
-                    if (color != DyeColor.WHITE) { // i know what you are
-                        ItemStack stack = new ItemStack(PAINT_BALLOONS.get(color));
-                        output.accept(stack);
-                    }
+                    ItemStack stack = new ItemStack(PAINT_BALLOONS.get(color));
+                    output.accept(stack);
                 }
                 output.accept(PRESSURE_WASHER);
                 ROLLERBLADES.forEach(output::accept);
