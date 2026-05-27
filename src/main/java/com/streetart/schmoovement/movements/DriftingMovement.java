@@ -16,8 +16,8 @@ public class DriftingMovement extends Movement {
      */
     private WallrunMovement wallrun;
 
-    public double boostSpeedCap = 0.45;
     private double turning = 0;
+    private double bestTurn = 0;
 
     public DriftingMovement(final RollerbladeController controller, final LivingEntity owner) {
         super(controller, owner);
@@ -38,12 +38,13 @@ public class DriftingMovement extends Movement {
             this.wallrun.resetUses();
         }
         this.turning = 0;
+        this.bestTurn = 0;
     }
 
     @Override
     public void end() {
         if (!this.owner.isCrouching()) {
-            final double strength = Math.clamp(Math.abs(this.turning) / Math.PI * 4 - 1, 0, 1);
+            final double strength = Math.clamp(this.bestTurn / Math.PI * 4 - 1, 0, 1);
             if (strength > 0 && (this.owner.xxa != 0 || this.owner.zza != 0)) {
                 final Vector2d vel = new Vector2d(
                         this.owner.getDeltaMovement().x,
@@ -73,22 +74,23 @@ public class DriftingMovement extends Movement {
 
     @Override
     public Vector2d transformAcceleration(final Vector2d input, final Vector2d impulse) {
-        if (impulse.length() == 0) {
-            return impulse.zero();
-        }
-
         final Vector2d vel = new Vector2d(
                 this.owner.getDeltaMovement().x,
                 this.owner.getDeltaMovement().z
         );
+
+        if (vel.length() <= 0.05) {
+            return impulse;
+        }
 
         double deltaAngle = RollerbladeController.deltaAngle (vel, impulse);
         final double maxDeltaAngle = (Math.clamp(this.controller.crouchTicks / 40d, 0, 1) + 0.5) * 0.09;
 
         deltaAngle = Math.clamp(deltaAngle, -maxDeltaAngle, maxDeltaAngle);
         this.turning += deltaAngle;
+        this.bestTurn = Math.max(this.bestTurn, Math.abs(this.turning));
 
-        final double turning = Math.clamp(Math.abs(this.turning) / Math.PI * 4 - 1, 0, 1);
+        final double turning = Math.clamp(this.bestTurn / Math.PI * 4 - 1, 0, 1);
         if (turning > 0) {
             this.spawnBoostParticles(vel, turning == 1 ? 4 : 1);
         }
