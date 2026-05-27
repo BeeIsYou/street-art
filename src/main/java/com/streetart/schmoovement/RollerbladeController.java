@@ -82,6 +82,8 @@ public class RollerbladeController {
     }
 
     public void alwaysTick() {
+        final AttributeInstance step = this.owner.getAttribute(Attributes.STEP_HEIGHT);
+        step.removeModifier(STEP_MODIFIER_ZOOMING.id());
         this.active = this.canRoll();
         if (!this.active) {
             this.transitionTo(this.movements.getLast());
@@ -121,7 +123,6 @@ public class RollerbladeController {
         }
 
         final AttributeInstance step = this.owner.getAttribute(Attributes.STEP_HEIGHT);
-        step.removeModifier(STEP_MODIFIER_ZOOMING.id());
         if (this.isZooming()) {
             step.addTransientModifier(STEP_MODIFIER_ZOOMING);
         }
