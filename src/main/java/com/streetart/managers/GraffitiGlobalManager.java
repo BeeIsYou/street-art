@@ -6,7 +6,6 @@ import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.networking.BiDirectionalGraffitiChange;
 import com.streetart.networking.ServerBoundRequestDataPacket;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -32,7 +31,7 @@ public class GraffitiGlobalManager {
             final GraffitiChangeData change = entry.getValue();
 
             final LevelChunk chunk = level.getChunkAt(key.pos());
-            if (!chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER).handleChange(context.player(), packet, key, change)) {
+            if (!chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER).handleClientToServerPacketChange(context.player(), packet, key, change)) {
                 continue;
             }
 

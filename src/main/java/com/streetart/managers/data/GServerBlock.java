@@ -39,7 +39,7 @@ public class GServerBlock {
 
     public void copyFrom(final GServerBlock other) {
         this.layerMap.clear();
-        for (Map.Entry<Identifier, BlockDataMapper> entries : other.layerMap.entrySet()) {
+        for (final Map.Entry<Identifier, BlockDataMapper> entries : other.layerMap.entrySet()) {
             this.layerMap.put(entries.getKey(), entries.getValue().copy());
         }
     }
@@ -55,7 +55,6 @@ public class GServerBlock {
         this.recentPlayerID = recentPlayerID.orElse(null);
     }
 
-    //TODO: see if we want to smother all layers or only the default?
     public void handleSmothered(final List<ExposedGraffitiData> gatherer, final Direction dir) {
         this.layerMap.forEach((layer, mapper) -> {
             final GServerDataHolder holder = mapper.smotheredFromDir(dir);
@@ -63,6 +62,10 @@ public class GServerBlock {
                 gatherer.add(new ExposedGraffitiData(layer, holder, this.blockPos, dir));
             }
         });
+
+        for (final ExposedGraffitiData d : gatherer) {
+            this.tryRemoveData(d.layer(), d.dir(), 0);
+        }
     }
 
     public List<ExposedGraffitiData> compileData(final Identifier layer) {

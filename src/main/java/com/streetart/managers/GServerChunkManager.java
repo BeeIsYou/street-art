@@ -152,6 +152,7 @@ public class GServerChunkManager {
         final GServerBlock block = this.graffiti.get(pos);
         if (block != null) {
             block.handleSmothered(this.dirtyDatas.get(Type.SMOTHERED), dir);
+            this.removeIfEmpty(pos);
         }
     }
 
@@ -223,7 +224,7 @@ public class GServerChunkManager {
         }
     }
 
-    public boolean handleChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final GraffitiKey key, final GraffitiChangeData change) {
+    public boolean handleClientToServerPacketChange(final ServerPlayer player, final BiDirectionalGraffitiChange packet, final GraffitiKey key, final GraffitiChangeData change) {
         final int depth = Mth.clamp(key.depth(), 0, 15);
         final GServerDataHolder tile = this.getOrConditionalCreateFace(
                 packet.layer().identifier(),
@@ -315,6 +316,27 @@ public class GServerChunkManager {
         }
 
         return null;
+    }
+
+
+    /**
+     * Attempts to get the {@link GServerBlock} at the given block position, creating a new, empty data if applicable.
+     *
+     * @param clearing Whether this method should create a new {@link GServerBlock}
+     * @return The server block associated with the given {@link BlockPos pos}
+     */
+    public GServerBlock getOrCreateBlock(final BlockPos pos, final boolean clearing) {
+        GServerBlock block = this.graffiti.get(pos);
+        if (clearing) {
+            return block;
+        }
+
+        if (block == null) {
+            block = new GServerBlock(pos);
+            this.graffiti.put(pos, block);
+        }
+
+        return block;
     }
 
     public void blame(@Nullable final Entity entity, final BlockPos pos) {

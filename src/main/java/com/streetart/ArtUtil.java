@@ -3,6 +3,7 @@ package com.streetart;
 import com.streetart.component.ColorComponent;
 import com.streetart.graffiti_data.GraffitiKey;
 import com.streetart.managers.GServerChunkManager;
+import com.streetart.managers.data.GServerBlock;
 import com.streetart.managers.data.GServerDataHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -121,7 +122,7 @@ public class ArtUtil {
                                               final byte content,
                                               final Vector4f gradient,
                                               final SplashUtil.VariableThreshold threshold
-                                              ) {
+    ) {
         final ChunkAccess chunk = serverLevel.getChunk(pos);
         final GServerChunkManager manager = chunk.getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
 
@@ -133,19 +134,40 @@ public class ArtUtil {
 
 
         boolean changed = false;
+        final boolean clearing = content == ColorComponent.CLEAR.id;
+        final GServerBlock block = manager.getOrCreateBlock(pos, clearing);
+        if (block == null) {
+            return;
+        }
+
         for (final ShapeFaces faces : shapeFaces) {
             changed |= faces.doWith(thisDir, face -> {
-                final GraffitiKey key = new GraffitiKey(pos, thisDir, face.depth());
-                final GServerDataHolder data = manager.getOrConditionalCreateFace(layer, key.pos(), key.dir(), key.depth(), content == ColorComponent.CLEAR.id);
-                if (data != null) {
-                    data.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, key.pos(), threshold);
-                    manager.markFullResend(layer, data, pos, thisDir);
-                    manager.blame(entity, key.pos());
+
+                final GServerDataHolder holder;
+                if (clearing) {
+                    holder = block.get(AllGraffitiLayers.DEFAULT_LAYER.identifier(), thisDir, face.depth);
+                } else {
+                    holder = block.getOrCreate(AllGraffitiLayers.DEFAULT_LAYER.identifier(), thisDir, face.depth);
+                }
+
+                if (holder != null) {
+                    holder.partialFillFromTo(content, face.x1(), face.y1(), face.x2(), face.y2(), gradient, pos, threshold);
+                    if (clearing) {
+                        if (holder.checkEmpty()) {
+                            block.tryRemoveData(AllGraffitiLayers.DEFAULT_LAYER.identifier(), thisDir, face.depth);
+                            manager.removeIfEmpty(pos);
+                        }
+                    }
+
+                    manager.markFullResend(layer, holder, pos, thisDir);
+                    manager.blame(entity, pos);
                     return true;
                 }
+
                 return false;
             });
         }
+
 
         if (changed) {
             chunk.markUnsaved();
@@ -218,5 +240,6 @@ public class ArtUtil {
         }
     }
 
-    public record Face(int depth, int x1, int y1, int x2, int y2) {}
+    public record Face(int depth, int x1, int y1, int x2, int y2) {
+    }
 }
