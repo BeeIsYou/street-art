@@ -92,18 +92,20 @@ public class CountCommand {
             if (iter != null) {
                 for (final Map.Entry<Direction, GServerDataHolder[]> entries : iter) {
                     for (final GServerDataHolder face : entries.getValue()) {
-                        final int dc = countFace(face, type, color);
+                        if (face != null) {
+                            final int dc = countFace(face, type, color);
 
-                        if (dc > 0) {
-                            if (type == CountType.BLOCKS) {
-                                return 1;
-                            } else if (type == CountType.FACES) {
-                                c++;
-                                continue;
+                            if (dc > 0) {
+                                if (type == CountType.BLOCKS) {
+                                    return 1;
+                                } else if (type == CountType.FACES) {
+                                    c++;
+                                    continue;
+                                }
                             }
-                        }
 
-                        c += dc;
+                            c += dc;
+                        }
                     }
                 }
             }
