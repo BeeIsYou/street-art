@@ -121,18 +121,20 @@ public class BlockDataMapper {
 
     public void removeDepth(final Direction dir, final int depth) {
         final GServerDataHolder[] holders = this.blockData.get(dir);
-        holders[depth] = null;
+        if (holders != null) {
+            holders[depth] = null;
 
-        boolean isEmpty = true;
-        for (final GServerDataHolder holder : holders) {
-            if (holder != null) {
-                isEmpty = false;
-                break;
+            boolean isEmpty = true;
+            for (final GServerDataHolder holder : holders) {
+                if (holder != null) {
+                    isEmpty = false;
+                    break;
+                }
             }
-        }
 
-        if (isEmpty) {
-            this.blockData.remove(dir);
+            if (isEmpty) {
+                this.blockData.remove(dir);
+            }
         }
     }
 
