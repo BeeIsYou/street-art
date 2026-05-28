@@ -57,7 +57,10 @@ public abstract class LevelMixin {
                     manager.markForRemoval(pos);
                     for (final Direction dir : Direction.values()) {
                         if (Block.isShapeFullBlock(newShape.getFaceShape(dir))) {
-                            manager.markSmothered(pos.relative(dir), dir.getOpposite());
+                            final GServerChunkManager manager2 = serverLevel.getChunk(pos.relative(dir)).getAttached(AttachmentTypes.CHUNK_MANAGER);
+                            if (manager2 != null) {
+                                manager2.markSmothered(pos.relative(dir), dir.getOpposite());
+                            }
                         }
                     }
                 }
