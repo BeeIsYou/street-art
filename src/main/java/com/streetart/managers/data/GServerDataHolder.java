@@ -210,4 +210,17 @@ public class GServerDataHolder {
         clone.put(og);
         return new GServerDataHolder(clone, this.depth, this.graceTimer, this.dir);
     }
+
+    public void overlayFrom(final GServerDataHolder overlay) {
+        final ByteBuffer onto = this.getGraffitiData();
+        final ByteBuffer from = overlay.getGraffitiData();
+        onto.rewind();
+        from.rewind();
+        for (int i = 0; i < 16 * 16; i++) {
+            final byte c = from.get();
+            if (c != ColorComponent.CLEAR.id) {
+                onto.put(i, c);
+            }
+        }
+    }
 }

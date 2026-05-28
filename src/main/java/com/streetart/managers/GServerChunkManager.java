@@ -293,13 +293,26 @@ public class GServerChunkManager {
         return this.graffiti.get(pos);
     }
 
-    public GServerBlock copyTo(final BlockPos pos, final GServerBlock block) {
+    public GServerBlock copyFrom(final BlockPos pos, final GServerBlock block) {
         final GServerBlock newBlock = new GServerBlock(pos);
         newBlock.copyFrom(block);
         for (final Map.Entry<ResourceKey<GraffitiLayerType>, GraffitiLayerType> entry : AllGraffitiLayers.LAYER_REGISTRY.entrySet()) {
             this.dirtyDatas.get(Type.FULL_RESEND).addAll(newBlock.compileData(entry.getValue().identifier()));
         }
         return this.graffiti.put(pos, newBlock);
+    }
+
+    public GServerBlock overlayFrom(final BlockPos pos, final GServerBlock block) {
+        final GServerBlock current = this.getBlock(pos);
+        if (current != null) {
+            current.overlayFrom(block);
+            for (final Map.Entry<ResourceKey<GraffitiLayerType>, GraffitiLayerType> entry : AllGraffitiLayers.LAYER_REGISTRY.entrySet()) {
+                this.dirtyDatas.get(Type.FULL_RESEND).addAll(current.compileData(entry.getValue().identifier()));
+            }
+            return current;
+        } else {
+            return this.copyFrom(pos, block);
+        }
     }
 
     @Nullable

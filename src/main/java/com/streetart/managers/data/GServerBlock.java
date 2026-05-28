@@ -44,6 +44,17 @@ public class GServerBlock {
         }
     }
 
+    public void overlayFrom(GServerBlock other) {
+        for (final Map.Entry<Identifier, BlockDataMapper> otherEntry : other.layerMap.entrySet()) {
+            BlockDataMapper data = this.layerMap.get(otherEntry.getKey());
+            if (data == null) {
+                this.layerMap.put(otherEntry.getKey(), otherEntry.getValue().copy());
+            } else {
+                data.overlayFrom(otherEntry.getValue());
+            }
+        }
+    }
+
     private GServerBlock(final Map<Identifier, BlockDataMapper> layerMap, final BlockPos pos, final Optional<UUID> recentPlayerID) {
         this.blockPos = pos;
 

@@ -189,4 +189,31 @@ public class BlockDataMapper {
 
         return newData;
     }
+
+    public void overlayFrom(final BlockDataMapper other) {
+        for (final Map.Entry<Direction, GServerDataHolder[]> otherEntry : other.blockData.entrySet()) {
+            final GServerDataHolder[] thisDatas = this.blockData.get(otherEntry.getKey());
+            if (thisDatas == null) {
+                final GServerDataHolder[] copiedData = new GServerDataHolder[MAX_SIZE];
+                for (int i = 0; i < MAX_SIZE; i++) {
+                    final GServerDataHolder otherData = otherEntry.getValue()[i];
+                    if (otherData != null) {
+                        copiedData[i] = otherData.copy();
+                    }
+                }
+                this.blockData.put(otherEntry.getKey(), copiedData);
+            } else {
+                for (int i = 0; i < MAX_SIZE; i++) {
+                    final GServerDataHolder otherData = otherEntry.getValue()[i];
+                    if (otherData != null) {
+                        if (thisDatas[i] == null) {
+                            thisDatas[i] = otherData.copy();
+                        } else {
+                            thisDatas[i].overlayFrom(otherData);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

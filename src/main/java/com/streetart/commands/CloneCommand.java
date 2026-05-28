@@ -20,22 +20,26 @@ public class CloneCommand {
 
     public static void register(final LiteralArgumentBuilder<CommandSourceStack> builder) {
         builder.then(
-                Commands.literal("clone")
-                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+            Commands.literal("clone")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(
+                    Commands.argument("begin", BlockPosArgument.blockPos())
                         .then(
-                                Commands.argument("begin", BlockPosArgument.blockPos())
+                            Commands.argument("end", BlockPosArgument.blockPos())
+                                .then(
+                                    Commands.argument("destination", BlockPosArgument.blockPos())
+                                        .executes(ctx -> CloneCommand.cloneRegion(ctx, false))
                                         .then(
-                                                Commands.argument("end", BlockPosArgument.blockPos())
-                                                        .then(
-                                                                Commands.argument("destination", BlockPosArgument.blockPos())
-                                                                        .executes(CloneCommand::cloneRegion)
-                                                        )
+                                            Commands.literal("overlay")
+                                                .executes(ctx -> CloneCommand.cloneRegion(ctx, true))
                                         )
+                                )
                         )
+                )
         );
     }
 
-    public static int cloneRegion(final CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int cloneRegion(final CommandContext<CommandSourceStack> context, boolean overlay) throws CommandSyntaxException {
         final ServerLevel level = context.getSource().getLevel();
 
         final BlockPos begin = BlockPosArgument.getLoadedBlockPos(context, "begin");
@@ -58,13 +62,19 @@ public class CloneCommand {
                 for (int x = from.minX(); x <= from.maxX(); x++) {
                     pos.set(x, y, z);
 
-                    final GServerChunkManager fromManager = level.getChunk(pos).getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
-                    final GServerBlock fromBlock = fromManager.getBlock(pos);
-                    if (fromBlock != null) {
-                        pos.move(offset);
-                        final GServerChunkManager toManager = level.getChunk(pos).getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
-                        toManager.copyTo(pos.immutable(), fromBlock);
-                        copyCount++;
+                    final GServerChunkManager fromManager = level.getChunk(pos).getAttached(AttachmentTypes.CHUNK_MANAGER);
+                    if (fromManager != null) {
+                        final GServerBlock fromBlock = fromManager.getBlock(pos);
+                        if (fromBlock != null) {
+                            pos.move(offset);
+                            final GServerChunkManager toManager = level.getChunk(pos).getAttachedOrCreate(AttachmentTypes.CHUNK_MANAGER);
+                            if (overlay) {
+                                toManager.overlayFrom(pos.immutable(), fromBlock);
+                            } else {
+                                toManager.copyFrom(pos.immutable(), fromBlock);
+                            }
+                            copyCount++;
+                        }
                     }
                 }
             }
