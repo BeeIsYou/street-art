@@ -3,6 +3,7 @@ package com.streetart.mixin;
 import com.streetart.AllDataComponents;
 import com.streetart.component.paint_placer.PaintPlacerComponent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,6 +25,7 @@ public class ItemMixin {
                                                 final CallbackInfoReturnable<InteractionResult> cir) {
         final ItemStack stack = player.getItemInHand(hand);
         if (stack.has(AllDataComponents.PAINT_PLACER)) {
+            player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
             cir.setReturnValue(ItemUtils.startUsingInstantly(level, player, hand));
         }
     }
