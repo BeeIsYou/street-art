@@ -204,8 +204,10 @@ public class GServerDataHolder {
     }
 
     public GServerDataHolder copy() {
-        final ByteBuffer clone = ByteBuffer.allocate(this.getGraffitiData().capacity());
-        clone.put(this.getGraffitiData().asReadOnlyBuffer().flip());
+        final ByteBuffer og = this.getGraffitiData();
+        final ByteBuffer clone = ByteBuffer.allocate(og.capacity());
+        og.rewind();
+        clone.put(og);
         return new GServerDataHolder(clone, this.depth, this.graceTimer, this.dir);
     }
 }
