@@ -1,4 +1,8 @@
 {
+  "commands.street_art.blame.fail.no_uuid": "No entity attributed to block",
+  "commands.street_art.blame.fail.player": "No profile found",
+  "commands.street_art.blame.profile_fetch": "Fetching profile for UUID %s",
+  "commands.street_art.blame.success.player": "Block was last modified by player %s",
   "commands.street_art.clear.success": "Explodiated paint off of %s blocks",
   "commands.street_art.clone.overlap": "The source and destination areas cannot overlap",
   "commands.street_art.clone.success": "Made derivative work of %s blocks",

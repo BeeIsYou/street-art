@@ -204,6 +204,11 @@ public class StreetArtDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.add("commands.street_art_client.swag_mode.enabled", "Swag Mode Enabled");
 			translationBuilder.add("commands.street_art_client.swag_mode.already_in_mode", "Swag Mode was not changed");
 
+			translationBuilder.add("commands.street_art.blame.success.player", "Block was last modified by player %s");
+			translationBuilder.add("commands.street_art.blame.profile_fetch", "Fetching profile for UUID %s");
+			translationBuilder.add("commands.street_art.blame.fail.player", "No profile found");
+			translationBuilder.add("commands.street_art.blame.fail.no_uuid", "No entity attributed to block");
+
 			translationBuilder.add("gamerule.category.street_art.game_rules", "Street Art");
 			translationBuilder.add("gamerule.street_art.adventure_painting", "Allow Adventure Players to Paint");
 			translationBuilder.add("gamerule.street_art.second_layer_adventure_painting", "Allow Adventure Players to Paint on the secondary layer");

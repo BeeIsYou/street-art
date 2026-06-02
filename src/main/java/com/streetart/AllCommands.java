@@ -31,6 +31,7 @@ public class AllCommands {
         CountCommand.register(root);
         CloneCommand.register(root);
         SplashCommand.register(root);
+        BlameCommand.register(root);
 
         dispatcher.register(root);
     }

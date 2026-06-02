@@ -154,4 +154,8 @@ public class GServerBlock {
             this.recentPlayerID = null;
         }
     }
+
+    public @Nullable UUID getLastModifiedUUID() {
+        return this.recentPlayerID;
+    }
 }
