@@ -1,5 +1,6 @@
 package com.streetart.mixin.rollerblades;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.streetart.misc.OverwrittenWalkAnimationState;
@@ -58,7 +59,7 @@ public abstract class LivingEntityMixin extends Entity implements IHasRollerblad
         return original;
     }
 
-    @ModifyConstant(method = "travelInAir", constant = @Constant(floatValue = 0.91f))
+    @ModifyExpressionValue(method = "travelInAir", at = @At(value = "CONSTANT", args = "floatValue=0.91F"))
     private float streetArt$rollerBladeGlobalFriction(final float original) {
         if (this.controller.isActive()) {
             return 1;
